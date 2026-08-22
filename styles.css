@@ -92,6 +92,9 @@ input[type="search"] {
   color: var(--muted);
   white-space: nowrap;
 }
+.toolbar-toggle {
+  display: none;
+}
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -124,6 +127,7 @@ input[type="search"] {
   height: 76vh;
   min-height: 620px;
   overflow: hidden;
+  overscroll-behavior: contain;
   background: #05090d;
   cursor: grab;
   touch-action: none;
@@ -313,5 +317,97 @@ th {
   }
   .bottom-grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .toolbar {
+    max-height: min(72dvh, 640px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px 10px 6px;
+  }
+  .controls {
+    align-items: center;
+  }
+  .control {
+    min-width: 0;
+    max-width: 100%;
+  }
+  select {
+    max-width: 100%;
+  }
+  input[type="search"] {
+    width: min(100%, 390px);
+    min-width: 0;
+  }
+  .check {
+    min-height: 34px;
+    padding-bottom: 0;
+  }
+  .toolbar-toggle {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    width: 100%;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-color: var(--line2);
+    background: linear-gradient(
+      180deg,
+      rgba(32, 45, 57, 0.98),
+      rgba(17, 24, 33, 0.98)
+    );
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 650;
+    touch-action: none;
+    user-select: none;
+  }
+  .toolbar-toggle-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+  .toolbar.toolbar-collapsed {
+    max-height: 40px;
+    overflow: hidden;
+    padding: 3px 10px;
+  }
+  .toolbar.toolbar-collapsed > :not(.toolbar-toggle) {
+    display: none !important;
+  }
+  .toolbar.toolbar-collapsed .toolbar-toggle {
+    position: static;
+    min-height: 32px;
+    margin: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+  .layout {
+    gap: 6px;
+    padding: 6px;
+  }
+  .maphead {
+    padding: 8px 10px;
+  }
+  .maphead b {
+    font-size: 14px;
+  }
+  .viewport {
+    height: 68dvh;
+    min-height: 420px;
+  }
+  body.mobile-toolbar-collapsed .viewport {
+    height: calc(100dvh - 88px);
+    min-height: 520px;
+  }
+  .bottom,
+  .storage-spec {
+    margin-right: 6px;
+    margin-left: 6px;
   }
 }
