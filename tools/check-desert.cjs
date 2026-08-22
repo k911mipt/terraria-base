@@ -51,12 +51,20 @@
   const shaftWall = D.backgrounds.find((background) => background.name === "Фон центрального спуска");
   assert(shaftWall && shaftWall.x1 === 49 && shaftWall.x2 === 54 && shaftWall.y1 === 21 && shaftWall.y2 === 69, "Central shaft wall mismatch");
   const serviceWall = D.backgrounds.find((background) => background.name === "Фон сервисной и рыболовной зоны");
-  assert(serviceWall && serviceWall.x1 === 14 && serviceWall.x2 === 47 && serviceWall.y1 === 21 && serviceWall.y2 === 26, "Service wall mismatch");
+  assert(serviceWall && serviceWall.x1 === 28 && serviceWall.x2 === 47 && serviceWall.y1 === 21 && serviceWall.y2 === 26, "Service wall mismatch");
+  const serviceRoom = D.rooms.find((room) => room.id === "desert_service");
+  assert(serviceRoom && serviceRoom.x1 === 28 && serviceRoom.x2 === 47, "Service room must start at x28");
+  const armsSupport = D.solids.find((solid) => solid.name === "Естественный грунт под левым крылом");
+  assert(armsSupport && armsSupport.x1 === 14 && armsSupport.x2 === 27 && armsSupport.y1 === 21 && armsSupport.y2 === 26 && armsSupport.mat === "sand", "Natural sand support under Arms Dealer is missing");
+  assert(D.validation.emptyUnderArms === false, "Under-Arms empty-space snapshot must be false");
+  assert(D.validation.naturalSupportTiles === 84, "Natural support must contain 84 tiles");
+  assert(D.validation.lowerRoomInterior === "20×6", "Service-zone size snapshot mismatch");
   assert(!D.solids.some((solid) => solid.name === "Правая сервисная площадка"), "Legacy right service platform must be removed");
   assert(!D.backgrounds.some((background) => background.name === "Фон правой сервисной ниши"), "Legacy right niche wall must be removed");
   const html = fs.readFileSync(path.join(root, "desert.html"), "utf8");
   assert(!html.includes("Поднятый пустынный рыболовный зал"), "Legacy fishing-hall label remains in HTML");
   assert(html.includes(">Бассейн</button"), "Pool navigation button is missing");
+  assert(html.includes("Под Оружейником больше нет пустого пространства"), "HTML must explain the filled area under Arms Dealer");
   for (const solid of D.solids) {
     assert(solid.x1 >= D.bounds.xMin && solid.y1 >= D.bounds.yMin && solid.x2 <= D.bounds.xMax && solid.y2 <= D.bounds.yMax, (solid.name || solid.mat) + " outside bounds");
   }
