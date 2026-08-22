@@ -1,11 +1,11 @@
-// The first desert-outpost revision has no mandatory wiring.
+// Desert v2 requires no wiring.
 const ENG = {
-  stage: "Пустынный аванпост v1 · без обязательной проводки",
+  stage: "Пустынный аванпост v2 · без обязательной проводки",
   focus: {
-    x1: 0,
-    y1: 0,
-    x2: 95,
-    y2: 54,
+    x1: 14,
+    y1: 3,
+    x2: 84,
+    y2: 70,
   },
   circuits: [],
   junctionBoxes: [],

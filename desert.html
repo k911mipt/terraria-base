@@ -42,7 +42,7 @@
         ><button id="greenhouse">NPC-комнаты</button
         ><button id="craft">Сервисный этаж</button
         ><button id="arena">Рыболовный зал</button
-        ><button id="pitsBtn">Выход вниз</button
+        ><button id="pitsBtn">Прямой спуск</button
         ><button id="fit">Весь план</button><button id="back">← Назад</button>
         <button id="bossLeft" class="scene-hidden" hidden></button>
         <button id="museumBtn" class="scene-hidden" hidden></button>
@@ -62,9 +62,9 @@
       <section class="card">
         <div class="maphead">
           <div>
-            <b>Пустынный аванпост · пилон · рыболовный зал · выход вниз</b>
+            <b>Пустынный аванпост · пилон · рыболовный зал · прямой спуск</b>
             <div class="sub">
-              ЛКМ + drag — двигать · колесо — зум под курсором · клик —
+              ЛКМ + drag — двигать · колесо / два пальца — зум · клик —
               инспектор · двойной клик — фокус
             </div>
           </div>
@@ -78,11 +78,11 @@
 
       <aside class="card inspector">
         <div>
-          <h2 id="iname">Пустынный аванпост v1</h2>
+          <h2 id="iname">Пустынный аванпост v2</h2>
           <div class="sub" id="idesc">
-            Два валидных NPC-дома окружают центральный Desert Pylon. Под ними
-            находятся сервисная галерея, водоём 45×16 и двухдверный выход в
-            естественную подземную пустыню.
+            Два NPC-дома окружают Desert Pylon. Под павильоном находится
+            сплошной фундамент, центральная шахта с уровнями y20/27/34,
+            водоём 45×16 и прямой правый спуск с платформами через 7 тайлов.
           </div>
         </div>
         <div class="kv" id="ikv"></div>
@@ -91,10 +91,10 @@
           <div class="status" id="status"></div>
         </div>
         <div class="note">
-          Сцена универсальна: она не предполагает расположение какого-либо
-          конкретного босса, строения или края мира рядом с пустыней. За наружной
-          дверью показан только интерфейс выхода; реальные пещеры остаются частью
-          конкретного мира.
+          Под жилыми комнатами нет пустых карманов: всё заполнено Sandstone
+          Block, кроме безопасной центральной шахты. Справа одна дверь
+          открывается сразу на вертикальный спуск; бокового тоннеля и второй
+          двери больше нет.
         </div>
       </aside>
     </div>
@@ -121,7 +121,7 @@
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #f0c45d"></span
-            ><span>Два дома окружают пилон и не смешиваются с сервисом</span>
+            ><span>Под комнатами сплошной фундамент без зон спавна</span>
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #2f9caf"></span
@@ -129,7 +129,7 @@
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #9a6c3e"></span
-            ><span>Двухдверный коридор отделяет безопасную базу от пещер</span>
+            ><span>Прямой спуск начинается за одной дверью; шаг платформ 7</span>
           </div>
         </div>
       </div>
