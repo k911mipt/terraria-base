@@ -41,8 +41,8 @@
         <button id="upper">Павильон</button
         ><button id="greenhouse">NPC-комнаты</button
         ><button id="craft">Сервисный этаж</button
-        ><button id="arena">Рыболовный зал</button
-        ><button id="pitsBtn">Прямой спуск</button
+        ><button id="arena">Бассейн</button
+        ><button id="pitsBtn">Центральный спуск</button
         ><button id="fit">Весь план</button><button id="back">← Назад</button>
         <button id="bossLeft" class="scene-hidden" hidden></button>
         <button id="museumBtn" class="scene-hidden" hidden></button>
@@ -62,7 +62,7 @@
       <section class="card">
         <div class="maphead">
           <div>
-            <b>Компактный пустынный аванпост · пилон · рыбалка · прямой спуск</b>
+            <b>Компактный пустынный аванпост · пилон · рыбалка · центральный спуск</b>
             <div class="sub">
               ЛКМ + drag — двигать · колесо / два пальца — зум · клик —
               инспектор · двойной клик — фокус
@@ -78,11 +78,11 @@
 
       <aside class="card inspector">
         <div>
-          <h2 id="iname">Пустынный аванпост v5</h2>
+          <h2 id="iname">Пустынный аванпост v6</h2>
           <div class="sub" id="idesc">
-            Павильон сохраняет ширину 55 тайлов и одноблочный пол y20. Вместо
-            шеститайлового фундамента под ним теперь безопасная сервисная комната,
-            а мостик и бассейн подняты на уровень y27/y28.
+            Под люком находится единая центральная шахта. Бассейн, мостик и
+            сундуки входят в одну сервисную зону слева; отдельного рыболовного
+            помещения больше нет.
           </div>
         </div>
         <div class="kv" id="ikv"></div>
@@ -91,10 +91,9 @@
           <div class="status" id="status"></div>
         </div>
         <div class="note">
-          Пол павильона — одна полоса блоков на y20. Под ним находится комната
-          высотой шесть тайлов с безопасной фоновой стеной, поэтому мобы внутри не
-          спавнятся. Вода занимает x28–47, y28–43; дверь спуска — y24–26, а
-          платформы шахты идут y27/34/41/48/55/62/69.
+          Люк x49–50 открывается прямо в шахту x49–54. Через боковую дверь x48
+          можно выйти к сундукам и бассейну 20×16. Справа больше нет второй шахты
+          и отдельной сервисной площадки.
         </div>
       </aside>
     </div>
@@ -121,10 +120,7 @@
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #f0c45d"></span
-            ><span
-              >Под комнатами безопасная сервисная комната; пол павильона — 1
-              блок</span
-            >
+            ><span>Бассейн и сундуки входят в одну сервисную зону</span>
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #2f9caf"></span
@@ -132,7 +128,7 @@
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #9a6c3e"></span
-            ><span>Прямой спуск начинается за одной дверью; шаг платформ 7</span>
+            ><span>Шахта начинается под люком; шаг платформ 7 тайлов</span>
           </div>
         </div>
       </div>

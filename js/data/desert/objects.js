@@ -63,7 +63,7 @@ const DESERT_OBJECTS = [
     "style": "route",
     "short": "ЛЮК",
     "room": "desert_hub",
-    "desc": "Люк 2×1 ведёт к платформе y27 и рыболовному этажу y34; отдельная проводка не нужна."
+    "desc": "Люк 2×1 открывается прямо в центральную шахту x49–54; спуск не требует отдельной боковой шахты."
   },
   {
     "id": "DESERT_ARMS",
@@ -359,7 +359,7 @@ const DESERT_OBJECTS = [
   {
     "id": "DESERT_LOOT",
     "name": "Пустынный лут и материалы",
-    "x": 50,
+    "x": 44,
     "y": 25,
     "w": 2,
     "h": 2,
@@ -367,7 +367,7 @@ const DESERT_OBJECTS = [
     "style": "build_brown",
     "short": "DESERT",
     "room": "desert_service",
-    "desc": "Сундук стоит на шеститайловой площадке сразу после правой стенки бассейна. На поднятом сервисном этаже предмет стоит непосредственно над полом y27.",
+    "desc": "Сундук перенесён на правую половину рыболовного мостика; отдельная сервисная площадка справа удалена.",
     "look": "Sandstone Chest + Brown Paint; ранняя замена — Stone/обычный Chest + Brown Paint.",
     "loot": "Antlion Mandible, Desert Fossil, Hardened Sand, Sandstone, Cactus, Sand Blocks и локальные расходники строительства.",
     "avoid": "Оружие, аксессуары и редкие нестакуемые предметы после сортировки отправлять на основной склад.",
@@ -398,7 +398,7 @@ const DESERT_OBJECTS = [
   {
     "id": "DESERT_SERVICE_LIGHT_R",
     "name": "Правый свет сервисной галереи",
-    "x": 50,
+    "x": 44,
     "y": 21,
     "w": 1,
     "h": 1,
@@ -406,7 +406,7 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "✦",
     "room": "desert_service",
-    "desc": "Свет нижней безопасной комнаты между потолком y20 и полом y27."
+    "desc": "Правый свет сервисной зоны над сундуком DESERT и мостиком."
   },
   {
     "id": "DESERT_WATER",
@@ -418,8 +418,8 @@ const DESERT_OBJECTS = [
     "kind": "water",
     "style": "oasis_water",
     "short": "ВОДА 320",
-    "room": "desert_fishing",
-    "desc": "320 тайлов воды: 20×16 на y28–43. Рыболовный уровень поднят вплотную под одноблочный пол павильона.",
+    "room": "desert_service",
+    "desc": "Бассейн 20×16 является частью общей сервисной и рыболовной зоны; отдельного помещения-«зала» нет.",
     "foregroundLayer": "Жидкость",
     "foregroundItemRu": "Вода",
     "foregroundItemEn": "Water",
@@ -431,21 +431,21 @@ const DESERT_OBJECTS = [
   },
   {
     "id": "DESERT_ACCESS_INNER",
-    "name": "Дверь прямого спуска",
-    "x": 54,
+    "name": "Дверь из центральной шахты",
+    "x": 48,
     "y": 24,
     "w": 1,
     "h": 3,
     "kind": "door",
     "style": "route",
     "short": "ДВ",
-    "room": "desert_access",
-    "desc": "Дверь y24–26 соединяет нижнюю сервисную комнату с верхней платформой прямого спуска y27."
+    "room": "desert_shaft",
+    "desc": "Боковая дверь соединяет центральную шахту под люком с сервисной комнатой и бассейном."
   },
   {
     "id": "DESERT_ACCESS_LIGHT",
     "name": "Верхний свет прямого спуска",
-    "x": 58,
+    "x": 52,
     "y": 21,
     "w": 1,
     "h": 1,
@@ -453,13 +453,13 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
-    "desc": "Свет над дверью y24–26 и верхней площадкой y27."
+    "room": "desert_shaft",
+    "desc": "Верхний свет центральной шахты непосредственно под люком."
   },
   {
     "id": "DESERT_ACCESS_LIGHT_1",
     "name": "Свет прямого спуска 1",
-    "x": 61,
+    "x": 54,
     "y": 30,
     "w": 1,
     "h": 1,
@@ -467,13 +467,13 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y27 и y34."
   },
   {
     "id": "DESERT_ACCESS_LIGHT_2",
     "name": "Свет прямого спуска 2",
-    "x": 61,
+    "x": 54,
     "y": 37,
     "w": 1,
     "h": 1,
@@ -481,13 +481,13 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y34 и y41."
   },
   {
     "id": "DESERT_ACCESS_LIGHT_3",
     "name": "Свет прямого спуска 3",
-    "x": 61,
+    "x": 54,
     "y": 44,
     "w": 1,
     "h": 1,
@@ -495,13 +495,13 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y41 и y48."
   },
   {
     "id": "DESERT_ACCESS_LIGHT_4",
     "name": "Свет прямого спуска 4",
-    "x": 61,
+    "x": 54,
     "y": 51,
     "w": 1,
     "h": 1,
@@ -509,13 +509,13 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y48 и y55."
   },
   {
     "id": "DESERT_ACCESS_LIGHT_5",
     "name": "Свет прямого спуска 5",
-    "x": 61,
+    "x": 54,
     "y": 58,
     "w": 1,
     "h": 1,
@@ -523,7 +523,7 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y55 и y62."
   },
   {
@@ -609,7 +609,7 @@ const DESERT_OBJECTS = [
   {
     "id": "DESERT_ACCESS_LIGHT_6",
     "name": "Свет прямого спуска 6",
-    "x": 61,
+    "x": 54,
     "y": 65,
     "w": 1,
     "h": 1,
@@ -617,7 +617,7 @@ const DESERT_OBJECTS = [
     "style": "lantern_warm",
     "short": "",
     "hideLabel": true,
-    "room": "desert_access",
+    "room": "desert_shaft",
     "desc": "Свет между площадками y62 и y69."
   }
 ];
