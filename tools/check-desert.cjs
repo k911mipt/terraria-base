@@ -43,7 +43,7 @@ assert(
   "Direct descent must use exactly one door",
 );
 assert(!D.objects.some((object) => object.id === "DESERT_ACCESS_OUTER"), "Legacy outer access door must stay removed");
-assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Desert v3 must not require wiring");
+assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Desert v4 must not require wiring");
 
 const surface = D.rooms.find((room) => room.id === "desert_surface");
 const fishingHall = D.rooms.find((room) => room.id === "desert_fishing");
@@ -54,7 +54,7 @@ assert(surface?.x1 === 10 && surface?.x2 === 76, "Surface context room must cove
 
 const water = D.objects.find((object) => object.id === "DESERT_WATER");
 assert(Boolean(water), "DESERT_WATER is missing");
-assert(water?.x === 28 && water?.y === 35, "Water reservoir must start at x34 y35");
+assert(water?.x === 28 && water?.y === 35, "Water reservoir must start at x28 y35");
 assert(water?.w === 20 && water?.h === 16, "Water reservoir must be 20×16");
 assert(water?.w * water?.h === 320, "Water reservoir must contain 320 tiles");
 assert(water?.tiles === 320, "Water object tile snapshot must be 320");
@@ -110,7 +110,7 @@ assert(
   descentPlatforms.every(
     (solid) => solid.x1 === 55 && solid.x2 === 61 && solid.y1 === solid.platformLevel,
   ),
-  "Direct descent platforms must span x61–67",
+  "Direct descent platforms must span x55–61",
 );
 
 const solidAt = (x, y) =>
@@ -145,7 +145,7 @@ assert(
 const accessDoor = D.objects.find((object) => object.id === "DESERT_ACCESS_INNER");
 assert(
   accessDoor?.x === 54 && accessDoor?.y === 31 && accessDoor?.h === 3,
-  "Direct descent door must be x60 y31–33",
+  "Direct descent door must be x54 y31–33",
 );
 assert(
   descentPlatforms[0]?.x1 === accessDoor.x + 1 && descentPlatforms[0]?.y1 === 34,
