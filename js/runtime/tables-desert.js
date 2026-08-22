@@ -28,8 +28,9 @@ function populate() {
     ["good", `локальных сундуков: ${v.serviceChests}`],
     ["good", `дверей к спуску: ${v.accessDoors}`],
     ["good", `шаг платформ: ${v.platformStep}`],
-    ["good", `фундамент: ${v.foundationTiles} тайла`],
+    ["good", `фундамент: ${v.foundationTiles} тайлов`],
     ["", `павильон: ${v.surfaceWidth} тайлов`],
+    ["", `сцена: ${v.sceneWidth} тайлов`],
     ["good", v.status],
   ]
     .map(
