@@ -43,32 +43,35 @@ assert(
   "Direct descent must use exactly one door",
 );
 assert(!D.objects.some((object) => object.id === "DESERT_ACCESS_OUTER"), "Legacy outer access door must stay removed");
-assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Desert v3 must not require wiring");
+assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Desert v4 must not require wiring");
 
 const surface = D.rooms.find((room) => room.id === "desert_surface");
 const fishingHall = D.rooms.find((room) => room.id === "desert_fishing");
 assert(D.validation.surfaceWidth === 55, "Pavilion width snapshot must be 55 tiles");
-assert(fishingHall?.x1 === 27 && fishingHall?.x2 === 60, "Fishing hall must span x27–60");
-assert(fishingHall?.x2 - fishingHall?.x1 + 1 === 34, "Fishing hall must be 34 tiles wide");
+assert(fishingHall?.x1 === 27 && fishingHall?.x2 === 54, "Fishing hall must span x27–54");
+assert(fishingHall?.x2 - fishingHall?.x1 + 1 === 28, "Fishing hall must be 28 tiles wide");
 assert(surface?.x1 === 10 && surface?.x2 === 76, "Surface context room must cover both palms");
 
 const water = D.objects.find((object) => object.id === "DESERT_WATER");
 assert(Boolean(water), "DESERT_WATER is missing");
-assert(water?.x === 34 && water?.y === 35, "Water reservoir must start at x34 y35");
+assert(water?.x === 28 && water?.y === 35, "Water reservoir must start at x28 y35");
 assert(water?.w === 20 && water?.h === 16, "Water reservoir must be 20×16");
 assert(water?.w * water?.h === 320, "Water reservoir must contain 320 tiles");
 assert(water?.tiles === 320, "Water object tile snapshot must be 320");
 assert(D.validation.fishingWaterTiles === 320, "Validation water snapshot must be 320");
+assert(D.validation.leftPoolGap === 0, "Pool must have no left-side gap");
+assert(JSON.stringify(D.validation.poolX) === JSON.stringify([28, 47]), "Pool X snapshot mismatch");
+assert(!D.backgrounds.some((background) => background.name === "Фон левой сервисной ниши"), "Legacy left service niche must stay removed");
 
 const fishingDeck = D.solids
   .filter((solid) => solid.platformGroup === "fishing_deck")
   .sort((a, b) => a.x1 - b.x1);
 assert(fishingDeck.length === 2, "Fishing deck must have two halves");
 assert(
-  fishingDeck[0]?.x1 === 34 &&
-    fishingDeck[0]?.x2 === 41 &&
-    fishingDeck[1]?.x1 === 46 &&
-    fishingDeck[1]?.x2 === 53 &&
+  fishingDeck[0]?.x1 === 28 &&
+    fishingDeck[0]?.x2 === 35 &&
+    fishingDeck[1]?.x1 === 40 &&
+    fishingDeck[1]?.x2 === 47 &&
     fishingDeck.every((solid) => solid.y1 === 34 && solid.y2 === 34),
   "Fishing deck must be 8 + opening 4 + 8 on y34",
 );
@@ -105,9 +108,9 @@ assert(
 );
 assert(
   descentPlatforms.every(
-    (solid) => solid.x1 === 61 && solid.x2 === 67 && solid.y1 === solid.platformLevel,
+    (solid) => solid.x1 === 55 && solid.x2 === 61 && solid.y1 === solid.platformLevel,
   ),
-  "Direct descent platforms must span x61–67",
+  "Direct descent platforms must span x55–61",
 );
 
 const solidAt = (x, y) =>
@@ -136,13 +139,13 @@ assert(D.validation.foundationTiles === foundationTiles, "Foundation snapshot mi
 
 const accessRoom = D.rooms.find((room) => room.id === "desert_access");
 assert(
-  accessRoom?.x1 === 60 && accessRoom?.x2 === 68 && accessRoom?.y2 === 70,
+  accessRoom?.x1 === 54 && accessRoom?.x2 === 62 && accessRoom?.y2 === 70,
   "Direct access room must begin at the compact fishing-hall wall",
 );
 const accessDoor = D.objects.find((object) => object.id === "DESERT_ACCESS_INNER");
 assert(
-  accessDoor?.x === 60 && accessDoor?.y === 31 && accessDoor?.h === 3,
-  "Direct descent door must be x60 y31–33",
+  accessDoor?.x === 54 && accessDoor?.y === 31 && accessDoor?.h === 3,
+  "Direct descent door must be x54 y31–33",
 );
 assert(
   descentPlatforms[0]?.x1 === accessDoor.x + 1 && descentPlatforms[0]?.y1 === 34,
@@ -151,8 +154,8 @@ assert(
 
 const shaftWall = D.backgrounds.find((background) => background.name === "Фон прямого спуска");
 assert(
-  shaftWall?.x1 === 61 &&
-    shaftWall?.x2 === 67 &&
+  shaftWall?.x1 === 55 &&
+    shaftWall?.x2 === 61 &&
     shaftWall?.y1 === 28 &&
     shaftWall?.y2 === 69,
   "Direct descent must have a safe player-placed wall throughout",

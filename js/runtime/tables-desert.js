@@ -25,6 +25,7 @@ function populate() {
     ["good", `вода: ${v.fishingWaterTiles} тайлов`],
     ["good", `резервуар: ${v.fishingWaterWidth}×${v.fishingWaterDepth}`],
     ["good", `проём заброса: ${v.fishingOpeningWidth}`],
+    ["good", `зазор слева: ${v.leftPoolGap}`],
     ["good", `локальных сундуков: ${v.serviceChests}`],
     ["good", `дверей к спуску: ${v.accessDoors}`],
     ["good", `шаг платформ: ${v.platformStep}`],
