@@ -164,9 +164,9 @@ viewport.addEventListener("pointermove", (e) => {
 });
 
 viewport.addEventListener("pointerup", (e) => finishViewportPointer(e));
-viewport.addEventListener("pointercancel", (e) => {
-  finishViewportPointer(e, true);
-});
+viewport.addEventListener("pointercancel", (e) =>
+  finishViewportPointer(e, true),
+);
 
 viewport.addEventListener("pointerleave", () => {
   if (viewportPointers.size === 0) hideTip();
@@ -409,6 +409,9 @@ function installMobileToolbar() {
     swipeStart = null;
     if (Math.abs(dy) >= 36 && Math.abs(dy) > Math.abs(dx) * 1.15) {
       suppressToggleClick = true;
+      window.setTimeout(() => {
+        suppressToggleClick = false;
+      }, 400);
       setCollapsed(dy < 0);
     }
   });
