@@ -7,6 +7,12 @@ on:
     paths:
       - tools/apply-desert-pool-left.cjs
       - .github/workflows/apply-desert-pool-left.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tools/apply-desert-pool-left.cjs
+      - .github/workflows/apply-desert-pool-left.yml
 
 permissions:
   contents: write
