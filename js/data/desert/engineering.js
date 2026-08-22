@@ -1,6 +1,6 @@
-// Desert v4 requires no wiring.
+// Desert v5 requires no wiring.
 const ENG = {
-  stage: "Компактный пустынный аванпост v4 · без обязательной проводки",
+  stage: "Компактный пустынный аванпост v5 · без обязательной проводки",
   focus: {
     x1: 14,
     y1: 3,
