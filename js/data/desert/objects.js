@@ -1,6 +1,6 @@
 // Furniture, NPCs, local storage, pylon, water and landscape accents.
 const DESERT_OBJECTS = [
-  // Surface doors and central descent.
+  // Surface doors and service descent.
   {
     id: "D_OUTER_L",
     name: "Левая наружная дверь",
@@ -17,7 +17,7 @@ const DESERT_OBJECTS = [
   {
     id: "D_INNER_L",
     name: "Оружейник ↔ центральный хаб",
-    x: 31,
+    x: 28,
     y: 17,
     w: 1,
     h: 3,
@@ -30,7 +30,7 @@ const DESERT_OBJECTS = [
   {
     id: "D_INNER_R",
     name: "Центральный хаб ↔ Красильщик",
-    x: 64,
+    x: 54,
     y: 17,
     w: 1,
     h: 3,
@@ -43,7 +43,7 @@ const DESERT_OBJECTS = [
   {
     id: "D_OUTER_R",
     name: "Правая наружная дверь",
-    x: 77,
+    x: 64,
     y: 17,
     w: 1,
     h: 3,
@@ -55,8 +55,8 @@ const DESERT_OBJECTS = [
   },
   {
     id: "D_HATCH",
-    name: "Люк в центральную шахту",
-    x: 54,
+    name: "Люк в сервисную шахту",
+    x: 49,
     y: 20,
     w: 2,
     h: 1,
@@ -64,14 +64,14 @@ const DESERT_OBJECTS = [
     style: "route",
     short: "ЛЮК",
     room: "desert_hub",
-    desc: "Центральный 2×1 люк ведёт к платформе y27 и рыболовному этажу y34; отдельная проводка не нужна.",
+    desc: "Люк 2×1 ведёт к платформе y27 и рыболовному этажу y34; отдельная проводка не нужна.",
   },
 
   // Recommended pylon pair. Houses remain usable by other NPCs.
   {
     id: "DESERT_ARMS",
     name: "Оружейник",
-    x: 24,
+    x: 23,
     y: 15,
     w: 2,
     h: 3,
@@ -84,7 +84,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ARMS_TABLE",
     name: "Пальмовый стол Оружейника",
-    x: 20,
+    x: 19,
     y: 18,
     w: 3,
     h: 2,
@@ -97,7 +97,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ARMS_CHAIR",
     name: "Пальмовый стул Оружейника",
-    x: 28,
+    x: 26,
     y: 18,
     w: 1,
     h: 2,
@@ -110,7 +110,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ARMS_LIGHT",
     name: "Фонарь комнаты Оружейника",
-    x: 24,
+    x: 23,
     y: 9,
     w: 1,
     h: 1,
@@ -123,7 +123,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_DYE",
     name: "Красильщик",
-    x: 70,
+    x: 59,
     y: 15,
     w: 2,
     h: 3,
@@ -136,7 +136,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_DYE_TABLE",
     name: "Пальмовый стол Красильщика",
-    x: 65,
+    x: 55,
     y: 18,
     w: 3,
     h: 2,
@@ -149,7 +149,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_DYE_CHAIR",
     name: "Пальмовый стул Красильщика",
-    x: 75,
+    x: 62,
     y: 18,
     w: 1,
     h: 2,
@@ -162,7 +162,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_DYE_LIGHT",
     name: "Фонарь комнаты Красильщика",
-    x: 71,
+    x: 59,
     y: 9,
     w: 1,
     h: 1,
@@ -177,7 +177,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_PYLON",
     name: "Пустынный пилон",
-    x: 47,
+    x: 42,
     y: 16,
     w: 3,
     h: 4,
@@ -185,7 +185,7 @@ const DESERT_OBJECTS = [
     style: "desert_pylon",
     short: "PYLON",
     room: "desert_hub",
-    desc: "Главная точка быстрого доступа к пустынному аванпосту. Стоит на твёрдом полу y20 между двумя жилыми крыльями.",
+    desc: "Главная точка быстрого доступа к аванпосту. Стоит на твёрдом полу y20 между двумя жилыми крыльями.",
     foregroundLayer: "Мебель / транспорт",
     foregroundItemRu: "Пустынный пилон",
     foregroundItemEn: "Desert Pylon",
@@ -196,7 +196,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_BED",
     name: "Пальмовая кровать",
-    x: 34,
+    x: 30,
     y: 18,
     w: 4,
     h: 2,
@@ -215,7 +215,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_QUICK_FISH",
     name: "Быстрый сундук снастей",
-    x: 39,
+    x: 35,
     y: 18,
     w: 2,
     h: 2,
@@ -241,7 +241,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_QUICK_TRAVEL",
     name: "Быстрый сундук аванпоста",
-    x: 42,
+    x: 38,
     y: 18,
     w: 2,
     h: 2,
@@ -267,7 +267,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_WORKBENCH",
     name: "Пальмовый верстак",
-    x: 59,
+    x: 51,
     y: 19,
     w: 2,
     h: 1,
@@ -286,7 +286,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_HUB_LIGHT_L",
     name: "Левый фонарь центрального хаба",
-    x: 39,
+    x: 34,
     y: 7,
     w: 1,
     h: 1,
@@ -299,7 +299,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_HUB_LIGHT_R",
     name: "Правый фонарь центрального хаба",
-    x: 59,
+    x: 50,
     y: 7,
     w: 1,
     h: 1,
@@ -314,7 +314,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_BAIT",
     name: "Наживка и рыболовные расходники",
-    x: 22,
+    x: 29,
     y: 32,
     w: 2,
     h: 2,
@@ -340,7 +340,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_CATCH",
     name: "Улов, ящики и квестовая рыба",
-    x: 24,
+    x: 32,
     y: 32,
     w: 2,
     h: 2,
@@ -366,7 +366,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_LOOT",
     name: "Пустынный лут и материалы",
-    x: 72,
+    x: 56,
     y: 32,
     w: 2,
     h: 2,
@@ -392,7 +392,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_SERVICE_LIGHT_L",
     name: "Левый свет сервисной галереи",
-    x: 31,
+    x: 36,
     y: 28,
     w: 1,
     h: 1,
@@ -400,12 +400,12 @@ const DESERT_OBJECTS = [
     style: "lantern_warm",
     short: "✦",
     room: "desert_service",
-    desc: "Тёплый свет над BAIT/CATCH и левым краем воды.",
+    desc: "Тёплый свет над BAIT/CATCH и левым краем бассейна.",
   },
   {
     id: "DESERT_SERVICE_LIGHT_R",
     name: "Правый свет сервисной галереи",
-    x: 67,
+    x: 56,
     y: 28,
     w: 1,
     h: 1,
@@ -413,20 +413,20 @@ const DESERT_OBJECTS = [
     style: "lantern_warm",
     short: "✦",
     room: "desert_service",
-    desc: "Зеркальный свет над правой сервисной площадкой.",
+    desc: "Свет над правой сервисной площадкой и локальным складом.",
   },
   {
     id: "DESERT_WATER",
     name: "Пустынный рыболовный резервуар",
-    x: 26,
+    x: 34,
     y: 35,
-    w: 45,
+    w: 20,
     h: 16,
     kind: "water",
     style: "oasis_water",
-    short: "ВОДА 720",
+    short: "ВОДА 320",
     room: "desert_fishing",
-    desc: "720 тайлов воды: 45×16. Размер выбран с запасом для стабильной пустынной рыбалки и удобного визуального резервуара.",
+    desc: "320 тайлов воды: 20×16. Это компактный прямоугольный бассейн с небольшим запасом относительно 300 тайлов.",
     foregroundLayer: "Жидкость",
     foregroundItemRu: "Вода",
     foregroundItemEn: "Water",
@@ -434,14 +434,14 @@ const DESERT_OBJECTS = [
     foregroundPaintEn: "None",
     foregroundNote: "Искусственный водоём внутри существующего пустынного биома.",
     liquid: "Water",
-    tiles: 720,
+    tiles: 320,
   },
 
   // One door opens directly onto the vertical access shaft.
   {
     id: "DESERT_ACCESS_INNER",
     name: "Дверь прямого спуска",
-    x: 76,
+    x: 60,
     y: 31,
     w: 1,
     h: 3,
@@ -449,12 +449,12 @@ const DESERT_OBJECTS = [
     style: "route",
     short: "ДВ",
     room: "desert_access",
-    desc: "За дверью сразу находится верхняя платформа y34; горизонтального коридора и второй двери больше нет.",
+    desc: "За дверью сразу находится верхняя платформа y34; горизонтального коридора и второй двери нет.",
   },
   {
     id: "DESERT_ACCESS_LIGHT",
     name: "Верхний свет прямого спуска",
-    x: 80,
+    x: 64,
     y: 28,
     w: 1,
     h: 1,
@@ -468,7 +468,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ACCESS_LIGHT_1",
     name: "Свет прямого спуска 1",
-    x: 83,
+    x: 67,
     y: 37,
     w: 1,
     h: 1,
@@ -482,7 +482,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ACCESS_LIGHT_2",
     name: "Свет прямого спуска 2",
-    x: 83,
+    x: 67,
     y: 44,
     w: 1,
     h: 1,
@@ -496,7 +496,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ACCESS_LIGHT_3",
     name: "Свет прямого спуска 3",
-    x: 83,
+    x: 67,
     y: 51,
     w: 1,
     h: 1,
@@ -510,7 +510,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ACCESS_LIGHT_4",
     name: "Свет прямого спуска 4",
-    x: 83,
+    x: 67,
     y: 58,
     w: 1,
     h: 1,
@@ -524,7 +524,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_ACCESS_LIGHT_5",
     name: "Свет прямого спуска 5",
-    x: 83,
+    x: 67,
     y: 65,
     w: 1,
     h: 1,
@@ -560,7 +560,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_PALM_RIGHT",
     name: "Правая пальма",
-    x: 85,
+    x: 74,
     y: 9,
     w: 3,
     h: 11,
@@ -600,7 +600,7 @@ const DESERT_OBJECTS = [
   {
     id: "DESERT_CACTUS_RIGHT",
     name: "Правый кактус",
-    x: 82,
+    x: 69,
     y: 16,
     w: 2,
     h: 4,
