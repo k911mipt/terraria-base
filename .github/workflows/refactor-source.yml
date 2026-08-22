@@ -1,12 +1,13 @@
 name: Refactor planner source
 
 on:
-  push:
+  pull_request:
     branches:
-      - refactor/readable-source
+      - main
     paths:
       - ".github/workflows/refactor-source.yml"
       - "tools/refactor-source.py"
+      - "tools/verify-source.py"
       - "index.html"
 
 permissions:
