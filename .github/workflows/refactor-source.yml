@@ -1,0 +1,70 @@
+name: Refactor planner source
+
+on:
+  push:
+    branches:
+      - refactor/readable-source
+    paths:
+      - ".github/workflows/refactor-source.yml"
+      - "tools/refactor-source.py"
+      - "index.html"
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out refactor branch
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/readable-source
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Normalize the one-time migration script
+        run: |
+          sed -i 's/)]}“/)]}"/' tools/refactor-source.py
+          python3 -m py_compile tools/refactor-source.py tools/verify-source.py
+
+      - name: Split the monolithic source
+        run: python3 tools/refactor-source.py
+
+      - name: Format HTML, CSS, and JavaScript
+        run: >
+          npx --yes prettier@3.3.3 --write
+          index.html
+          styles.css
+          js/app.js
+          js/data/base.js
+          js/data/engineering.js
+          js/data/materials.js
+          README.md
+
+      - name: Verify preserved data and geometry
+        run: python3 tools/verify-source.py
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/data/base.js
+          node --check js/data/engineering.js
+          node --check js/data/materials.js
+          node --check js/app.js
+
+      - name: Commit the refactored source
+        run: |
+          rm .github/workflows/refactor-source.yml
+          rm tools/refactor-source.py
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: split planner into readable source files"
+          git push origin HEAD:refactor/readable-source
