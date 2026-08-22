@@ -1,0 +1,63 @@
+{
+  "source": {
+    "indexBlobHint": "8356a5267751413cf2ddb84a869b7104ee0f7689",
+    "dHash": "4b9fc5a1c652b398",
+    "engHash": "4f8a7060b1b18202",
+    "runtimeTopLevelNodes": 134,
+    "functionDeclarations": 86
+  },
+  "counts": {
+    "rooms": 18,
+    "solids": 219,
+    "backgrounds": 383,
+    "objects": 343,
+    "circuits": 8,
+    "engineeringDevices": 40,
+    "traps": 32
+  },
+  "modules": {
+    "dataScripts": [
+      "js/data/layout.js",
+      "js/data/solids/upper.js",
+      "js/data/solids/street.js",
+      "js/data/solids/lower.js",
+      "js/data/solids/index.js",
+      "js/data/backgrounds/core.js",
+      "js/data/backgrounds/boss-arena.js",
+      "js/data/backgrounds/museum-pits.js",
+      "js/data/backgrounds/index.js",
+      "js/data/objects/routes.js",
+      "js/data/objects/crafting.js",
+      "js/data/objects/rooms.js",
+      "js/data/objects/street.js",
+      "js/data/objects/storage-left.js",
+      "js/data/objects/storage-right.js",
+      "js/data/objects/greenhouse.js",
+      "js/data/objects/dyes.js",
+      "js/data/objects/arena.js",
+      "js/data/objects/museum.js",
+      "js/data/objects/pits.js",
+      "js/data/objects/index.js",
+      "js/data/metadata.js",
+      "js/data/base.js",
+      "js/data/engineering/circuits.js",
+      "js/data/engineering/controls.js",
+      "js/data/engineering/traps.js",
+      "js/data/engineering/index.js",
+      "js/data/materials.js"
+    ],
+    "runtimeScripts": [
+      "js/runtime/core.js",
+      "js/runtime/validation.js",
+      "js/runtime/model.js",
+      "js/runtime/render-base.js",
+      "js/runtime/render-objects.js",
+      "js/runtime/overlay.js",
+      "js/runtime/inspector.js",
+      "js/runtime/tables.js",
+      "js/runtime/camera.js",
+      "js/runtime/interactions.js",
+      "js/runtime/bootstrap.js"
+    ]
+  }
+}
