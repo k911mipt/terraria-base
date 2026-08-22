@@ -1,0 +1,192 @@
+name: Refine runtime module boundaries
+
+on:
+  push:
+    branches:
+      - refactor/modular-source
+    paths:
+      - .github/workflows/refine-modules.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out refactor branch
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/modular-source
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Restore refinement script
+        shell: bash
+        run: |
+          cat > /tmp/refine.cjs.gz.b64 <<'PAYLOAD'
+          H4sIAEWViWoC/+VaW28bxxV+568Y00ZMAstlkLRAIMUOEttJ3dZOEDkpCkkAV7tDce3lLrsXKYIgwJadS+s0Ros8BH3JQ58LKLLl0I5l/4XlX+gv6XfOzM5e
+          SClOirYPBYKYOzPnMud85zIzOnumnyVxf8MP+zLcEmHkyVY7S6RI0th30/Zyq+VGYZKKYSIuiFj+IfNj2WkPk3Z3Wc9MnHRUnaPvctZxozisTvMAzesFcRSl
+          mJ/EkSuTxHa3vY4hjqXjYa4z9APZFRcuQgubxt7F98pO6HZIln0z8sMOsbEEL7REO0uHb7S7WDsJHFd2+mvxWtjfxMRaWKq2HfupLNhbAoOpDFOWs9sSQi1K
+          nXhTsoKLRC1jHXQa3/L8uFQIH6Ezlh1FC312sRM3ixN/Sy6JNM6k2CtIWQmzH0VhdLFl6CW/89NRhxUXbxUTYkkMzu3qj721cGD2vNzaK603jrbknP3Gp1lu
+          Vwyj2K1qqd2YJDImM3Tw7fmpH4WWGMNhzqY0FvOHonPGzHdFOoqjbRHKbXEljqO4U6yv6EiAW4kyiCTeCf+yeJS5qgE7CXx4kUbtBCZK1QqyTtcGTsedChjj
+          pMKKmEAxxpzNc0bGrpDu2PlYwitRuCTagZPKJG1bWuaNnQms0E7c2J+kbbZEa5iFLu1MFD+uw8sJ65V02QKxTDPAnUfssTPpdMxWWGPfe8smaHRt2DuVceed
+          KAqkE5JJKvwVKPRXovGZ+in9U7WRlsrLO/gh2I0W/xr0++LcLhMBIOd2T9JJWb9u+q5CBkBHsGN8gadSEmyvEaxSZyOQfbgjzRKxKUMZO6x7lKUiGqoR3wVg
+          YylGMpjA0LZ2Eo0Zp1M8d9o3k36chak/ln2atW9WEgwNvJ2oGCQPluRmCSvD3sAqAtyKTDur7Q2fxuBTJCU/TIsPmbi/SscBj0eTjDzfXq+JM7YHu9X1mpTm
+          VAsBw1Gh0Uyb1xrbG5G30zWhwQhIgStx5sIF0S4YXZZu4CjjIcQppv0wk5QeOuW27JGjgAYIKQQhGTT0Waqr3rUnWTJSzmbPqRgmnKzatl3yXrfllox3gAvm
+          S2mihu+6mK7th26QeQR8Wt8laLQvRVngYf+pCCIX9hTMUoPko6uGo/BDUTjYalFQNbBOzBaAgYWsjJ0gEMnIiaVXYIrylXAdd4QhN4pizw8pkCmFBlFM/0LJ
+          2BEjP0kjaOSEnthGIeJ8ntjMuARU8WX0YR1PV5H3mJRKqojYcLxNoJHEkdJIsmPELlRAArQEdhA60M2P3cxPedUYase+EwjNb4FmdUco8yEcVyYBeGDrkuyy
+          gXSO4u1MBMWmHKNAJNhxOqLAdEdOuOmHm0jN0o8Re8A+ipKQn6A+qfAlNkWgGl4nR6tZUgtZM1qN2wa3brUGUDRViTh0TI/gwoSERUrsJnmdEFZXPpnEqDPY
+          y0qxf4RVkZizIFg2tV2apZQ1uKKYkWXNvRypyLgEfUo58+z1Z4WWdiC1mheIxVUPivlDX8ZtRPL8SootRLTiuGcs4Scf+3J7EsXpbwFoyrH/tk2GTpDI/6BR
+          GvzV/sB7bs8Vy6liNme0a3K8IeOKEPHKK9WV0cZN6aYnWHnhUjYzL93Sdm0uRGOKPJPuvBRXs7jk63jelS2sL/zV1pXUuBSbQXzIq6EnP9EmT9AehB6PVKp1
+          EQXFCHHXxFcoqiXyR7hZBiEqHjIfJ4uTmM/DyVBzo/XzlNrI/MB7x0nkJcrLnBaK4lPb7EXxqrVoC50uckEWeg7yNZWUIX0QF81kbmMXa0YEz8qK01lVdnlx
+          zmBgxPPZ5AQmpalSeV1nMWUq1bFie1XFyi5VDS4iqW+kqdEi3y7iMr+TcqN1Dy+irq1ttA3lXi2Bz+pOeKCpGA+Wkopeg4OGMUObJElFP8oQYm1WeWKdW08u
+          re+UpY1LHlczlLw0mvQC8A3KkqfqmG4xKse9lbImmoNf0VgXU9dVZ80nh5dqreuUvESIk1vtRh0seu6C7oTWu9XQv9mGsBKmC7n8/jXuKi454ZaTIK0O0RyE
+          riwbIl5vqdZJ9Sn+eJxxiyHQsAXOhgx0F1LxuWmHTlZEQ8KoUgls5epCHDRDwxOSH6V7KxHInGjmxtTDyCEdG2pRDFJwUArVUPcSKlUYlY3aBxEPW2J7JGUA
+          Lzhb/ia34b2NLE0hk7RMpBO7I2pnoahWQptlDuovoQlHglGB86Oqi3HmqkO18oA+l/haCz/EkRq9IfeNyD9uVrpGRxZLV0f+Uxs06hg/lFyf0ASim0byBwrC
+          KPSRy4XnpA6f9sdQI8ZpU/iIlUkWTyIcrP2EyjaShJ8WPSIRFGXCdIc02N9ABWCh0NNcxbQh/pKRRkt6VZE7Np3KamtoujfGFoPKohpPjhwiuoENBXSFwkSJ
+          hOYBtbc4dIAQUMOBFJwy9NfL2D12Q0EtojDYIUwhz20BnKo3Vo1w2/o3mDPaf5R7AZrScEzHICmtW3du3b5waiBTMcKZ1jhB8aChhv3tfpMeBi8Hjex5C6/q
+          DHWe/vemuhkRSexeUORlsCUTtFZRTFwuvtlXCy+et16OvDxO/XRaldp+Hm0zR/x0DrVImyNfN4m93bX+D+xp6tFPJ61UkP+FH02O/lEfVtqjMxRq5dVIu552
+          uSUtAhJJ26crAVOTRTNHa54NlovN2+Dt+eoaJpaupOxUrjNpppIaLE4auir8RsoJ1wRPTiTWhO5ObxjjrMb1GcXACfzNUHp8m8ALY64jnioaim1xYieSyzRc
+          JKQ0ioKkz+Oc8W2XlKpmmPNzmY3Nfn4+L54vS+0JjK1Sg7IDRJL2hzJJP1AvFm0vcmFQOXQounrFLATgZLncoMH6X6+8f11fIvOWquy6kGIY6CpgkzYrDCDq
+          Nk+bVs1icU3fUs2mOkw1bSLeEvMGEUu6PV2khoZMqcnqaZdslfEtONzjJmTRLJfkRRMxgSfumfKyeFodwJNFK1Dl4sDZWTRVS4bW6TdxCxOZdWrbfEob+2Pt
+          5OImb72AaRUsloISPbGhNx7umEmL73ss8Vq38j6mmNITUeG71TZ5jOr2ohtRu81HptV26T5a+qHiI5zMo46OukpZ68zr3bjhwm4mBjcIkvxliSCKbmWTpHZ8
+          2JTRWKY4Ijf1qOCB+NDFQA/upYRCDTa3vlmMTs8cVmg9N/t1DhoyxORdGGAzpnO40KOWGGYx2uQMBwe+T80SmY0XMNPoIi7vxb5n6aOOVTOHJ7d8V29s2+eh
+          ApUFHwNFYxwzwmSUl1J/olq/MFVxVBArqLIL5+6LiYk/RO/L7X9xHawJFZKJ8JI6x6FshAmdm7CD4g4LySBNSWdipywgEroiz4LCEuvly66+UL6Gc/WFGtxa
+          xSl2ldI8mlGpyiEWr5vrxuJeL6ldEQ8q4XBul8j3EBADfvUsKJzK3XBSXAmX06F+znH0bXBxPtYvZ42XtfJ2buG7ysmHcvOgomTrC8jB2bNnxdriXawN6HB+
+          brdijj01wirXRFVfUljkoAe253ar43ud7tpgMHf+x+l/QDrtcSdevRUoLgP4cMlFzMVGUMAm9tjjbDQ4K/K/5Qez27P9/EDk09md2af58/xRfoz/P8yfi/wp
+          fx60Wvk3lclp/lTMbucH+ff4PMp/mP0lPxb5d/j5vZjdw8xR/iR/lh/mz/H7KbMWsztYgO/ZH4k8P7BF/i1/PwCP52AIggPIuINpEOaHMEASITXBkFZrbbDh
+          uLdUKNMAJnVArw2I+9rgyvX3bB2OGALXQ+j1ID+a7YPpAzH7nLnvz76cfUWinivNQZpPW7N7pBOJhj53S5p72OITLDoAwbTX3AENQnBRXdcGdqsFOORfY+o4
+          P57dz49arZ6CB9dhpIUoS3mp+Oftr0X+kI0Ie84+m90nraY0YCmzP8PEATS5bwm26PfQ63Z+SAuh9ENWi7+eQWWafGDXpCnj9QtZh0QOD5L3nhQSXoDLEe0c
+          Mu6SNWaf5Qf93//yFyyDlj4uCLQU2APg6GEtXDS7O/sCbD/nzT4hF9Pwk7oeFccZZb5j7NBOSf4h9vlAsHHh/x4BEqPHPG/EMob2IY23AJlHEPcUuh2J/AUI
+          nit0zu7XpWuUGMnPGO5fkJ+1be8Q+LGDz8BrusD2JIVs/chi+WwzthOtJX8xbvYVmjCmtSfahvYP8N1Qr1JMChXBmoQQKwqfh6zcffLPC4bLIduMbPCAuL7+
+          Gq3b14H4pcKduIzWQtygo0JNXPF6mFRA+AI8aUf7sMl9beXn2qdH4oaMY6r4hP4XsDmspKIF+2SL1QWUwaD2AlasFYxqMoDKCM/z72Z/YvBR7lkbXF4bLDMG
+          aD1gNZ19Op8S6L9jZJtnBE4KwCMNlWNKVscUuToIv2F9wQzrkQXI8gXsH7VaZWZFOdsjCpD8nQiKhEQA01EMMmAV1r9LWDAh3WwN9ZYvv3+trzqUHqkO+h8I
+          pgysQmMFnT/TLsngH13tsWLHBov7FZzMd5ql5yiLPWT3wzo600Lrx6w7SYL+ZEcafKQiXdlxqoNGpQVScE5eo301eQQsjpT7CI3k0X0YixAxJcDfp13pMPqB
+          g1QlNCopL1SinyrVpxxaB/YCg8ZpfZucuUldBj7JV+ZDZHFUkh4clTpvHVC6N+HwhDI5JJMDAY/8H6CYCk4hMDQhqJLqlbMfciF4DEZf6WIAsc9KqB0qqZwr
+          RAU3T/MjFLa/Quxd1niq3P6Ya9xDFQTIVCrvU9lsVauuAtuLelmcziOZXHrImh9oX08p6zLwv625FZUbfciAymcyavHDyaKDcGuyk46i8HXRG+Oon05svoWM
+          xRuvvvqqZgC7Ub2mFH9UCwiYjCBBtUmBW/CGjih4VWp6SpmFsryprOQiOJ1ELfX79LcgwShK0iWS16dCOqg+yVCrOC7/rODDK29fvnaFepjavUCbGpWi8OoS
+          g4SmQKtSN6WT/WrxgCFLz+PD5DF0GEUQqwTzSKWa2W1G2JRilAvqPcLg7A6JWQshpwrkgbq5/S8pZi1Qy4JOJ0TqtObEQps59csLlNLslvZI4aEokHYQbZIT
+          GidWblZ3dcta+4uZpcZfD9X/Jqm4gqv/KcvS6X9xVBBxQi7fVpYqD1N2gIKLk7VeqVNqdW31zaixupIQqxTN950GFWezhjb6Laa2ck/9wyd7/vWaftGElf8F
+          pYTYE38rAAA=
+          PAYLOAD
+          base64 --decode /tmp/refine.cjs.gz.b64 | gzip --decompress > /tmp/refine.cjs
+          node --check /tmp/refine.cjs
+
+      - name: Install temporary tools
+        run: |
+          npm install --prefix /tmp/refactor-tools \
+            acorn@8.12.1 \
+            prettier@3.3.3 \
+            playwright@1.47.2
+
+      - name: Refine source modules
+        env:
+          NODE_PATH: /tmp/refactor-tools/node_modules
+        run: node /tmp/refine.cjs
+
+      - name: Format source
+        run: |
+          /tmp/refactor-tools/node_modules/.bin/prettier --write \
+            index.html \
+            README.md \
+            "docs/**/*.{md,json}" \
+            "js/**/*.js" \
+            "tools/**/*.cjs"
+
+      - name: Validate data and JavaScript syntax
+        run: |
+          node tools/check-data.cjs
+          find js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check tools/check-data.cjs
+          test ! -e js/data/base.js
+          test ! -e js/runtime/bootstrap.js
+          test -s js/runtime/interactions.js
+          test -s js/runtime/tables.js
+          grep -q 'js/data/index.js' index.html
+          grep -q 'js/runtime/state.js' index.html
+          grep -q 'js/runtime/start.js' index.html
+
+      - name: Install Chromium
+        run: /tmp/refactor-tools/node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Smoke-test the modular planner
+        env:
+          NODE_PATH: /tmp/refactor-tools/node_modules
+        shell: bash
+        run: |
+          python3 -m http.server 8000 >/tmp/terraria-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+          cat > /tmp/smoke.cjs <<'NODE'
+          "use strict";
+
+          const { chromium } = require("playwright");
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+            const pageErrors = [];
+            page.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
+
+            await page.goto("http://127.0.0.1:8000/", { waitUntil: "networkidle" });
+            await page.waitForFunction(
+              () => document.querySelectorAll("#storageRows tr").length === 86,
+            );
+
+            await page.click("#pitsBtn");
+            await page.selectOption("#mode", "wiring");
+            await page.fill("#search", "L_PIT_TIMER");
+            await page.waitForTimeout(250);
+
+            const result = await page.evaluate(() => ({
+              status: document.querySelector("#status")?.textContent || "",
+              storageRows: document.querySelectorAll("#storageRows tr").length,
+              materialRows: document.querySelectorAll("#materialRows tr").length,
+              canvasSizes: [...document.querySelectorAll("#viewport canvas")].map(
+                (canvas) => [canvas.width, canvas.height],
+              ),
+            }));
+
+            if (!result.status.includes("PASS")) throw new Error("PASS status missing");
+            if (result.storageRows !== 86) throw new Error("Storage table changed");
+            if (result.materialRows === 0) throw new Error("Material table is empty");
+            if (result.canvasSizes.some(([width, height]) => width === 0 || height === 0)) {
+              throw new Error("Canvas size is zero");
+            }
+            if (pageErrors.length) throw new Error(pageErrors.join("\n\n"));
+
+            console.log(JSON.stringify(result, null, 2));
+            await browser.close();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+          node /tmp/smoke.cjs
+
+      - name: Remove one-time workflow and commit
+        shell: bash
+        run: |
+          rm -f .github/workflows/refine-modules.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && {
+            echo "Refinement produced no changes"
+            exit 1
+          }
+          git commit -m "refactor: clarify runtime module boundaries [skip ci]"
+          git push origin HEAD:refactor/modular-source
