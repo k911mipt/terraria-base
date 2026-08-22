@@ -1,0 +1,38 @@
+// Pit liquids and final pit-specific foreground objects.
+// Generated from the canonical monolith without changing item order.
+const OBJECTS_PITS = [
+  {
+    id: "L_PIT_LAVA",
+    name: "Лава левой ямы",
+    x: -17,
+    y: 63,
+    w: 16,
+    h: 1,
+    kind: "lava",
+    style: "combat",
+    short: "ЛАВА",
+    desc: "Тонкий слой на 16 тайлов: два ведра. Под ним конвейеры y64.",
+    room: "pit_l",
+    pitModule: true,
+    arenaSpec: true,
+    liquid: "Lava",
+    buckets: 2,
+  },
+  {
+    id: "R_PIT_LAVA",
+    name: "Лава правой ямы",
+    x: 137,
+    y: 63,
+    w: 16,
+    h: 1,
+    kind: "lava",
+    style: "combat",
+    short: "ЛАВА",
+    desc: "Зеркальный тонкий слой на 16 тайлов: два ведра. Конвейеры гонят лут влево.",
+    room: "pit_r",
+    pitModule: true,
+    arenaSpec: true,
+    liquid: "Lava",
+    buckets: 2,
+  },
+];
