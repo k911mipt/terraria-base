@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Terraria — пустынный аванпост</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./scene-tabs.css" />
+  </head>
+  <body>
+    <div class="toolbar">
+      <nav class="scene-tabs" aria-label="Сцены проекта">
+        <a class="scene-tab" href="./index.html">Основная база</a>
+        <a class="scene-tab" href="./desert.html" aria-current="page"
+          >Пустынный аванпост</a
+        >
+      </nav>
+      <div class="controls">
+        <div class="control">
+          <label for="mode">Режим</label
+          ><select id="mode">
+            <option value="visual">Визуальный макет</option>
+            <option value="structure">Каркас и материалы</option>
+            <option value="furniture">Мебель и NPC</option>
+            <option value="backgrounds">Фоновые стены</option>
+          </select>
+        </div>
+        <label class="check"
+          ><input id="grid" type="checkbox" checked /> сетка</label
+        >
+        <label class="check"
+          ><input id="labels" type="checkbox" checked /> подписи</label
+        >
+        <label class="check"
+          ><input id="roomNames" type="checkbox" checked /> комнаты</label
+        >
+        <label class="check scene-hidden"
+          ><input id="reserves" type="checkbox" /> резервы</label
+        >
+        <button id="upper">Павильон</button
+        ><button id="greenhouse">NPC-комнаты</button
+        ><button id="craft">Сервисный этаж</button
+        ><button id="arena">Рыболовный зал</button
+        ><button id="pitsBtn">Выход вниз</button
+        ><button id="fit">Весь план</button><button id="back">← Назад</button>
+        <button id="bossLeft" class="scene-hidden" hidden></button>
+        <button id="museumBtn" class="scene-hidden" hidden></button>
+        <button id="wiringBtn" class="scene-hidden" hidden></button>
+        <div class="control">
+          <label for="search">Поиск</label
+          ><input
+            id="search"
+            type="search"
+            placeholder="PYLON, BAIT, Оружейник…"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="maphead">
+          <div>
+            <b>Пустынный аванпост · пилон · рыболовный зал · выход вниз</b>
+            <div class="sub">
+              ЛКМ + drag — двигать · колесо — зум под курсором · клик —
+              инспектор · двойной клик — фокус
+            </div>
+          </div>
+          <div class="sub" id="viewInfo"></div>
+        </div>
+        <div class="viewport" id="viewport">
+          <canvas id="baseCanvas"></canvas><canvas id="objectCanvas"></canvas
+          ><canvas id="overlayCanvas"></canvas>
+        </div>
+      </section>
+
+      <aside class="card inspector">
+        <div>
+          <h2 id="iname">Пустынный аванпост v1</h2>
+          <div class="sub" id="idesc">
+            Два валидных NPC-дома окружают центральный Desert Pylon. Под ними
+            находятся сервисная галерея, водоём 45×16 и двухдверный выход в
+            естественную подземную пустыню.
+          </div>
+        </div>
+        <div class="kv" id="ikv"></div>
+        <div>
+          <b>Зафиксировано</b>
+          <div class="status" id="status"></div>
+        </div>
+        <div class="note">
+          Сцена универсальна: она не предполагает расположение какого-либо
+          конкретного босса, строения или края мира рядом с пустыней. За наружной
+          дверью показан только интерфейс выхода; реальные пещеры остаются частью
+          конкретного мира.
+        </div>
+      </aside>
+    </div>
+
+    <section class="card bottom">
+      <div class="bottom-grid">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Модуль</th>
+                <th>Габарит</th>
+                <th>Роль</th>
+              </tr>
+            </thead>
+            <tbody id="roomRows"></tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <b>Логика аванпоста</b>
+          <div class="legend-row">
+            <span class="swatch" style="background: #d8b36b"></span
+            ><span>Sandstone + Palm Wood — низкий пустынный павильон</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #f0c45d"></span
+            ><span>Два дома окружают пилон и не смешиваются с сервисом</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #2f9caf"></span
+            ><span>720 тайлов воды с центральным проёмом для заброса</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #9a6c3e"></span
+            ><span>Двухдверный коридор отделяет безопасную базу от пещер</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 14px; overflow: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Слой</th>
+              <th>Внутренний стиль</th>
+              <th>Реальный предмет Terraria</th>
+              <th>Краска / покрытие</th>
+              <th>Примечание</th>
+            </tr>
+          </thead>
+          <tbody id="materialRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <details class="card storage-spec" open>
+      <summary>Спецификация пустынного аванпоста</summary>
+      <div class="storage-wrap">
+        <table class="storage-table">
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Координаты</th>
+              <th>Модуль</th>
+              <th>Объект</th>
+              <th>Строительная логика</th>
+            </tr>
+          </thead>
+          <tbody id="arenaRows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card storage-spec">
+      <summary>Локальное хранение: пять сундуков</summary>
+      <div class="storage-wrap">
+        <table class="storage-table">
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Имя в игре ≤20</th>
+              <th>Корпус</th>
+              <th>Что хранить</th>
+              <th>Не сюда</th>
+            </tr>
+          </thead>
+          <tbody id="storageRows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="tooltip" id="tip"></div>
+
+    <script src="./js/data/desert/layout.js"></script>
+    <script src="./js/data/desert/solids.js"></script>
+    <script src="./js/data/desert/backgrounds.js"></script>
+    <script src="./js/data/desert/objects.js"></script>
+    <script src="./js/data/desert/index.js"></script>
+    <script src="./js/data/desert/engineering.js"></script>
+    <script src="./js/data/materials.js"></script>
+    <script src="./js/data/desert/materials.js"></script>
+
+    <script src="./js/runtime/core.js"></script>
+    <script src="./js/runtime/validation.js"></script>
+    <script src="./js/runtime/model.js"></script>
+    <script src="./js/runtime/render-base.js"></script>
+    <script src="./js/runtime/render-objects.js"></script>
+    <script src="./js/runtime/desert-extensions.js"></script>
+    <script src="./js/runtime/overlay.js"></script>
+    <script src="./js/runtime/inspector.js"></script>
+    <script src="./js/runtime/tables-desert.js"></script>
+    <script src="./js/runtime/camera.js"></script>
+    <script src="./js/runtime/state.js"></script>
+    <script src="./js/runtime/prepare-desert.js"></script>
+    <script src="./js/runtime/interactions.js"></script>
+    <script src="./js/runtime/interactions-desert.js"></script>
+    <script src="./js/runtime/start-desert.js"></script>
+  </body>
+</html>
