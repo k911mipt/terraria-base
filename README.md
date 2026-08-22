@@ -9,8 +9,8 @@ https://k911mipt.github.io/terraria-base/
 ## Структура проекта
 
 `index.html` — тонкая точка входа. Стили находятся в `styles.css`,
-данные базы — в тематических файлах `js/data/`, Canvas-рендерер и интерфейс —
-в `js/runtime/`.
+данные базы — в тематических файлах `js/data/`, Canvas-рендерер, интерфейс,
+обработчики и запуск — в `js/runtime/`.
 
 Подробная карта исходников: [docs/code-map.md](docs/code-map.md).
 

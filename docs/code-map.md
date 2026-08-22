@@ -12,16 +12,14 @@
 - `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители, арены, музей и ямы.
 - `js/data/engineering/` — цепи, органы управления и 32 отдельные Dart Trap.
 - `js/data/materials.js` — палитры и точные Terraria-спецификации.
-- `js/data/base.js` — только сборка объекта `D`; больших массивов в нём намеренно нет.
+- `js/data/index.js` — только сборка объекта `D`; больших массивов в нём намеренно нет.
 
 ## Исполняемый код
 
 ### `js/runtime/core.js`
 
-Core helpers that do not belong to a narrower subsystem.
+Small shared helpers.
 
-- `biName()`
-- `paintName()`
 - `cp()`
 - `cy()`
 - `seeded()`
@@ -34,8 +32,6 @@ Core helpers that do not belong to a narrower subsystem.
 - `expandOrthPath()`
 - `schedule()`
 - `roomAt()`
-- `escHtml()`
-- `populate()`
 
 ### `js/runtime/validation.js`
 
@@ -131,9 +127,12 @@ Tile inspector and tooltip presentation.
 
 ### `js/runtime/tables.js`
 
-Room, material, storage, arena and circuit tables.
+Status badges and specification tables.
 
-- No functions in the current version.
+- `biName()`
+- `paintName()`
+- `escHtml()`
+- `populate()`
 
 ### `js/runtime/camera.js`
 
@@ -148,16 +147,15 @@ Camera transforms, viewport fitting and render scheduling.
 - `focusRect()`
 - `fit()`
 
-### `js/runtime/interactions.js`
+### Упорядоченный запуск
 
-Named interaction handlers.
+- `js/runtime/state.js` — DOM/Canvas-ссылки, камера, кэши и UI-константы.
+- `js/runtime/prepare.js` — подготовка инженерных индексов и проверки.
+- `js/runtime/interactions.js` — все обработчики мыши, колеса, кнопок и поиска.
+- `js/runtime/start.js` — построение кэшей, таблиц и начальный фокус.
 
-- No functions in the current version.
-
-### `js/runtime/bootstrap.js`
-
-DOM-ссылки, состояние камеры, построение индексов, обработчики событий и
-запуск. Его исполняемые выражения сохранены в исходном порядке.
+Эти четыре файла загружаются именно в таком порядке. Внутри каждого сохранён
+исходный порядок исполняемых выражений.
 
 ## Проверка
 

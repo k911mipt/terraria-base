@@ -39,7 +39,7 @@
       "js/data/objects/pits.js",
       "js/data/objects/index.js",
       "js/data/metadata.js",
-      "js/data/base.js",
+      "js/data/index.js",
       "js/data/engineering/circuits.js",
       "js/data/engineering/controls.js",
       "js/data/engineering/traps.js",
@@ -56,8 +56,10 @@
       "js/runtime/inspector.js",
       "js/runtime/tables.js",
       "js/runtime/camera.js",
+      "js/runtime/state.js",
+      "js/runtime/prepare.js",
       "js/runtime/interactions.js",
-      "js/runtime/bootstrap.js"
+      "js/runtime/start.js"
     ]
   }
 }

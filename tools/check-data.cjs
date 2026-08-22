@@ -29,7 +29,7 @@ const files = [
   "js/data/objects/pits.js",
   "js/data/objects/index.js",
   "js/data/metadata.js",
-  "js/data/base.js",
+  "js/data/index.js",
   "js/data/engineering/circuits.js",
   "js/data/engineering/controls.js",
   "js/data/engineering/traps.js",

@@ -1,5 +1,5 @@
-// Canonical base-data assembly.
-// The large datasets live in semantic modules; this file only preserves their order.
+// Canonical data-model assembly.
+// The large datasets live in semantic modules; this index only preserves their order.
 const D = {
   bounds: BASE_BOUNDS,
   rooms: ROOMS,
