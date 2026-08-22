@@ -1,0 +1,56 @@
+name: Clean up desert v5 descriptions
+
+on:
+  push:
+    branches:
+      - redesign/desert-one-tile-floor
+    paths:
+      - .github/workflows/cleanup-desert-v5.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: redesign/desert-one-tile-floor
+          fetch-depth: 0
+
+      - name: Fix generated prose
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('js/data/desert/objects.js')
+          text = path.read_text()
+          replacements = {
+              'Первый нижний сундук: расходники непосредственно для рыбалки На поднятом сервисном этаже':
+                  'Первый нижний сундук: расходники непосредственно для рыбалки. На поднятом сервисном этаже',
+              'Второй нижний сундук: временный буфер после рыбалки На поднятом сервисном этаже':
+                  'Второй нижний сундук: временный буфер после рыбалки. На поднятом сервисном этаже',
+              'Сундук стоит на шеститайловой площадке сразу после правой стенки бассейна На поднятом сервисном этаже':
+                  'Сундук стоит на шеститайловой площадке сразу после правой стенки бассейна. На поднятом сервисном этаже',
+          }
+          for source, target in replacements.items():
+              if source not in text:
+                  raise SystemExit(f'missing target: {source}')
+              text = text.replace(source, target)
+          path.write_text(text)
+          PY
+
+      - name: Validate
+        run: |
+          node tools/check-desert.cjs
+          node --check js/data/desert/objects.js
+
+      - name: Remove workflow and commit
+        run: |
+          rm .github/workflows/cleanup-desert-v5.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- js/data/desert/objects.js .github/workflows/cleanup-desert-v5.yml
+          git commit -m "chore: clean up desert v5 descriptions"
+          git push origin HEAD:redesign/desert-one-tile-floor
