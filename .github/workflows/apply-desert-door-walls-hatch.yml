@@ -1,0 +1,65 @@
+name: Apply desert door-wall and hatch corrections
+
+on:
+  push:
+    branches:
+      - fix/desert-door-walls-hatch
+    paths:
+      - tools/apply-desert-door-walls-hatch.cjs
+      - .github/workflows/apply-desert-door-walls-hatch.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tools/apply-desert-door-walls-hatch.cjs
+      - .github/workflows/apply-desert-door-walls-hatch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/desert-door-walls-hatch
+          fetch-depth: 0
+
+      - name: Validate migration syntax
+        run: node --check tools/apply-desert-door-walls-hatch.cjs
+
+      - name: Apply geometry corrections
+        run: node tools/apply-desert-door-walls-hatch.cjs
+
+      - name: Validate desert scene
+        run: |
+          node tools/check-desert.cjs
+          for file in js/data/desert/*.js js/runtime/tables-desert.js; do
+            node --check "$file"
+          done
+
+      - name: Remove one-time migration files
+        run: |
+          rm tools/apply-desert-door-walls-hatch.cjs
+          rm .github/workflows/apply-desert-door-walls-hatch.yml
+
+      - name: Commit generated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            desert.html \
+            docs/desert-outpost.md \
+            js/data/desert/layout.js \
+            js/data/desert/solids.js \
+            js/data/desert/backgrounds.js \
+            js/data/desert/objects.js \
+            js/data/desert/engineering.js \
+            js/runtime/tables-desert.js \
+            tools/check-desert.cjs \
+            tools/apply-desert-door-walls-hatch.cjs \
+            .github/workflows/apply-desert-door-walls-hatch.yml
+          git commit -m "fix: add door walls and lower desert hatch"
+          git push origin HEAD:fix/desert-door-walls-hatch
