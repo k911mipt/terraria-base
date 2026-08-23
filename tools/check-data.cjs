@@ -25,6 +25,7 @@ const files = [
   "js/data/objects/greenhouse.js",
   "js/data/objects/dyes.js",
   "js/data/objects/arena.js",
+  "js/data/objects/eternia.js",
   "js/data/objects/museum.js",
   "js/data/objects/pits.js",
   "js/data/objects/index.js",
@@ -127,6 +128,10 @@ assert(ENG.circuits.length === 8, "Engineering circuit count changed");
 assert(
   new Set(D.objects.map((object) => object.id)).size === D.objects.length,
   "Duplicate object ids",
+);
+assert(
+  D.objects.filter((object) => object.eterniaSpec).length === 5,
+  "Expected one Eternia stand and four planning zones",
 );
 assert(
   new Set(ENG.devices.map((device) => device.id)).size === ENG.devices.length,

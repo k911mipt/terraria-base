@@ -17,6 +17,7 @@
 
 - Подробная карта основных исходников: [docs/code-map.md](docs/code-map.md).
 - Постоянные строительные инварианты: [docs/building-rules.md](docs/building-rules.md).
+- Совмещённая босс/Этерия-арена: [docs/eternia-arena.md](docs/eternia-arena.md).
 
 ## Локальный запуск
 
@@ -36,6 +37,7 @@ python3 -m http.server 8000
 ```bash
 node tools/check-data.cjs
 node tools/check-desert.cjs
+node tools/check-eternia.cjs
 ```
 
 ## Правила изменений
