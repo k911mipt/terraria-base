@@ -281,7 +281,8 @@ const DESERT_SOLIDS = [
     "y2": 23,
     "mat": "sandstone_block_plain",
     "name": "Верх левой стены центральной шахты",
-    "desc": "Проём y24–26 оставлен под дверь из шахты в сервисную комнату."
+    "desc": "Проём y24–26 оставлен под дверь из шахты в сервисную комнату.",
+    "hatchSupport": true
   },
   {
     "x1": 48,
@@ -386,5 +387,26 @@ const DESERT_SOLIDS = [
     "desc": "Площадка центрального спуска с шагом ровно семь тайлов.",
     "platformGroup": "descent",
     "platformLevel": 69
+  },
+  {
+    "x1": 49,
+    "y1": 20,
+    "x2": 50,
+    "y2": 20,
+    "mat": "palm_platform",
+    "name": "Платформа над опущенным люком",
+    "desc": "Palm Wood Platform занимает прежнее место люка в линии пола y20. Сам Trap Door расположен на один тайл ниже.",
+    "hatchPlatform": true
+  },
+  {
+    "x1": 51,
+    "y1": 21,
+    "x2": 51,
+    "y2": 21,
+    "mat": "sandstone_block_plain",
+    "name": "Правая опора люка",
+    "desc": "Твёрдый Sandstone Block справа от люка x49–50, y21. Вместе с блоком x48 он даёт люку две реальные боковые опоры.",
+    "hatchSupport": true,
+    "generatedHatchSupport": true
   }
 ];
