@@ -1,4 +1,4 @@
-// Safe player-placed walls for rooms, every door opening and the central shaft.
+// Safe player-placed walls for rooms, doors, enclosed platforms and the central shaft.
 const DESERT_BACKGROUNDS = [
   {
     "x1": 19,
@@ -89,6 +89,26 @@ const DESERT_BACKGROUNDS = [
     "mat": "sandstone_wall_plain",
     "name": "Фон центрального спуска",
     "desc": "Безопасная поставленная игроком стена закрывает шахту непосредственно под люком."
+  },
+  {
+    "x1": 49,
+    "y1": 20,
+    "x2": 50,
+    "y2": 20,
+    "mat": "palm_wall",
+    "name": "Фон платформы над люком",
+    "desc": "Palm Wood Wall продолжает фон центрального хаба за платформой, которая занимает прежнее место люка.",
+    "platformBackground": true
+  },
+  {
+    "x1": 28,
+    "y1": 27,
+    "x2": 47,
+    "y2": 27,
+    "mat": "sandstone_wall_plain",
+    "name": "Фон рыболовного мостика",
+    "desc": "Sandstone Wall продолжает безопасный фон сервисной зоны за обеими половинами мостика и центральным проёмом для заброса.",
+    "platformBackground": true
   },
   {
     "doorId": "D_OUTER_L",
