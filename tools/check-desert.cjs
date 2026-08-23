@@ -33,9 +33,27 @@
   assert(D.objects.filter((object) => object.kind === "pylon").length === 1, "Expected one pylon");
   assert(D.objects.filter((object) => object.kind === "chest").length === 5, "Expected five chests");
   assert(D.objects.filter((object) => object.kind === "door").length === 5, "Expected five doors");
+  const backgroundAt = (x, y) => [...D.backgrounds].reverse().find((background) => x >= background.x1 && x <= background.x2 && y >= background.y1 && y <= background.y2);
+  const doors = D.objects.filter((object) => object.kind === "door");
+  let coveredDoorTiles = 0;
+  for (const door of doors) {
+    for (let y = door.y; y < door.y + door.h; y++) {
+      const wall = backgroundAt(door.x, y);
+      assert(Boolean(wall), "Missing background wall behind " + door.id + " at y" + y);
+      if (wall) coveredDoorTiles += 1;
+    }
+  }
+  assert(coveredDoorTiles === 15, "All 15 door tiles must have background walls");
+  assert(D.validation.doorsWithWall === 5 && D.validation.doorWallTiles === 15, "Door-wall validation snapshot mismatch");
   assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Desert scene must not require wiring");
   const hatch = D.objects.find((object) => object.id === "D_HATCH");
-  assert(hatch && hatch.x === 49 && hatch.w === 2 && hatch.y === 20, "Hatch coordinates changed unexpectedly");
+  assert(hatch && hatch.x === 49 && hatch.w === 2 && hatch.y === 21, "Hatch must be x49–50 y21");
+  const hatchPlatform = D.solids.find((solid) => solid.hatchPlatform);
+  assert(hatchPlatform && hatchPlatform.x1 === 49 && hatchPlatform.x2 === 50 && hatchPlatform.y1 === 20 && hatchPlatform.y2 === 20 && hatchPlatform.mat === "palm_platform", "Palm platform must replace the old hatch position");
+  const solidAt = (x, y) => D.solids.find((solid) => x >= solid.x1 && x <= solid.x2 && y >= solid.y1 && y <= solid.y2);
+  assert(Boolean(solidAt(48, 21)), "Left solid hatch support x48 y21 is missing");
+  assert(Boolean(solidAt(51, 21)), "Right solid hatch support x51 y21 is missing");
+  assert(D.validation.hatchShiftedBelowFloor === true && D.validation.hatchPlatformY === 20, "Hatch validation snapshot mismatch");
   const water = D.objects.find((object) => object.id === "DESERT_WATER");
   assert(water && water.x === 28 && water.y === 28 && water.w === 20 && water.h === 16, "Pool must stay 20×16 at x28 y28");
   assert(water.tiles === 320, "Pool must contain 320 tiles");
@@ -64,7 +82,8 @@
   const html = fs.readFileSync(path.join(root, "desert.html"), "utf8");
   assert(!html.includes("Поднятый пустынный рыболовный зал"), "Legacy fishing-hall label remains in HTML");
   assert(html.includes(">Бассейн</button"), "Pool navigation button is missing");
-  assert(html.includes("Под Оружейником больше нет пустого пространства"), "HTML must explain the filled area under Arms Dealer");
+  assert(html.includes("За каждой дверью теперь есть безопасная фоновая стена"), "HTML must explain door walls");
+  assert(html.includes("сам люк опущен на y21"), "HTML must explain the shifted hatch");
   for (const solid of D.solids) {
     assert(solid.x1 >= D.bounds.xMin && solid.y1 >= D.bounds.yMin && solid.x2 <= D.bounds.xMax && solid.y2 <= D.bounds.yMax, (solid.name || solid.mat) + " outside bounds");
   }

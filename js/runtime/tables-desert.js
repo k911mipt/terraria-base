@@ -28,6 +28,8 @@ function populate() {
     ["good", `зазор слева: ${v.leftPoolGap}`],
     ["good", `локальных сундуков: ${v.serviceChests}`],
     ["good", `дверей к спуску: ${v.accessDoors}`],
+    ["good", `двери со стеной: ${v.doorsWithWall}/${v.totalDoors}`],
+    ["good", `люк: platform y${v.hatchPlatformY} / hatch y${v.hatch.y}`],
     ["good", `шаг платформ: ${v.platformStep}`],
     ["good", `фундамент: ${v.foundationTiles}`],
     ["good", `сервисная зона: ${v.lowerRoomInterior}`],

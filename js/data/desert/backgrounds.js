@@ -1,4 +1,4 @@
-// Safe player-placed walls for housing, service/fishing and the central shaft.
+// Safe player-placed walls for rooms, every door opening and the central shaft.
 const DESERT_BACKGROUNDS = [
   {
     "x1": 19,
@@ -89,5 +89,60 @@ const DESERT_BACKGROUNDS = [
     "mat": "sandstone_wall_plain",
     "name": "Фон центрального спуска",
     "desc": "Безопасная поставленная игроком стена закрывает шахту непосредственно под люком."
+  },
+  {
+    "doorId": "D_OUTER_L",
+    "x1": 18,
+    "y1": 17,
+    "x2": 18,
+    "y2": 19,
+    "mat": "sandstone_wall_plain",
+    "name": "Фоновая стена левой наружной двери",
+    "desc": "Безопасная Sandstone Wall находится непосредственно за дверью.",
+    "doorBackground": true
+  },
+  {
+    "doorId": "D_INNER_L",
+    "x1": 28,
+    "y1": 17,
+    "x2": 28,
+    "y2": 19,
+    "mat": "palm_wall",
+    "name": "Фоновая стена левой внутренней двери",
+    "desc": "Palm Wood Wall продолжает фон центрального хаба под дверью.",
+    "doorBackground": true
+  },
+  {
+    "doorId": "D_INNER_R",
+    "x1": 54,
+    "y1": 17,
+    "x2": 54,
+    "y2": 19,
+    "mat": "palm_wall",
+    "name": "Фоновая стена правой внутренней двери",
+    "desc": "Palm Wood Wall продолжает фон центрального хаба под дверью.",
+    "doorBackground": true
+  },
+  {
+    "doorId": "D_OUTER_R",
+    "x1": 64,
+    "y1": 17,
+    "x2": 64,
+    "y2": 19,
+    "mat": "sandstone_wall_plain",
+    "name": "Фоновая стена правой наружной двери",
+    "desc": "Безопасная Sandstone Wall находится непосредственно за дверью.",
+    "doorBackground": true
+  },
+  {
+    "doorId": "DESERT_ACCESS_INNER",
+    "x1": 48,
+    "y1": 24,
+    "x2": 48,
+    "y2": 26,
+    "mat": "sandstone_wall_plain",
+    "name": "Фоновая стена двери центральной шахты",
+    "desc": "Безопасная Sandstone Wall закрывает все три тайла боковой двери шахты.",
+    "doorBackground": true
   }
 ];
