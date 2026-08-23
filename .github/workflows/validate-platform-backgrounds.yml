@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/desert-platform-backgrounds
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
