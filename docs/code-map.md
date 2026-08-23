@@ -9,7 +9,7 @@
 - `js/data/layout.js` — границы мира, комнаты, резервы и главы музея.
 - `js/data/solids/` — верхний комплекс, улица/Y54 и нижний музейно-ловушечный слой.
 - `js/data/backgrounds/` — база, левая босс-арена, музей и технические проходы.
-- `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители, арены, музей и ямы.
+- `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители, арены, отдельная разметка Этерии, музей и ямы.
 - `js/data/engineering/` — цепи, органы управления и 32 отдельные Dart Trap.
 - `js/data/materials.js` — палитры и точные Terraria-спецификации.
 - `js/data/index.js` — только сборка объекта `D`; больших массивов в нём намеренно нет.
@@ -161,6 +161,7 @@ Camera transforms, viewport fitting and render scheduling.
 
 ```bash
 node tools/check-data.cjs
+node tools/check-eternia.cjs
 python3 -m http.server 8000
 ```
 
