@@ -47,3 +47,5 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:8000/underground.html >/dev/null
           curl --fail --silent --show-error http://127.0.0.1:8000/js/runtime/underground-extensions.js >/dev/null
           curl --fail --silent --show-error http://127.0.0.1:8000/tools/check-lighting.cjs >/dev/null
+
+# Final human-triggered validation after switching to room-local light sources.
