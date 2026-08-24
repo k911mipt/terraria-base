@@ -6,18 +6,20 @@
 
 - Основная база: https://k911mipt.github.io/terraria-base/
 - Пустынный аванпост: https://k911mipt.github.io/terraria-base/desert.html
+- Снежная мастерская Гоблина: https://k911mipt.github.io/terraria-base/underground.html
 
 Между сценами можно переключаться вкладками в верхней панели.
 
 ## Структура проекта
 
-`index.html` — точка входа основной базы, `desert.html` — отдельная сцена пустынного аванпоста. Общие стили находятся в `styles.css`, оформление вкладок — в `scene-tabs.css`.
+`index.html` — точка входа основной базы, `desert.html` — пустынный аванпост, `underground.html` — снежная мастерская Гоблина. Общие стили находятся в `styles.css`, оформление вкладок — в `scene-tabs.css`.
 
-Данные основной базы находятся в тематических файлах `js/data/`. Пустынная сцена хранится отдельно в `js/data/desert/`. Общий Canvas-рендерер, инспектор и управление находятся в `js/runtime/`; небольшие пустынные расширения не меняют модель основной базы.
+Данные основной базы находятся в тематических файлах `js/data/`. Отдельные сцены хранятся в `js/data/desert/` и `js/data/underground/` (подземный Ice biome). Общий Canvas-рендерер, инспектор и управление находятся в `js/runtime/`; небольшие расширения сцен не меняют модель основной базы.
 
 - Подробная карта основных исходников: [docs/code-map.md](docs/code-map.md).
 - Постоянные строительные инварианты: [docs/building-rules.md](docs/building-rules.md).
 - Совмещённая босс/Этерия-арена: [docs/eternia-arena.md](docs/eternia-arena.md).
+- Снежная мастерская Гоблина: [docs/underground-workshop.md](docs/underground-workshop.md).
 
 ## Локальный запуск
 
@@ -30,7 +32,8 @@ python3 -m http.server 8000
 Затем откройте:
 
 - `http://localhost:8000/` — основная база;
-- `http://localhost:8000/desert.html` — пустынный аванпост.
+- `http://localhost:8000/desert.html` — пустынный аванпост;
+- `http://localhost:8000/underground.html` — подземная мастерская Гоблина.
 
 Проверки данных и критических координат:
 
@@ -38,6 +41,7 @@ python3 -m http.server 8000
 node tools/check-data.cjs
 node tools/check-desert.cjs
 node tools/check-eternia.cjs
+node tools/check-underground.cjs
 ```
 
 ## Правила изменений
