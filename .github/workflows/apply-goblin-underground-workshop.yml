@@ -29,7 +29,16 @@ jobs:
 
       - name: Reconstruct and apply prepared patch
         run: |
-          cat tools/.goblin-workshop.patch.gz.b64.part-* \
+          cat \
+            tools/.goblin-workshop.patch.gz.b64.part-00 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-00 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-01 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-02 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-03 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-04 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-05 \
+            tools/.goblin-workshop.patch.gz.b64.part-02 \
+            tools/.goblin-workshop.patch.gz.b64.part-03 \
             | base64 --decode \
             | gzip --decompress \
             > /tmp/goblin-underground-workshop.patch
@@ -99,6 +108,12 @@ jobs:
             tools/check-underground.cjs \
             tools/.goblin-workshop.patch.gz.b64.part-00 \
             tools/.goblin-workshop.patch.gz.b64.part-01 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-00 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-01 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-02 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-03 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-04 \
+            tools/.goblin-workshop.patch.gz.b64.part-01-sub-05 \
             tools/.goblin-workshop.patch.gz.b64.part-02 \
             tools/.goblin-workshop.patch.gz.b64.part-03 \
             .github/workflows/apply-goblin-underground-workshop.yml
