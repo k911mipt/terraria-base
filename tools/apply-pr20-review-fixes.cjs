@@ -84,41 +84,49 @@ lighting = replaceRequired(
   "      localLightCount: localLights.length,\n      influencingLightCount: influencingLights.length,\n      contributingLights: influencingLights.map((light) => light.id),",
   "lighting result counts",
 );
+
+const helperReplacement = [
+  '  const lights = D.objects.filter((object) => object.kind === "light");',
+  "  const ceilingMountedStyles = new Set([",
+  '    "ice_lantern",',
+  '    "copper_chandelier",',
+  '    "crystal_chandelier",',
+  "  ]);",
+  "  const solidAt = (x, y) =>",
+  "    [...D.solids]",
+  "      .reverse()",
+  "      .find(",
+  "        (solid) =>",
+  "          x >= solid.x1 && x <= solid.x2 && y >= solid.y1 && y <= solid.y2,",
+  "      );",
+  "  for (const light of lights) {",
+].join("\n");
 lighting = replaceRequired(
   lighting,
-  "  const lights = D.objects.filter((object) => object.kind === \"light\");\n  for (const light of lights) {",
-  `  const lights = D.objects.filter((object) => object.kind === "light");
-  const ceilingMountedStyles = new Set([
-    "ice_lantern",
-    "copper_chandelier",
-    "crystal_chandelier",
-  ]);
-  const solidAt = (x, y) =>
-    [...D.solids]
-      .reverse()
-      .find(
-        (solid) =>
-          x >= solid.x1 && x <= solid.x2 && y >= solid.y1 && y <= solid.y2,
-      );
-  for (const light of lights) {`,
+  '  const lights = D.objects.filter((object) => object.kind === "light");\n  for (const light of lights) {',
+  helperReplacement,
   "ceiling support helpers",
 );
+
+const assertionReplacement = [
+  "    assert(",
+  "      Number.isFinite(light.lightRadius) && light.lightRadius > 0,",
+  "      `${light.id} must declare a positive lightRadius`,",
+  "    );",
+  "    if (ceilingMountedStyles.has(light.style)) {",
+  "      const supportX = Math.floor(light.x + light.w / 2);",
+  "      const supportY = light.y - 1;",
+  "      assert(",
+  "        Boolean(solidAt(supportX, supportY)),",
+  "        `${light.id} must have a block or platform directly above at x${supportX} y${supportY}`,",
+  "      );",
+  "    }",
+  "  }",
+].join("\n");
 lighting = replaceRequired(
   lighting,
   "    assert(\n      Number.isFinite(light.lightRadius) && light.lightRadius > 0,\n      `${light.id} must declare a positive lightRadius`,\n    );\n  }",
-  `    assert(
-      Number.isFinite(light.lightRadius) && light.lightRadius > 0,
-      `${light.id} must declare a positive lightRadius`,
-    );
-    if (ceilingMountedStyles.has(light.style)) {
-      const supportX = Math.floor(light.x + light.w / 2);
-      const supportY = light.y - 1;
-      assert(
-        Boolean(solidAt(supportX, supportY)),
-        `${light.id} must have a block or platform directly above at x${supportX} y${supportY}`,
-      );
-    }
-  }`,
+  assertionReplacement,
   "ceiling support assertions",
 );
 write(lightingPath, lighting);
@@ -140,4 +148,3 @@ if (!rules.includes("## Подвесные источники света")) {
 write(rulesPath, rules);
 
 console.log("Applied PR #20 review fixes.");
-// Touch this file after the workflow exists so the push event is guaranteed to fire.
