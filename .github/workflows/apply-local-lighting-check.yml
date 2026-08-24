@@ -1,0 +1,54 @@
+name: Apply room-local lighting validation
+
+on:
+  push:
+    branches:
+      - fix/underground-access-lighting-style
+    paths:
+      - tools/apply-local-lighting-check.cjs
+      - .github/workflows/apply-local-lighting-check.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/underground-access-lighting-style
+          fetch-depth: 0
+
+      - name: Apply stricter lighting validation
+        run: node tools/apply-local-lighting-check.cjs
+
+      - name: Validate planner
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node --check js/data/underground/objects.js
+          node --check tools/check-lighting.cjs
+
+      - name: Remove one-time files
+        run: |
+          rm tools/apply-local-lighting-check.cjs
+          rm .github/workflows/apply-local-lighting-check.yml
+
+      - name: Commit generated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            docs/building-rules.md \
+            docs/underground-workshop.md \
+            js/data/underground/objects.js \
+            tools/check-lighting.cjs \
+            tools/apply-local-lighting-check.cjs \
+            .github/workflows/apply-local-lighting-check.yml
+          git commit -m "test: validate room lighting with local sources"
+          git push origin HEAD:fix/underground-access-lighting-style
