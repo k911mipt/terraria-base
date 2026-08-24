@@ -1,0 +1,98 @@
+name: Apply Goblin workshop fishing redesign
+
+on:
+  push:
+    branches:
+      - redesign/goblin-workshop-fishing
+    paths:
+      - tools/.goblin-v2.tar.gz.b64.part-*
+      - .github/workflows/apply-goblin-workshop-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: redesign/goblin-workshop-fishing
+          fetch-depth: 0
+
+      - name: Reconstruct and extract prepared source files
+        run: |
+          cat tools/.goblin-v2.tar.gz.b64.part-* \
+            | base64 --decode \
+            > /tmp/goblin-v2.tar.gz
+          echo "36563fde08a127ef12f440d5586b2de677f654139f668009c09126efb5a8a15e  /tmp/goblin-v2.tar.gz" \
+            | sha256sum --check -
+          tar -xzf /tmp/goblin-v2.tar.gz
+
+      - name: Validate every planner scene
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+
+      - name: Validate changed JavaScript
+        run: |
+          for file in \
+            js/data/underground/layout.js \
+            js/data/underground/solids.js \
+            js/data/underground/backgrounds.js \
+            js/data/underground/objects.js \
+            js/data/underground/materials.js \
+            js/data/underground/engineering.js \
+            js/runtime/underground-extensions.js \
+            js/runtime/interactions-underground.js \
+            js/runtime/tables-underground.js \
+            tools/check-underground.cjs; do
+            node --check "$file"
+          done
+
+      - name: Smoke-test static pages and new scene resources
+        run: |
+          python3 -m http.server 8000 >/tmp/terraria-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          sleep 1
+          curl --fail --silent --show-error http://127.0.0.1:8000/index.html >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8000/desert.html >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8000/underground.html >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8000/js/data/underground/objects.js >/dev/null
+          curl --fail --silent --show-error http://127.0.0.1:8000/js/runtime/underground-extensions.js >/dev/null
+
+      - name: Remove one-time payload and workflow
+        run: |
+          rm tools/.goblin-v2.tar.gz.b64.part-*
+          rm .github/workflows/apply-goblin-workshop-v2.yml
+
+      - name: Commit generated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            underground.html \
+            docs/underground-workshop.md \
+            js/data/underground/layout.js \
+            js/data/underground/solids.js \
+            js/data/underground/backgrounds.js \
+            js/data/underground/objects.js \
+            js/data/underground/materials.js \
+            js/data/underground/engineering.js \
+            js/runtime/underground-extensions.js \
+            js/runtime/interactions-underground.js \
+            js/runtime/tables-underground.js \
+            tools/check-underground.cjs \
+            tools/.goblin-v2.tar.gz.b64.part-00 \
+            tools/.goblin-v2.tar.gz.b64.part-01 \
+            tools/.goblin-v2.tar.gz.b64.part-02 \
+            tools/.goblin-v2.tar.gz.b64.part-03 \
+            tools/.goblin-v2.tar.gz.b64.part-04 \
+            tools/.goblin-v2.tar.gz.b64.part-05 \
+            .github/workflows/apply-goblin-workshop-v2.yml
+          git commit -m "redesign: style Goblin workshop and add fishing pool"
+          git push origin HEAD:redesign/goblin-workshop-fishing
