@@ -40,6 +40,22 @@ jobs:
           node --check /tmp/apply-underground-v3.cjs
           node /tmp/apply-underground-v3.cjs
 
+          # Keep the water-volume invariant visible in the HTML summary.
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("underground.html")
+          source = path.read_text(encoding="utf-8")
+          old = "рыболовному сундуку открыт, а четыре зоны проверяются по освещённости."
+          new = (
+              "рыболовному сундуку открыт; водоём 20×16 содержит 320 тайлов воды, "
+              "а четыре зоны проверяются по освещённости."
+          )
+          if old not in source:
+              raise SystemExit("Expected underground HTML summary was not found")
+          path.write_text(source.replace(old, new, 1), encoding="utf-8")
+          PY
+
       - name: Validate every planner scene
         run: |
           node tools/check-data.cjs
