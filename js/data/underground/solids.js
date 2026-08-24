@@ -1,4 +1,4 @@
-// Guaranteed Ice-biome context, styled rooms and accessible artificial fishing reservoir.
+// Guaranteed Ice-biome context, styled rooms, open access and artificial fishing reservoir.
 const UNDERGROUND_SOLIDS = [
   {
     "x1": 0,
@@ -389,5 +389,16 @@ const UNDERGROUND_SOLIDS = [
     "desc": "Boreal Wood Platform поддерживает сундук готовых сборок и освобождает жилой пол.",
     "decorativePlatform": true,
     "princessStyle": true
+  },
+  {
+    "x1": 40,
+    "y1": 11,
+    "x2": 40,
+    "y2": 11,
+    "mat": "glass_platform",
+    "name": "Стеклянная опора фонаря ниши пилона",
+    "desc": "Glass Platform непосредственно над Ice Lantern позволяет реально установить подвесной фонарь в стеклянной нише.",
+    "decorativePlatform": true,
+    "lanternSupport": true
   }
 ];

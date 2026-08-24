@@ -571,7 +571,7 @@ const UNDERGROUND_OBJECTS = [
     "short": "✦",
     "room": "underground_goblin",
     "lightRadius": 9,
-    "desc": "Ice Lantern отдельно освещает правую сторону мастерской и стеклянную нишу Пилона пещер.",
+    "desc": "Ice Lantern освещает правую сторону мастерской и стеклянную нишу Пилона пещер; над ним установлена отдельная Glass Platform на x40, y11.",
     "foregroundLayer": "Освещение",
     "foregroundItemRu": "Ледяной фонарь",
     "foregroundItemEn": "Ice Lantern",
@@ -620,7 +620,7 @@ const UNDERGROUND_OBJECTS = [
     "id": "UG_FISH_LIGHT_L",
     "name": "Левый ледяной фонарь рыболовного этажа",
     "x": 18,
-    "y": 23,
+    "y": 22,
     "w": 1,
     "h": 2,
     "kind": "light",
@@ -628,13 +628,13 @@ const UNDERGROUND_OBJECTS = [
     "short": "✦",
     "room": "underground_fishing",
     "lightRadius": 10,
-    "desc": "Ice Lantern освещает левую половину помоста и край водоёма."
+    "desc": "Ice Lantern освещает левую половину помоста и край водоёма. Фонарь теперь висит непосредственно под твёрдым полом y21."
   },
   {
     "id": "UG_FISH_LIGHT_R",
     "name": "Правый ледяной фонарь рыболовного этажа",
     "x": 31,
-    "y": 23,
+    "y": 22,
     "w": 1,
     "h": 2,
     "kind": "light",
@@ -642,13 +642,13 @@ const UNDERGROUND_OBJECTS = [
     "short": "✦",
     "room": "underground_fishing",
     "lightRadius": 10,
-    "desc": "Второй Ice Lantern симметрично освещает правую половину помоста."
+    "desc": "Второй Ice Lantern симметрично освещает правую половину помоста. Фонарь теперь висит непосредственно под твёрдым полом y21."
   },
   {
     "id": "UG_FISH_SERVICE_LIGHT",
     "name": "Свет площадки рыболовных снастей",
     "x": 40,
-    "y": 23,
+    "y": 22,
     "w": 1,
     "h": 2,
     "kind": "light",
@@ -656,6 +656,6 @@ const UNDERGROUND_OBJECTS = [
     "short": "✦",
     "room": "underground_fishing",
     "lightRadius": 7,
-    "desc": "Ice Lantern освещает сундук и стул справа от открытого прохода из шахты."
+    "desc": "Ice Lantern освещает сундук и стул справа от открытого прохода из шахты. Фонарь теперь висит непосредственно под твёрдым полом y21."
   }
 ];
