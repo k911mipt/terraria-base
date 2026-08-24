@@ -7,6 +7,9 @@ on:
     paths:
       - tools/.apply-underground-v3.cjs.gz.b64.part-*
       - .github/workflows/apply-underground-v3.yml
+  pull_request:
+    branches:
+      - main
 
 concurrency:
   group: apply-underground-v3
