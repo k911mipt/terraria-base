@@ -3,7 +3,7 @@ const UNDERGROUND_BOUNDS = {
   xMin: 0,
   xMax: 65,
   yMin: 0,
-  yMax: 34,
+  yMax: 50,
 };
 
 const UNDERGROUND_ROOMS = [
@@ -13,9 +13,9 @@ const UNDERGROUND_ROOMS = [
     x1: 0,
     y1: 0,
     x2: 65,
-    y2: 34,
+    y2: 50,
     short: "ЛЕДЯНОЙ БИОМ",
-    desc: "Компактная трёхкомнатная мастерская внутри гарантированного ледяного биома; сцена не привязана к уникальным структурам конкретного мира.",
+    desc: "Трёхкомнатная мастерская и искусственный рыболовный резервуар внутри гарантированного ледяного биома; сцена не привязана к уникальным структурам конкретного мира.",
   },
   {
     id: "underground_mechanic",
@@ -29,13 +29,13 @@ const UNDERGROUND_ROOMS = [
   },
   {
     id: "underground_goblin",
-    name: "Мастерская Гоблина",
+    name: "Стилизованная мастерская Гоблина",
     x1: 23,
     y1: 7,
     x2: 42,
-    y2: 21,
+    y2: 22,
     short: "ГОБЛИН / ПИЛОН",
-    desc: "Центральная комната перековки: Гоблин, Мастерская инженера, сейф, сундук на перековку и Пилон пещер.",
+    desc: "Центральная комната разделена на жилой угол, медно-зелёную зону перековки и стеклянную нишу Пилона пещер; рядом расположен люк в рыболовный этаж.",
   },
   {
     id: "underground_princess",
@@ -65,7 +65,17 @@ const UNDERGROUND_ROOMS = [
     x2: 65,
     y2: 22,
     short: "ВХОД R",
-    desc: "Зеркальный запасной вход без лишних платформ, шахт и пустых технических камер.",
+    desc: "Зеркальный запасной вход без лишних платформ и пустых технических камер.",
+  },
+  {
+    id: "underground_fishing",
+    name: "Подлёдный рыбацкий резервуар",
+    x1: 14,
+    y1: 21,
+    x2: 43,
+    y2: 45,
+    short: "РЫБАЛКА 20×16",
+    desc: "Нижний функциональный этаж под мастерской: люк и семитайловый спуск, безопасный помост, водоём 20×16 на 320 тайлов и локальный сундук снастей.",
   },
 ];
 
@@ -74,7 +84,7 @@ const UNDERGROUND_RESERVES = [];
 const UNDERGROUND_VALIDATION = {
   status: "PASS",
   sceneWidth: 66,
-  sceneHeight: 35,
+  sceneHeight: 51,
   workshopWidth: 42,
   npcHouses: 3,
   residents: ["Mechanic", "Goblin Tinkerer", "Princess"],
@@ -83,35 +93,52 @@ const UNDERGROUND_VALIDATION = {
   goblinBiome: "Underground Snow / Ice",
   goblinPriceModifier: 0.75,
   goblinNeighborDistances: {
-    mechanic: 17,
-    princess: 12,
+    mechanic: 13,
+    princess: 16,
   },
   pylonCount: 1,
   pylonType: "Cavern Pylon",
   pylonWorksBeforePrincess: true,
-  serviceChests: 3,
+  serviceChests: 4,
   personalStorage: 1,
   tinkerersWorkshops: 1,
   beds: 1,
-  totalDoors: 4,
-  doorsWithWall: 4,
-  doorWallTiles: 12,
-  iceBiomeBlocks: 1536,
+  totalDoors: 5,
+  doorsWithWall: 5,
+  doorWallTiles: 15,
+  iceBiomeBlocks: 1984,
   iceBiomeThreshold: 1500,
   iceBiomeGuaranteed: true,
-  platforms: 0,
-  hatches: 0,
+  fishingWaterWidth: 20,
+  fishingWaterDepth: 16,
+  fishingWaterTiles: 320,
+  fishingOpeningWidth: 4,
+  poolX: [15, 34],
+  poolY: [29, 44],
+  artificialPool: true,
+  platformTiles: 20,
+  platformLevels: [21, 28],
+  hatches: 1,
+  hatch: {
+    x: 36,
+    y: 22,
+    w: 2,
+  },
+  hatchPlatformY: 21,
+  hatchSupportX: [35, 38],
   wiringCircuits: 0,
+  goblinStylePanels: 3,
 };
 
 const UNDERGROUND_NOTES = [
-  "Финальная группа из ранее выбранного плана: Механик, Гоблин-инженер и Принцесса в подземном снежном биоме.",
+  "Финальная группа: Механик, Гоблин-инженер и Принцесса в подземном снежном биоме.",
   "Гоблин находится в предпочитаемом подземном слое рядом с любимым Механиком и нравящейся ему Принцессой; оба соседа ближе 25 тайлов.",
-  "1512 Ice Block и 24 Snow Block дают 1536 биомных блоков и превышают порог 1500 и гарантируют ледяной биом; он перекрывает подземный штраф Механика.",
-  "До появления Принцессы Пилон пещер уже работает от двух поселённых NPC: Гоблина и Механика.",
-  "За всеми четырьмя дверями есть безопасные фоновые стены на всех трёх тайлах проёма.",
-  "В сцене нет платформ и люков; правила их установки остаются обязательными для будущих расширений.",
+  "1960 Ice Block и 24 Snow Block дают 1984 биомных блока и превышают порог 1500.",
+  "Мастерская Гоблина оформлена тремя зонами: тёплый жилой угол, медно-зелёная рабочая панель и стеклянная ниша пилона.",
+  "Искусственный водоём 20×16 содержит 320 тайлов воды и имеет четырёхтайловый проём для заброса.",
+  "Люк установлен по постоянному правилу: платформа на y21, сам Trap Door на y22, твёрдые опоры x35 и x38.",
+  "Все пять дверей и все платформы внутри закрытых помещений имеют непрерывные фоновые стены.",
 ];
 
 const UNDERGROUND_TITLE =
-  "Terraria — подземная снежная мастерская Гоблина, перековка 75% и Пилон пещер";
+  "Terraria — снежная мастерская Гоблина, перековка 75%, Пилон пещер и рыбалка";

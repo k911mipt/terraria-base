@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Terraria — снежная мастерская Гоблина</title>
+    <title>Terraria — стильная снежная мастерская Гоблина и рыбалка</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./scene-tabs.css" />
@@ -43,7 +43,7 @@
         ><button id="greenhouse">Механик</button
         ><button id="craft">Гоблин</button
         ><button id="arena">Принцесса</button
-        ><button id="pitsBtn">Пилон и входы</button
+        ><button id="pitsBtn">Рыбалка 20×16</button
         ><button id="fit">Весь план</button><button id="back">← Назад</button>
         <button id="bossLeft" class="scene-hidden" hidden></button>
         <button id="museumBtn" class="scene-hidden" hidden></button>
@@ -53,7 +53,7 @@
           ><input
             id="search"
             type="search"
-            placeholder="GOBLIN, PYLON, REFORGE…"
+            placeholder="GOBLIN, PYLON, REFORGE, FISH…"
           />
         </div>
       </div>
@@ -63,7 +63,7 @@
       <section class="card">
         <div class="maphead">
           <div>
-            <b>Подземный снег · перековка 75% · Пилон пещер</b>
+            <b>Подземный снег · перековка 75% · Пилон пещер · рыбалка 20×16</b>
             <div class="sub">
               ЛКМ + drag — двигать · колесо / два пальца — зум · клик —
               инспектор · двойной клик — фокус
@@ -79,11 +79,11 @@
 
       <aside class="card inspector">
         <div>
-          <h2 id="iname">Снежная мастерская Гоблина v1</h2>
+          <h2 id="iname">Снежная мастерская Гоблина v2</h2>
           <div class="sub" id="idesc">
-            Финальная группа из старого плана: Механик, Гоблин и Принцесса.
-            Мастерская окружена 1536 Snow/Ice Blocks, поэтому ледяной биом гарантирован,
-            а Пилон пещер работает уже при первых двух жителях.
+            Комната Гоблина получила тёплый жилой угол, медно-зелёную рабочую
+            панель, тёмные подвесные стойки и стеклянную нишу пилона. Под ней
+            расположен безопасный искусственный водоём 20×16 на 320 тайлов.
           </div>
         </div>
         <div class="kv" id="ikv"></div>
@@ -92,11 +92,11 @@
           <div class="status" id="status"></div>
         </div>
         <div class="note">
-          Сейчас заселяются Гоблин и Механик: этого уже достаточно для пилона.
-          Правая комната заранее оставлена Принцессе, которая появится позже; с
-          ней финальный ценовой множитель Гоблина достигает 0.75. Cavern Pylon
-          при необходимости нужно заранее купить в чистом подземном биоме и
-          принести сюда.
+          Люк построен по постоянному правилу: на уровне пола y21 находится
+          Boreal Wood Platform, сам Trap Door опущен на y22 и удерживается
+          твёрдыми блоками x35/x38. Нижняя площадка находится на y28 — ровно
+          через 7 тайлов. За всеми платформами и пятью дверями продолжаются
+          безопасные фоновые стены.
         </div>
       </aside>
     </div>
@@ -118,20 +118,20 @@
         <div class="legend">
           <b>Логика узла</b>
           <div class="legend-row">
-            <span class="swatch" style="background: #74aac5"></span
-            ><span>1536 Snow/Ice Blocks: гарантированный ледяной биом</span>
-          </div>
-          <div class="legend-row">
             <span class="swatch" style="background: #57904c"></span
-            ><span>Гоблин между любимым Механиком и будущей Принцессой</span>
+            ><span>Гоблинская: дерево, зелёная стена, медь и тёмный каркас</span>
           </div>
           <div class="legend-row">
             <span class="swatch" style="background: #54a9ad"></span
-            ><span>Пилон пещер работает уже от двух текущих жителей</span>
+            ><span>Пилон пещер выделен отдельной стеклянной нишей</span>
           </div>
           <div class="legend-row">
-            <span class="swatch" style="background: #78838c"></span
-            ><span>Три компактных жилья, без пустых технических помещений</span>
+            <span class="swatch" style="background: #4f9fc0"></span
+            ><span>320 тайлов воды: искусственный подлёдный бассейн 20×16</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #74aac5"></span
+            ><span>1984 Snow/Ice Blocks: биом остаётся гарантированным</span>
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@
     </section>
 
     <details class="card storage-spec" open>
-      <summary>Спецификация снежной мастерской</summary>
+      <summary>Спецификация снежной мастерской и водоёма</summary>
       <div class="storage-wrap">
         <table class="storage-table">
           <thead>
@@ -170,7 +170,7 @@
     </details>
 
     <details class="card storage-spec">
-      <summary>Локальное хранение: три сундука</summary>
+      <summary>Локальное хранение: четыре сундука</summary>
       <div class="storage-wrap">
         <table class="storage-table">
           <thead>
