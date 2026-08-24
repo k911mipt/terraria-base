@@ -140,3 +140,4 @@ if (!rules.includes("## Подвесные источники света")) {
 write(rulesPath, rules);
 
 console.log("Applied PR #20 review fixes.");
+// Touch this file after the workflow exists so the push event is guaranteed to fire.
