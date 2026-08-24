@@ -7,6 +7,16 @@ on:
     paths:
       - tools/.goblin-v2.tar.gz.b64.part-*
       - .github/workflows/apply-goblin-workshop-v2.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tools/.goblin-v2.tar.gz.b64.part-*
+      - .github/workflows/apply-goblin-workshop-v2.yml
+
+concurrency:
+  group: goblin-workshop-v2-apply
+  cancel-in-progress: true
 
 permissions:
   contents: write
