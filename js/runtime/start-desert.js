@@ -50,6 +50,17 @@ function reloadIfDeploymentChanged() {
 
 reloadIfDeploymentChanged();
 
+const desertSceneTabs = document.querySelector(".scene-tabs");
+if (
+  desertSceneTabs &&
+  !desertSceneTabs.querySelector('a[href="./underground.html"]')
+) {
+  desertSceneTabs.insertAdjacentHTML(
+    "beforeend",
+    '<a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>',
+  );
+}
+
 // Cache construction, tables and initial full-scene focus.
 buildBaseCaches();
 buildObjectCache();

@@ -11,6 +11,8 @@
 - `js/data/backgrounds/` — база, левая босс-арена, музей и технические проходы.
 - `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители, арены, отдельная разметка Этерии, музей и ямы.
 - `js/data/engineering/` — цепи, органы управления и 32 отдельные Dart Trap.
+- `js/data/desert/` — самостоятельная пустынная сцена.
+- `js/data/underground/` — снежная мастерская Гоблина, группа Механик/Гоблин/Принцесса и Cavern Pylon.
 - `js/data/materials.js` — палитры и точные Terraria-спецификации.
 - `js/data/index.js` — только сборка объекта `D`; больших массивов в нём намеренно нет.
 
@@ -125,14 +127,11 @@ Tile inspector and tooltip presentation.
 - `showTip()`
 - `hideTip()`
 
-### `js/runtime/tables.js`
+### Таблицы отдельных сцен
 
-Status badges and specification tables.
-
-- `biName()`
-- `paintName()`
-- `escHtml()`
-- `populate()`
+- `js/runtime/tables.js` — основная база;
+- `js/runtime/tables-desert.js` — пустынный аванпост;
+- `js/runtime/tables-underground.js` — снежная мастерская Гоблина.
 
 ### `js/runtime/camera.js`
 
@@ -150,19 +149,20 @@ Camera transforms, viewport fitting and render scheduling.
 ### Упорядоченный запуск
 
 - `js/runtime/state.js` — DOM/Canvas-ссылки, камера, кэши и UI-константы.
-- `js/runtime/prepare.js` — подготовка инженерных индексов и проверки.
-- `js/runtime/interactions.js` — все обработчики мыши, колеса, кнопок и поиска.
-- `js/runtime/start.js` — построение кэшей, таблиц и начальный фокус.
-
-Эти четыре файла загружаются именно в таком порядке. Внутри каждого сохранён
-исходный порядок исполняемых выражений.
+- `js/runtime/prepare.js` и сценические варианты — подготовка инженерных индексов.
+- `js/runtime/interactions.js` — общие обработчики мыши, pinch zoom, кнопок и поиска.
+- `js/runtime/interactions-*.js` — координаты кнопок отдельных сцен.
+- `js/runtime/start*.js` — построение кэшей, таблиц, вкладок и начальный фокус.
 
 ## Проверка
 
 ```bash
 node tools/check-data.cjs
 node tools/check-eternia.cjs
+node tools/check-desert.cjs
+node tools/check-underground.cjs
 python3 -m http.server 8000
 ```
 
-После запуска сервера схема открывается на `http://localhost:8000/`.
+После запуска сервера основная схема открывается на `http://localhost:8000/`,
+а отдельные сцены — на `desert.html` и `underground.html`.
