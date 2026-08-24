@@ -293,7 +293,7 @@ const UNDERGROUND_OBJECTS = [
     "foregroundItemEn": "Green Torch",
     "foregroundPaintRu": "Без краски",
     "foregroundPaintEn": "None",
-    "lightRadius": 7
+    "lightRadius": 10
   },
   {
     "id": "UG_TOOL_FRAME_WRENCH",

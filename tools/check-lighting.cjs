@@ -56,7 +56,8 @@
         tiles.push({ x: x + 0.5, y: y + 0.5, tileX: x, tileY: y });
       }
     }
-    const influencingLights = lights.filter((light) =>
+    const localLights = lights.filter((light) => light.room === zone.room);
+    const influencingLights = localLights.filter((light) =>
       tiles.some((tile) => covers(light, tile.x, tile.y)),
     );
     const uncovered = tiles.filter(
@@ -69,7 +70,7 @@
     let darkestTile = null;
     for (const tile of tiles) {
       const nearest = Math.min(
-        ...lights.map((light) => {
+        ...localLights.map((light) => {
           const center = lightCenter(light);
           return (
             Math.hypot(tile.x - center.x, tile.y - center.y) / light.lightRadius
@@ -86,13 +87,14 @@
       `${zone.name}: coverage ${(coverage * 100).toFixed(1)}% is below ${(zone.minCoverage * 100).toFixed(1)}%; first dark tile ${uncovered[0] ? `x${uncovered[0].tileX} y${uncovered[0].tileY}` : "n/a"}`,
     );
     assert(
-      influencingLights.length >= zone.minSources,
-      `${zone.name}: expected at least ${zone.minSources} contributing lights, found ${influencingLights.length}`,
+      localLights.length >= zone.minSources,
+      `${zone.name}: expected at least ${zone.minSources} room-local lights, found ${localLights.length}`,
     );
     results.push({
       id: zone.id,
       name: zone.name,
       coveragePercent: Number((coverage * 100).toFixed(1)),
+      localLightCount: localLights.length,
       contributingLights: influencingLights.map((light) => light.id),
       darkestTile,
       worstNormalizedDistance: Number(worstNormalizedDistance.toFixed(3)),
