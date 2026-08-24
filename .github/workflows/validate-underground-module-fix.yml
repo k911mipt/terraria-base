@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/underground-object-module-column
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
