@@ -240,3 +240,102 @@ drawObjectSprite = function drawUndergroundObjectSprite(ctx, o) {
   }
   return sharedUndergroundDrawObjectSprite(ctx, o);
 };
+
+
+// V3 room lighting and wall-display sprites. These overrides are scene-local.
+function drawUndergroundV3IceLantern(ctx, o) {
+  const b = objectBox(o), cx = b.x + b.w / 2;
+  ctx.save();
+  ctx.globalAlpha = 0.28;
+  ctx.fillStyle = "#91e9ff";
+  ctx.beginPath();
+  ctx.arc(cx, b.y + b.h * 0.58, 12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  pxRect(ctx, cx - 1, b.y, 2, 5, "#4c7180");
+  pxRect(ctx, cx - 5, b.y + 5, 10, b.h - 7, "#3e7487");
+  pxRect(ctx, cx - 4, b.y + 6, 8, b.h - 9, "#79dceb");
+  pxRect(ctx, cx - 2, b.y + 8, 4, Math.max(3, b.h - 13), "#e9fdff");
+}
+
+function drawUndergroundV3CrystalChandelier(ctx, o) {
+  const b = objectBox(o), cx = b.x + b.w / 2, barY = b.y + 13;
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = "#b7efff";
+  ctx.beginPath();
+  ctx.arc(cx, b.y + b.h * 0.58, 24, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  pxRect(ctx, cx - 1, b.y, 2, 9, "#7aa9b8");
+  pxRect(ctx, b.x + 7, barY, b.w - 14, 3, "#a9d9e6");
+  for (const offset of [-13, 0, 13]) {
+    const lampX = cx + offset;
+    pxRect(ctx, lampX - 1, barY + 3, 2, 5, "#789aaa");
+    ctx.fillStyle = "#d8f8ff";
+    ctx.beginPath();
+    ctx.moveTo(lampX, barY + 7);
+    ctx.lineTo(lampX + 5, barY + 13);
+    ctx.lineTo(lampX, barY + 18);
+    ctx.lineTo(lampX - 5, barY + 13);
+    ctx.closePath();
+    ctx.fill();
+    pxRect(ctx, lampX - 2, barY + 11, 4, 5, "#ffffff");
+  }
+}
+
+function drawUndergroundV3CrystalCandelabra(ctx, o) {
+  const b = objectBox(o), cx = b.x + b.w / 2, baseY = b.y + b.h - 4;
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = "#c5f3ff";
+  ctx.beginPath();
+  ctx.arc(cx, b.y + 10, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  pxRect(ctx, cx - 4, baseY, 8, 3, "#83aebb");
+  pxRect(ctx, cx - 1, b.y + 6, 2, baseY - b.y - 6, "#9cc8d4");
+  for (const dx of [-4, 0, 4]) {
+    pxRect(ctx, cx + dx - 1, b.y + 5, 2, 5, "#9cc8d4");
+    pxRect(ctx, cx + dx - 2, b.y + 2, 4, 4, "#f0fdff");
+  }
+}
+
+function drawUndergroundV3MechanicFrame(ctx, o) {
+  const b = objectBox(o), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+  pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 4, "#26373f");
+  pxRect(ctx, b.x + 4, b.y + 4, b.w - 8, b.h - 8, "#8d593d");
+  pxRect(ctx, b.x + 6, b.y + 6, b.w - 12, b.h - 12, "#20343b");
+  if (o.id === "UG_MECH_TIMER_FRAME") {
+    ctx.strokeStyle = "#e6f4f4";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx, cy - 5);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + 4, cy + 2);
+    ctx.stroke();
+  } else {
+    pxRect(ctx, cx - 1, cy - 8, 2, 12, "#d9e5e8");
+    pxRect(ctx, cx - 6, cy + 4, 12, 3, "#a7c4ca");
+    pxRect(ctx, cx + 3, cy - 7, 4, 4, "#d8a04a");
+  }
+}
+
+const sharedUndergroundV3DrawLight = drawLight;
+drawLight = function drawUndergroundV3Light(ctx, o) {
+  if (o.style === "copper_chandelier") return drawGoblinCopperChandelier(ctx, o);
+  if (o.style === "ice_lantern") return drawUndergroundV3IceLantern(ctx, o);
+  if (o.style === "crystal_chandelier") return drawUndergroundV3CrystalChandelier(ctx, o);
+  if (o.style === "crystal_candelabra") return drawUndergroundV3CrystalCandelabra(ctx, o);
+  return sharedUndergroundV3DrawLight(ctx, o);
+};
+
+const sharedUndergroundV3DrawObjectSprite = drawObjectSprite;
+drawObjectSprite = function drawUndergroundV3ObjectSprite(ctx, o) {
+  if (o.style === "mechanic_display") return drawUndergroundV3MechanicFrame(ctx, o);
+  return sharedUndergroundV3DrawObjectSprite(ctx, o);
+};

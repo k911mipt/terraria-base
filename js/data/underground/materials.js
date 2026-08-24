@@ -76,3 +76,26 @@ Object.assign(WALL_SPECS, {
     note: "Тёплая рабочая панель за инструментами и зоной перековки.",
   },
 });
+
+
+// V3 room-specific wall palette and display styles.
+Object.assign(WALL, {
+  princess_pink_wall: ["#6d3f62", "#bd7ba7"],
+});
+
+Object.assign(STYLE, {
+  mechanic_display: "#6d8790",
+  ice_lantern: "#78d7eb",
+  crystal_chandelier: "#aee8ff",
+  crystal_candelabra: "#c8efff",
+});
+
+Object.assign(WALL_SPECS, {
+  princess_pink_wall: {
+    itemRu: "Гладкая мраморная стена",
+    itemEn: "Smooth Marble Wall",
+    paintRu: "Розовая краска",
+    paintEn: "Pink Paint",
+    note: "Основная декоративная панель комнаты Принцессы и фон её настенной полки.",
+  },
+});

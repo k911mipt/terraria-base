@@ -91,7 +91,7 @@ const centerX = (object) => object.x + object.w / 2;
 const mechanicDistance = Math.abs(centerX(goblin) - centerX(mechanic));
 const princessDistance = Math.abs(centerX(goblin) - centerX(princess));
 assert(mechanicDistance === 13, `Mechanic distance changed: ${mechanicDistance}`);
-assert(princessDistance === 16, `Princess distance changed: ${princessDistance}`);
+assert(princessDistance === 15, `Princess distance changed: ${princessDistance}`);
 assert(
   mechanicDistance <= 25 && princessDistance <= 25,
   "Goblin neighbors must stay within 25 tiles",
@@ -104,7 +104,7 @@ const pylons = D.objects.filter((object) => object.kind === "pylon");
 assert(pylons.length === 1, `Expected one pylon, found ${pylons.length}`);
 assert(
   pylons[0]?.id === "UG_CAVERN_PYLON" &&
-    pylons[0]?.x === 39 &&
+    pylons[0]?.x === 38 &&
     pylons[0]?.y === 17 &&
     pylons[0]?.w === 3 &&
     pylons[0]?.h === 4,
@@ -173,6 +173,44 @@ assert(
   D.validation.doorsWithWall === 5 && D.validation.doorWallTiles === 15,
   "Door-wall validation snapshot mismatch",
 );
+
+const doorBlockingKinds = new Set([
+  "bed",
+  "chest",
+  "furniture",
+  "personal_storage",
+  "pylon",
+  "station",
+]);
+const blockingObjectAt = (x, y, excludedId) =>
+  D.objects.find(
+    (object) =>
+      object.id !== excludedId &&
+      doorBlockingKinds.has(object.kind) &&
+      x >= object.x &&
+      x < object.x + object.w &&
+      y >= object.y &&
+      y < object.y + object.h,
+  );
+const doorSideClear = (door, x) => {
+  for (let y = door.y; y < door.y + door.h; y += 1) {
+    if (effectiveSolidAt(x, y) || blockingObjectAt(x, y, door.id)) return false;
+  }
+  return true;
+};
+let openableDoors = 0;
+const doorClearance = {};
+for (const door of doors) {
+  const left = doorSideClear(door, door.x - 1);
+  const right = doorSideClear(door, door.x + 1);
+  doorClearance[door.id] = { left, right };
+  assert(left || right, `${door.id} is blocked on both sides`);
+  if (left || right) openableDoors += 1;
+}
+assert(openableDoors === 5, `Expected five openable doors, found ${openableDoors}`);
+assert(doorClearance.UG_MECH_GOBLIN.left && doorClearance.UG_MECH_GOBLIN.right, "Mechanic/Goblin door must be clear on both sides");
+assert(doorClearance.UG_GOBLIN_PRINCESS.left && doorClearance.UG_GOBLIN_PRINCESS.right, "Goblin/Princess door must be clear on both sides");
+assert(D.validation.openableDoors === 5, "Openable-door validation snapshot mismatch");
 
 const expectedDoorModules = {
   UG_OUTER_L: "underground_mechanic",
@@ -255,7 +293,9 @@ for (let x = 14; x <= 43; x += 1) {
   assert(effectiveSolidAt(x, 45)?.mat === "gray_brick", `Pool bottom missing at x${x} y45`);
 }
 
-const platformSolids = D.solids.filter((solid) => solid.mat === "boreal_platform");
+const platformSolids = D.solids.filter(
+  (solid) => solid.mat === "boreal_platform" && !solid.decorativePlatform,
+);
 const platformTiles = platformSolids.reduce(
   (total, solid) =>
     total + (solid.x2 - solid.x1 + 1) * (solid.y2 - solid.y1 + 1),
@@ -278,6 +318,23 @@ for (const platform of platformSolids) {
   }
 }
 assert(platformTilesWithWall === 20, "All 20 enclosed platform tiles must have walls");
+
+const princessShelf = D.solids.find((solid) => solid.decorativePlatform);
+assert(
+  princessShelf &&
+    princessShelf.x1 === 49 &&
+    princessShelf.x2 === 52 &&
+    princessShelf.y1 === 16 &&
+    princessShelf.mat === "boreal_platform",
+  "Princess wall shelf must be x49–52 y16",
+);
+for (let x = 49; x <= 52; x += 1) {
+  assert(Boolean(backgroundAt(x, 16)), `Missing wall behind Princess shelf at x${x} y16`);
+}
+
+for (let y = 23; y <= 27; y += 1) {
+  assert(!effectiveSolidAt(38, y), `Passage to fishing chest is blocked at x38 y${y}`);
+}
 
 for (let y = 29; y <= 44; y += 1) {
   for (let x = 36; x <= 42; x += 1) {
@@ -341,6 +398,24 @@ assert(
 );
 assert(D.objects.filter((object) => object.id === "UG_SAFE").length === 1, "Safe missing");
 assert(D.objects.filter((object) => object.id === "UG_PRINCESS_BED").length === 1, "Princess bed missing");
+assert(D.objects.find((object) => object.id === "UG_MECHANIC_CHAIR")?.x === 20, "Mechanic chair must not block x22");
+assert(D.objects.find((object) => object.id === "UG_GOBLIN_TABLE")?.x === 25, "Goblin table must leave x24 clear");
+assert(D.objects.find((object) => object.id === "UG_CAVERN_PYLON")?.x === 38, "Pylon must leave x41 clear");
+assert(D.objects.find((object) => object.id === "UG_PRINCESS_TABLE")?.x === 44, "Princess table must leave x43 clear");
+assert(D.objects.find((object) => object.id === "UG_READY_CHEST")?.y === 14, "Ready chest must be on the wall shelf");
+for (const id of [
+  "UG_MECH_CHANDELIER",
+  "UG_MECH_TIMER_FRAME",
+  "UG_MECH_SWITCH_FRAME",
+  "UG_PYLON_ICE_LANTERN",
+  "UG_PRINCESS_CHANDELIER",
+  "UG_PRINCESS_CANDELABRA",
+  "UG_FISH_LIGHT_L",
+  "UG_FISH_LIGHT_R",
+  "UG_FISH_SERVICE_LIGHT",
+]) {
+  assert(D.objects.some((object) => object.id === id), `Missing V3 room object ${id}`);
+}
 assert(ENG.circuits.length === 0 && ENG.devices.length === 0, "Scene must not require wiring");
 
 for (const solid of D.solids) {
@@ -377,7 +452,7 @@ for (const forbidden of ["dungeon", "skeletron", "данж"]) {
 }
 
 const html = fs.readFileSync(path.join(root, "underground.html"), "utf8");
-assert(html.includes("Снежная мастерская Гоблина v2"), "V2 title is missing");
+assert(html.includes("Снежная мастерская Гоблина v3"), "V3 title is missing");
 assert(html.includes("рыбалка 20×16"), "Fishing title is missing");
 assert(html.includes("320 тайлов"), "Water volume is missing from HTML");
 assert(html.includes("четыре сундука"), "Updated storage count is missing");
@@ -402,6 +477,8 @@ console.log(
       pylon: pylons[0].name,
       doors: doors.length,
       coveredDoorTiles,
+      openableDoors,
+      doorClearance,
       doorModules: displayedDoorModules,
       goblinStyleTiles,
       waterTiles: water.tiles,
