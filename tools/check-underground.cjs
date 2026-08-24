@@ -27,6 +27,21 @@ const { D, ENG } = vm.runInContext(
   context,
 );
 
+vm.runInContext(
+  fs.readFileSync(path.join(root, "js/runtime/tables-underground.js"), "utf8"),
+  context,
+  { filename: "js/runtime/tables-underground.js" },
+);
+
+const displayedDoorModules = vm.runInContext(
+  `Object.fromEntries(
+    D.objects
+      .filter((object) => object.kind === "door")
+      .map((object) => [object.id, moduleForObject(object)?.id || null])
+  )`,
+  context,
+);
+
 const errors = [];
 const assert = (condition, message) => {
   if (!condition) errors.push(message);
@@ -50,6 +65,12 @@ assert(D.validation.npcHouses === 3, "Expected three NPC houses");
 
 const ids = D.objects.map((object) => object.id);
 assert(new Set(ids).size === ids.length, "Object IDs must be unique");
+const roomIds = new Set(D.rooms.map((room) => room.id));
+for (const object of D.objects) {
+  if (object.room) {
+    assert(roomIds.has(object.room), `${object.id} declares unknown room ${object.room}`);
+  }
+}
 
 const residents = D.objects.filter((object) => object.kind === "npc");
 assert(residents.length === 3, `Expected 3 residents, found ${residents.length}`);
@@ -101,6 +122,19 @@ assert(
   D.validation.doorsWithWall === 4 && D.validation.doorWallTiles === 12,
   "Door-wall validation snapshot mismatch",
 );
+
+const expectedDoorModules = {
+  UG_OUTER_L: "underground_mechanic",
+  UG_MECH_GOBLIN: "underground_goblin",
+  UG_GOBLIN_PRINCESS: "underground_goblin",
+  UG_OUTER_R: "underground_princess",
+};
+for (const [doorId, roomId] of Object.entries(expectedDoorModules)) {
+  assert(
+    displayedDoorModules[doorId] === roomId,
+    `${doorId} table module must honor declared room ${roomId}, found ${displayedDoorModules[doorId]}`,
+  );
+}
 
 const iceBiomeBlocks = D.solids
   .filter((solid) => solid.iceBiome)
@@ -215,6 +249,7 @@ console.log(
       pylonWorksBeforePrincess: D.validation.pylonWorksBeforePrincess,
       doors: doors.length,
       coveredDoorTiles,
+      doorModules: displayedDoorModules,
       chests: chests.length,
       iceBiomeBlocks,
       iceBiomeThreshold: D.validation.iceBiomeThreshold,
