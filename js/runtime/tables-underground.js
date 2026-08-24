@@ -36,6 +36,8 @@ function populate() {
     ["good", `пилон уже работает: ${v.currentResidentsRequired} NPC`],
     ["good", `Пилон пещер: ${v.pylonCount}`],
     ["good", `двери со стеной: ${v.doorsWithWall}/${v.totalDoors}`],
+    ["good", `открываемые двери: ${v.openableDoors}/${v.totalDoors}`],
+    ["good", `освещение: ${v.lightingCoveragePercent}% · ${v.lightingZones} зоны`],
     ["good", `Мастерская инженера: ${v.tinkerersWorkshops}`],
     ["good", `Сейф: ${v.personalStorage}`],
     ["good", `локальных сундуков: ${v.serviceChests}`],

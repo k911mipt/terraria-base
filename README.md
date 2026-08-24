@@ -42,6 +42,7 @@ node tools/check-data.cjs
 node tools/check-desert.cjs
 node tools/check-eternia.cjs
 node tools/check-underground.cjs
+node tools/check-lighting.cjs
 ```
 
 ## Правила изменений
