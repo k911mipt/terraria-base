@@ -18,3 +18,15 @@ for (const [from, to] of [
 
 fs.writeFileSync(target, source);
 require(target);
+
+const checkerPath = path.join(__dirname, "check-jungle.cjs");
+let checker = fs.readFileSync(checkerPath, "utf8");
+const oldVersionCheck =
+  'assert(html.includes("Джунглевый аванпост v1"), "Jungle v1 title is missing");';
+const newVersionCheck =
+  'assert(html.includes("Джунглевый аванпост v2"), "Jungle v2 title is missing");';
+if (!checker.includes(oldVersionCheck)) {
+  throw new Error("Missing Jungle v1 HTML assertion in checker");
+}
+checker = checker.replace(oldVersionCheck, newVersionCheck);
+fs.writeFileSync(checkerPath, checker);
