@@ -21,7 +21,7 @@ function reloadIfDeploymentChanged() {
         previousVersion = window.localStorage.getItem(storageKey);
         window.localStorage.setItem(storageKey, remoteVersion);
       } catch {
-        // Storage can be unavailable in strict privacy modes; timestamp comparison remains.
+        // Storage can be unavailable in strict privacy modes.
       }
 
       const currentModified = Date.parse(document.lastModified);
@@ -50,20 +50,6 @@ function reloadIfDeploymentChanged() {
 
 reloadIfDeploymentChanged();
 
-const desertSceneTabs = document.querySelector(".scene-tabs");
-for (const [href, label] of [
-  ["./underground.html", "Мастерская Гоблина"],
-  ["./jungle.html", "Джунглевый аванпост"],
-]) {
-  if (desertSceneTabs && !desertSceneTabs.querySelector(`a[href="${href}"]`)) {
-    desertSceneTabs.insertAdjacentHTML(
-      "beforeend",
-      `<a class="scene-tab" href="${href}">${label}</a>`,
-    );
-  }
-}
-
-// Cache construction, tables and initial full-scene focus.
 buildBaseCaches();
 buildObjectCache();
 populate();

@@ -58,20 +58,34 @@ favicon.href = "./favicon.svg";
 favicon.sizes = "any";
 document.head.append(favicon);
 
-// Scene navigation. Each scene is a separate static page sharing one Canvas engine.
-const sceneTabsCss = document.createElement("link");
-sceneTabsCss.rel = "stylesheet";
-sceneTabsCss.href = "./scene-tabs.css";
-document.head.append(sceneTabsCss);
+// Scene navigation is present in HTML so a cached JavaScript file cannot hide
+// a newly deployed scene. The fallback keeps standalone/local copies resilient.
+let sceneTabs = document.querySelector(".scene-tabs");
+if (!sceneTabs) {
+  const sceneTabsCss = document.createElement("link");
+  sceneTabsCss.rel = "stylesheet";
+  sceneTabsCss.href = "./scene-tabs.css";
+  document.head.append(sceneTabsCss);
 
-const sceneTabs = document.createElement("nav");
-sceneTabs.className = "scene-tabs";
-sceneTabs.setAttribute("aria-label", "Сцены проекта");
-sceneTabs.innerHTML =
-  '<a class="scene-tab" href="./index.html" aria-current="page">Основная база</a>' +
-  '<a class="scene-tab" href="./desert.html">Пустынный аванпост</a>' +
-  '<a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>';
-document.querySelector(".toolbar").prepend(sceneTabs);
+  sceneTabs = document.createElement("nav");
+  sceneTabs.className = "scene-tabs";
+  sceneTabs.setAttribute("aria-label", "Сцены проекта");
+  document.querySelector(".toolbar").prepend(sceneTabs);
+}
+
+const sceneLinks = [
+  ["./index.html", "Основная база"],
+  ["./desert.html", "Пустынный аванпост"],
+  ["./underground.html", "Мастерская Гоблина"],
+  ["./jungle.html", "Джунглевый аванпост"],
+];
+for (const [href, label] of sceneLinks) {
+  if (sceneTabs.querySelector('a[href="' + href + '"]')) continue;
+  sceneTabs.insertAdjacentHTML(
+    "beforeend",
+    '<a class="scene-tab" href="' + href + '">' + label + '</a>',
+  );
+}
 
 // Cache construction, table population and initial arena focus.
 buildBaseCaches();

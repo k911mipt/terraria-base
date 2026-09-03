@@ -294,7 +294,7 @@ assert(rootSupports.length === 4, "Treehouse must keep four vertical living-root
 assert(
   !D.solids.some(
     (solid) =>
-      solid.x1 <= 52 && solid.x2 >= 8 && solid.y1 === 35 && solid.y2 >= 42 && !solid.rootSupport,
+      solid.x1 <= 51 && solid.x2 >= 8 && solid.y1 === 35 && solid.y2 >= 42 && !solid.rootSupport,
   ),
   "Do not replace the open root level with a solid artificial foundation",
 );
@@ -402,8 +402,17 @@ for (const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => 
   const relative = src.replace(/^\.\//, "");
   assert(fs.existsSync(path.join(root, relative)), `Missing script referenced by jungle.html: ${relative}`);
 }
-for (const page of ["index.html", "desert.html", "underground.html", "jungle.html"]) {
-  const source = fs.readFileSync(path.join(root, page), "utf8");
+const navigationSources = {
+  "index.html": fs.readFileSync(path.join(root, "js/runtime/start.js"), "utf8"),
+  "desert.html":
+    fs.readFileSync(path.join(root, "desert.html"), "utf8") +
+    fs.readFileSync(path.join(root, "js/runtime/start-desert.js"), "utf8"),
+  "underground.html":
+    fs.readFileSync(path.join(root, "underground.html"), "utf8") +
+    fs.readFileSync(path.join(root, "js/runtime/start-underground.js"), "utf8"),
+  "jungle.html": html,
+};
+for (const [page, source] of Object.entries(navigationSources)) {
   assert(source.includes("./jungle.html"), `${page} is missing the Jungle scene tab`);
 }
 

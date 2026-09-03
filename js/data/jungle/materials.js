@@ -1,131 +1,57 @@
-// Surface Jungle materials and object palettes layered on top of shared specs.
+// Surface Jungle palettes use the same base/dark/light and [dark, light]
+// contracts as the shared Canvas renderer.
 Object.assign(MAT, {
   rich_mahogany: {
     base: "#6e3d24",
-    accent: "#a56538",
-    edge: "#3e2418",
-    name: "Rich Mahogany",
+    dark: "#3e2418",
+    light: "#a56538",
   },
   rich_mahogany_platform: {
     base: "#7a4729",
-    accent: "#bd7841",
-    edge: "#402617",
-    name: "Rich Mahogany Platform",
+    dark: "#402617",
+    light: "#bd7841",
   },
   living_mahogany: {
     base: "#523522",
-    accent: "#87613a",
-    edge: "#2d2118",
-    name: "Living Mahogany",
+    dark: "#2d2118",
+    light: "#87613a",
   },
   leaf_block: {
     base: "#2f6e35",
-    accent: "#5ea34c",
-    edge: "#193f24",
-    name: "Leaf Block",
+    dark: "#193f24",
+    light: "#5ea34c",
   },
   jungle_grass: {
     base: "#59422d",
-    accent: "#4f963a",
-    edge: "#224f28",
-    name: "Jungle Grass on Mud",
+    dark: "#224f28",
+    light: "#4f963a",
   },
   bamboo_block: {
     base: "#9b8b42",
-    accent: "#c7b65b",
-    edge: "#5d572d",
-    name: "Bamboo",
+    dark: "#5d572d",
+    light: "#c7b65b",
   },
 });
 
 Object.assign(WALL, {
-  rich_mahogany_wall: {
-    base: "#5d3826",
-    accent: "#815139",
-    edge: "#382419",
-    name: "Rich Mahogany Wall",
-  },
-  jungle_leaf_wall: {
-    base: "#2e5930",
-    accent: "#4d7c43",
-    edge: "#203d25",
-    name: "Rich Mahogany Wall + Green Paint",
-  },
-  bamboo_wall: {
-    base: "#6f6837",
-    accent: "#948a47",
-    edge: "#454329",
-    name: "Bamboo Wall",
-  },
-  painter_yellow_wall: {
-    base: "#8f712f",
-    accent: "#c6a44b",
-    edge: "#5f4822",
-    name: "Rich Mahogany Wall + Yellow Paint",
-  },
-  painter_teal_wall: {
-    base: "#246a68",
-    accent: "#3e9690",
-    edge: "#174746",
-    name: "Rich Mahogany Wall + Teal Paint",
-  },
-  painter_magenta_wall: {
-    base: "#713756",
-    accent: "#a8567b",
-    edge: "#492337",
-    name: "Rich Mahogany Wall + Deep Pink Paint",
-  },
-  jungle_stone_wall: {
-    base: "#435342",
-    accent: "#61725a",
-    edge: "#2b362c",
-    name: "Gray Brick Wall + Green Paint",
-  },
+  rich_mahogany_wall: ["#5d3826", "#815139"],
+  jungle_leaf_wall: ["#2e5930", "#4d7c43"],
+  bamboo_wall: ["#6f6837", "#948a47"],
+  painter_yellow_wall: ["#8f712f", "#c6a44b"],
+  painter_teal_wall: ["#246a68", "#3e9690"],
+  painter_magenta_wall: ["#713756", "#a8567b"],
+  jungle_stone_wall: ["#435342", "#61725a"],
 });
 
 Object.assign(STYLE, {
-  jungle_route: {
-    fill: "#6d4228",
-    stroke: "#d5a260",
-    accent: "#9f6a36",
-    text: "#fff4d7",
-  },
-  jungle_dryad: {
-    fill: "#3f8d47",
-    stroke: "#c2ef91",
-    accent: "#7fc662",
-    text: "#f3ffe8",
-  },
-  jungle_hub: {
-    fill: "#4e7f4c",
-    stroke: "#d4c56d",
-    accent: "#8caa58",
-    text: "#fff7cf",
-  },
-  jungle_painter: {
-    fill: "#8e4e7b",
-    stroke: "#f0c85d",
-    accent: "#39a79d",
-    text: "#fff7f1",
-  },
-  jungle_witch: {
-    fill: "#5f4930",
-    stroke: "#bfcb68",
-    accent: "#7c9b4b",
-    text: "#fff2cf",
-  },
-  jungle_pylon: {
-    fill: "#3ca68a",
-    stroke: "#9bf5c1",
-    accent: "#d5f079",
-    text: "#f1fff9",
-  },
-  teleporter_reserve: {
-    fill: "#3d4d48",
-    stroke: "#94cdaa",
-    accent: "#5e8b78",
-    text: "#dff8e9",
-  },
+  jungle_route: "#6d4228",
+  jungle_dryad: "#3f8d47",
+  jungle_hub: "#4e7f4c",
+  jungle_painter: "#8e4e7b",
+  jungle_witch: "#5f4930",
+  jungle_pylon: "#3ca68a",
+  witch_cauldron: "#465842",
+  teleporter_reserve: "#3d4d48",
 });
 
 Object.assign(BLOCK_SPECS, {
