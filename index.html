@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Terraria — база, музей, Этерия и наружные ямы-ловушки</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./scene-tabs.css" />
   </head>
   <body>
     <div class="toolbar">
+      <nav class="scene-tabs" aria-label="Сцены проекта">
+        <a class="scene-tab" href="./index.html" aria-current="page">Основная база</a>
+        <a class="scene-tab" href="./desert.html">Пустынный аванпост</a>
+        <a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>
+        <a class="scene-tab" href="./jungle.html">Джунглевый аванпост</a>
+      </nav>
       <div class="controls">
         <div class="control">
           <label for="mode">Режим</label
@@ -243,6 +250,6 @@
     <script src="./js/runtime/state.js"></script>
     <script src="./js/runtime/prepare.js"></script>
     <script src="./js/runtime/interactions.js"></script>
-    <script src="./js/runtime/start.js"></script>
+    <script src="./js/runtime/start.js?v=20260903-jungle-tabs"></script>
   </body>
 </html>

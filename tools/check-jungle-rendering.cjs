@@ -101,14 +101,19 @@ assert(
 );
 
 for (const relative of [
-  "js/runtime/start.js",
-  "js/runtime/start-desert.js",
-  "js/runtime/start-underground.js",
+  "index.html",
+  "desert.html",
+  "underground.html",
+  "jungle.html",
 ]) {
   const source = fs.readFileSync(path.join(root, relative), "utf8");
   assert(
-    source.includes("./jungle.html"),
-    `${relative} must expose the Jungle scene tab`,
+    source.includes('<a class="scene-tab" href="./jungle.html"'),
+    `${relative} must contain a static Jungle scene tab`,
+  );
+  assert(
+    source.includes('./scene-tabs.css'),
+    `${relative} must load scene-tabs.css statically`,
   );
 }
 
