@@ -50,6 +50,17 @@ function reloadIfDeploymentChanged() {
 
 reloadIfDeploymentChanged();
 
+const undergroundSceneTabs = document.querySelector(".scene-tabs");
+if (
+  undergroundSceneTabs &&
+  !undergroundSceneTabs.querySelector('a[href="./jungle.html"]')
+) {
+  undergroundSceneTabs.insertAdjacentHTML(
+    "beforeend",
+    '<a class="scene-tab" href="./jungle.html">Джунглевый аванпост</a>',
+  );
+}
+
 buildBaseCaches();
 buildObjectCache();
 populate();
