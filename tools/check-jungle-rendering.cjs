@@ -21,8 +21,8 @@ for (const relative of [
   });
 }
 
-const { MAT, WALL, STYLE } = vm.runInContext(
-  "({ MAT: JSON.parse(JSON.stringify(MAT)), WALL: JSON.parse(JSON.stringify(WALL)), STYLE: JSON.parse(JSON.stringify(STYLE)) })",
+const { MAT, WALL, STYLE, WALL_SPECS } = vm.runInContext(
+  "({ MAT: JSON.parse(JSON.stringify(MAT)), WALL: JSON.parse(JSON.stringify(WALL)), STYLE: JSON.parse(JSON.stringify(STYLE)), WALL_SPECS: JSON.parse(JSON.stringify(WALL_SPECS)) })",
   context,
 );
 
@@ -58,6 +58,10 @@ for (const key of [
   assert(Array.isArray(palette), `WALL.${key} must be a two-color array`);
   assert(palette?.length === 2, `WALL.${key} must contain exactly two colors`);
   assert(isHex(palette?.[0]) && isHex(palette?.[1]), `WALL.${key} colors must be hex strings`);
+  assert(
+    WALL_SPECS[key]?.safe === true,
+    `WALL_SPECS.${key} must explicitly mark the player-placed wall as safe`,
+  );
 }
 
 for (const key of [
@@ -140,6 +144,7 @@ console.log(
     {
       texturedBlocks: 6,
       texturedWallFamilies: 8,
+      safeWallFamilies: 8,
       navigationEntryPoints: 3,
       stylePalettes: 8,
     },
