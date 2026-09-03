@@ -113,6 +113,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Rich Mahogany Wall",
     paintRu: "Без краски",
     paintEn: "None",
+    safe: true,
     note: "Тёплый безопасный фон центрального павильона.",
   },
   living_wood_wall: {
@@ -121,6 +122,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Living Wood Wall",
     paintRu: "Без краски",
     paintEn: "None",
+    safe: true,
     note: "Поставленная игроком безопасная и проходимая стена образует две декоративные колонны святилища.",
   },
   jungle_leaf_wall: {
@@ -129,6 +131,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Rich Mahogany Wall",
     paintRu: "Зелёная краска",
     paintEn: "Green Paint",
+    safe: true,
     note: "Садовый интерьер комнаты Дриады.",
   },
   bamboo_wall: {
@@ -137,6 +140,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Bamboo Wall",
     paintRu: "Без краски",
     paintEn: "None",
+    safe: true,
     note: "Тёплый ритуальный фон комнаты Шамана.",
   },
   painter_yellow_wall: {
@@ -145,6 +149,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Rich Mahogany Wall",
     paintRu: "Жёлтая краска",
     paintEn: "Yellow Paint",
+    safe: true,
     note: "Левая цветная треть студии Маляра.",
   },
   painter_teal_wall: {
@@ -153,6 +158,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Rich Mahogany Wall",
     paintRu: "Бирюзовая краска",
     paintEn: "Teal Paint",
+    safe: true,
     note: "Центральная цветная треть студии и фон платформы над люком.",
   },
   painter_magenta_wall: {
@@ -161,6 +167,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Rich Mahogany Wall",
     paintRu: "Глубокая розовая краска",
     paintEn: "Deep Pink Paint",
+    safe: true,
     note: "Правая цветная треть студии Маляра.",
   },
   jungle_stone_wall: {
@@ -169,6 +176,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Gray Brick Wall",
     paintRu: "Зелёная краска",
     paintEn: "Green Paint",
+    safe: true,
     note: "Безопасный фон вертикальной шахты к Подземным джунглям.",
   },
 });
