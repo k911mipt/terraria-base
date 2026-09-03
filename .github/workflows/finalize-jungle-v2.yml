@@ -1,0 +1,63 @@
+name: Deterministically finalize Jungle outpost
+
+on:
+  push:
+    branches:
+      - feature/jungle-outpost-final
+    paths:
+      - tools/finalize-jungle-v2.cjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-jungle-outpost-v2
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/jungle-outpost-final
+          fetch-depth: 0
+
+      - name: Apply deterministic final state
+        run: node tools/finalize-jungle-v2.cjs
+
+      - name: Validate everything
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node tools/check-jungle.cjs
+          for file in js/data/jungle/*.js js/runtime/jungle-extensions.js js/runtime/interactions-jungle.js js/runtime/tables-jungle.js tools/check-jungle.cjs; do
+            node --check "$file"
+          done
+
+      - name: Smoke-test static pages
+        run: |
+          python3 -m http.server 8000 >/tmp/terraria-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          sleep 1
+          for page in index.html desert.html underground.html jungle.html; do
+            curl --fail --silent --show-error "http://127.0.0.1:8000/$page" >/dev/null
+          done
+
+      - name: Remove one-time files and commit
+        run: |
+          rm -f tools/finalize-jungle-v2.cjs
+          rm -f .github/workflows/finalize-jungle-v2.yml
+          rm -f tools/apply-jungle-finalize.cjs
+          rm -f .github/workflows/apply-jungle-finalize.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: finalize surface Jungle outpost"
+          git pull --rebase origin feature/jungle-outpost-final
+          git push origin HEAD:feature/jungle-outpost-final

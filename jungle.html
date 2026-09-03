@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Terraria — джунглевый аванпост</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./scene-tabs.css" />
+  </head>
+  <body>
+    <div class="toolbar">
+      <nav class="scene-tabs" aria-label="Сцены проекта">
+        <a class="scene-tab" href="./index.html">Основная база</a>
+        <a class="scene-tab" href="./desert.html">Пустынный аванпост</a>
+        <a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>
+        <a class="scene-tab" href="./jungle.html" aria-current="page"
+          >Джунглевый аванпост</a
+        >
+      </nav>
+      <div class="controls">
+        <div class="control">
+          <label for="mode">Режим</label
+          ><select id="mode">
+            <option value="visual">Визуальный макет</option>
+            <option value="structure">Каркас и материалы</option>
+            <option value="furniture">Мебель и NPC</option>
+            <option value="backgrounds">Фоновые стены</option>
+          </select>
+        </div>
+        <label class="check"
+          ><input id="grid" type="checkbox" checked /> сетка</label
+        >
+        <label class="check"
+          ><input id="labels" type="checkbox" checked /> подписи</label
+        >
+        <label class="check"
+          ><input id="roomNames" type="checkbox" checked /> комнаты</label
+        >
+        <label class="check scene-hidden"
+          ><input id="reserves" type="checkbox" /> резервы</label
+        >
+        <button id="upper">Весь дом</button
+        ><button id="greenhouse">Дриада</button
+        ><button id="craft">Пилон</button
+        ><button id="arena">Маляр</button
+        ><button id="pitsBtn">Шаман</button
+        ><button id="shaftBtn">Шахта / Храм</button
+        ><button id="fit">Весь план</button><button id="back">← Назад</button>
+        <button id="bossLeft" class="scene-hidden" hidden></button>
+        <button id="museumBtn" class="scene-hidden" hidden></button>
+        <button id="wiringBtn" class="scene-hidden" hidden></button>
+        <div class="control">
+          <label for="search">Поиск</label
+          ><input
+            id="search"
+            type="search"
+            placeholder="DRYAD, PYLON, PAINTER, TEMPLE…"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="card">
+        <div class="maphead">
+          <div>
+            <b>Поверхность Джунглей · Дриада + Маляр + Шаман · Jungle Pylon</b>
+            <div class="sub">
+              ЛКМ + drag — двигать · колесо / два пальца — зум · клик —
+              инспектор · двойной клик — фокус
+            </div>
+          </div>
+          <div class="sub" id="viewInfo"></div>
+        </div>
+        <div class="viewport" id="viewport">
+          <canvas id="baseCanvas"></canvas><canvas id="objectCanvas"></canvas
+          ><canvas id="overlayCanvas"></canvas>
+        </div>
+      </section>
+
+      <aside class="card inspector">
+        <div>
+          <h2 id="iname">Джунглевый аванпост v1</h2>
+          <div class="sub" id="idesc">
+            Первый вариант — домик в кронах на живых корнях: садовая комната
+            Дриады слева, святилище пилона по центру, цветная студия Маляра
+            сверху, ритуальная хижина Шамана справа и отдельная шахта к
+            Подземным джунглям.
+          </div>
+        </div>
+        <div class="kv" id="ikv"></div>
+        <div>
+          <b>Зафиксировано</b>
+          <div class="status" id="status"></div>
+        </div>
+        <div class="note">
+          Верхний и нижний телепортеры пока отмечены как строительные резервы:
+          реальную конечную площадку надо перенести непосредственно к найденной
+          двери Храма. Активная проводка не рисуется, потому что её длина и
+          маршрут зависят от конкретного мира.
+        </div>
+      </aside>
+    </div>
+
+    <section class="card bottom">
+      <div class="bottom-grid">
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Модуль</th>
+                <th>Габарит</th>
+                <th>Роль</th>
+              </tr>
+            </thead>
+            <tbody id="roomRows"></tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <b>Логика аванпоста</b>
+          <div class="legend-row">
+            <span class="swatch" style="background: #477f42"></span
+            ><span>Rich/Living Mahogany и листья: домик в кронах</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #4bc59b"></span
+            ><span>Центральное святилище Jungle Pylon</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #c76b98"></span
+            ><span>Маляр живёт в отдельном трёхцветном верхнем лофте</span>
+          </div>
+          <div class="legend-row">
+            <span class="swatch" style="background: #6f6837"></span
+            ><span>Шахта: платформы y34/41/48/55/62, шаг 7</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 14px; overflow: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Слой</th>
+              <th>Внутренний стиль</th>
+              <th>Реальный предмет Terraria</th>
+              <th>Краска / покрытие</th>
+              <th>Примечание</th>
+            </tr>
+          </thead>
+          <tbody id="materialRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <details class="card storage-spec" open>
+      <summary>Спецификация джунглевого аванпоста</summary>
+      <div class="storage-wrap">
+        <table class="storage-table">
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Координаты</th>
+              <th>Модуль</th>
+              <th>Объект</th>
+              <th>Строительная логика</th>
+            </tr>
+          </thead>
+          <tbody id="arenaRows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card storage-spec">
+      <summary>Локальное хранение: четыре сундука</summary>
+      <div class="storage-wrap">
+        <table class="storage-table">
+          <thead>
+            <tr>
+              <th>Код</th>
+              <th>Имя в игре ≤20</th>
+              <th>Корпус</th>
+              <th>Что хранить</th>
+              <th>Не сюда</th>
+            </tr>
+          </thead>
+          <tbody id="storageRows"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="tooltip" id="tip"></div>
+
+    <script src="./js/data/jungle/layout.js"></script>
+    <script src="./js/data/jungle/solids.js"></script>
+    <script src="./js/data/jungle/backgrounds.js"></script>
+    <script src="./js/data/jungle/objects.js"></script>
+    <script src="./js/data/jungle/index.js"></script>
+    <script src="./js/data/jungle/engineering.js"></script>
+    <script src="./js/data/materials.js"></script>
+    <script src="./js/data/jungle/materials.js"></script>
+
+    <script src="./js/runtime/core.js"></script>
+    <script src="./js/runtime/validation.js"></script>
+    <script src="./js/runtime/model.js"></script>
+    <script src="./js/runtime/render-base.js"></script>
+    <script src="./js/runtime/render-objects.js"></script>
+    <script src="./js/runtime/jungle-extensions.js"></script>
+    <script src="./js/runtime/overlay.js"></script>
+    <script src="./js/runtime/inspector.js"></script>
+    <script src="./js/runtime/tables-jungle.js"></script>
+    <script src="./js/runtime/camera.js"></script>
+    <script src="./js/runtime/state.js"></script>
+    <script src="./js/runtime/prepare-underground.js"></script>
+    <script src="./js/runtime/interactions.js"></script>
+    <script src="./js/runtime/interactions-jungle.js"></script>
+    <script src="./js/runtime/start-underground.js"></script>
+  </body>
+</html>
