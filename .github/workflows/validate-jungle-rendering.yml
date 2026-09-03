@@ -55,7 +55,18 @@ jobs:
             --dump-dom \
             http://127.0.0.1:8000/index.html \
             > browser-artifacts/index-dom.html
-          grep -q "Джунглевый аванпост" browser-artifacts/index-dom.html
+          grep -q '<a class="scene-tab" href="./jungle.html">Джунглевый аванпост</a>' browser-artifacts/index-dom.html
+
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=1800,1200 \
+            --virtual-time-budget=5000 \
+            --run-all-compositor-stages-before-draw \
+            --screenshot=browser-artifacts/index.png \
+            http://127.0.0.1:8000/index.html
 
           "$chrome" \
             --headless=new \
@@ -79,6 +90,7 @@ jobs:
             http://127.0.0.1:8000/jungle.html \
             > browser-artifacts/jungle-dom.html
           grep -q "Джунглевый аванпост" browser-artifacts/jungle-dom.html
+          test "$(wc -c < browser-artifacts/index.png)" -gt 50000
           test "$(wc -c < browser-artifacts/jungle.png)" -gt 50000
 
       - name: Upload rendered pages
@@ -88,4 +100,4 @@ jobs:
           path: browser-artifacts/
           if-no-files-found: error
 
-# Re-run after the applied source commit so the real browser sees final files.
+# Re-run after static tabs were written into every HTML entry point.
