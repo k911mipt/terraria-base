@@ -70,7 +70,8 @@ sceneTabs.setAttribute("aria-label", "Сцены проекта");
 sceneTabs.innerHTML =
   '<a class="scene-tab" href="./index.html" aria-current="page">Основная база</a>' +
   '<a class="scene-tab" href="./desert.html">Пустынный аванпост</a>' +
-  '<a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>';
+  '<a class="scene-tab" href="./underground.html">Мастерская Гоблина</a>' +
+  '<a class="scene-tab" href="./jungle.html">Джунглевый аванпост</a>';
 document.querySelector(".toolbar").prepend(sceneTabs);
 
 // Cache construction, table population and initial arena focus.
