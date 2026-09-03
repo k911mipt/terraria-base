@@ -1,0 +1,58 @@
+name: Apply Jungle canopy and pillar fix
+
+on:
+  push:
+    branches:
+      - fix/jungle-canopies-passable-pillars
+    paths:
+      - tools/apply-jungle-canopy-pillars.cjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-jungle-canopy-pillars
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/jungle-canopies-passable-pillars
+          fetch-depth: 0
+
+      - name: Apply canopy, wall-pillar and lantern changes
+        run: node tools/apply-jungle-canopy-pillars.cjs
+
+      - name: Validate every planner scene
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node tools/check-jungle.cjs
+          node tools/check-jungle-rendering.cjs
+
+      - name: Validate changed JavaScript
+        run: |
+          node --check js/data/jungle/solids.js
+          node --check js/data/jungle/backgrounds.js
+          node --check js/data/jungle/materials.js
+          node --check js/data/jungle/objects.js
+          node --check js/data/jungle/layout.js
+          node --check js/runtime/jungle-extensions.js
+          node --check tools/check-jungle.cjs
+          node --check tools/check-jungle-rendering.cjs
+
+      - name: Remove one-time applicator and commit
+        run: |
+          rm tools/apply-jungle-canopy-pillars.cjs
+          rm .github/workflows/apply-jungle-canopy-pillars.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: attach Jungle canopies and make shrine pillars passable"
+          git push origin HEAD:fix/jungle-canopies-passable-pillars
