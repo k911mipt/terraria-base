@@ -1,0 +1,80 @@
+name: Finalize and validate Jungle outpost
+
+on:
+  push:
+    branches:
+      - feature/jungle-outpost-final
+    paths:
+      - tools/apply-jungle-finalize.cjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-jungle-outpost
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/jungle-outpost-final
+          fetch-depth: 0
+
+      - name: Finalize scene and navigation
+        run: node tools/apply-jungle-finalize.cjs
+
+      - name: Validate every planner scene
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node tools/check-jungle.cjs
+
+      - name: Validate Jungle JavaScript
+        run: |
+          for file in \
+            js/data/jungle/*.js \
+            js/runtime/jungle-extensions.js \
+            js/runtime/interactions-jungle.js \
+            js/runtime/tables-jungle.js \
+            tools/check-jungle.cjs; do
+            node --check "$file"
+          done
+
+      - name: Smoke-test all pages and Jungle assets
+        run: |
+          python3 -m http.server 8000 >/tmp/terraria-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          sleep 1
+          for page in index.html desert.html underground.html jungle.html; do
+            curl --fail --silent --show-error "http://127.0.0.1:8000/$page" >/dev/null
+          done
+          for asset in \
+            js/data/jungle/layout.js \
+            js/data/jungle/solids.js \
+            js/data/jungle/backgrounds.js \
+            js/data/jungle/objects.js \
+            js/runtime/jungle-extensions.js \
+            tools/check-jungle.cjs; do
+            curl --fail --silent --show-error "http://127.0.0.1:8000/$asset" >/dev/null
+          done
+
+      - name: Remove one-time finalizer
+        run: |
+          rm tools/apply-jungle-finalize.cjs
+          rm .github/workflows/apply-jungle-finalize.yml
+
+      - name: Commit finalized source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add surface Jungle outpost"
+          git push origin HEAD:feature/jungle-outpost-final
