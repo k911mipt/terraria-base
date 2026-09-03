@@ -75,10 +75,10 @@ const sceneLinks = [
   ["./jungle.html", "Джунглевый аванпост"],
 ];
 for (const [href, label] of sceneLinks) {
-  if (sceneTabs.querySelector(\`a[href="${href}"]\`)) continue;
+  if (sceneTabs.querySelector('a[href="' + href + '"]')) continue;
   sceneTabs.insertAdjacentHTML(
     "beforeend",
-    \`<a class="scene-tab" href="${href}">${label}</a>\`,
+    '<a class="scene-tab" href="' + href + '">' + label + '</a>',
   );
 }
 
