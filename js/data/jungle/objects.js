@@ -248,8 +248,8 @@ const JUNGLE_OBJECTS = [
   {
     id: "JG_HUB_LANTERN_L",
     name: "Левый фонарь святилища",
-    x: 23,
-    y: 23,
+    x: 25,
+    y: 24,
     w: 1,
     h: 2,
     kind: "light",
@@ -258,13 +258,13 @@ const JUNGLE_OBJECTS = [
     room: "jungle_hub",
     lightRadius: 12,
     ceilingMounted: true,
-    desc: "Подвесной Jungle Lantern освещает вход от Дриады и левую стойку святилища.",
+    desc: "Подвесной Jungle Lantern закреплён на левой части бамбуковой перемычки y23 и освещает пилон.",
   },
   {
     id: "JG_HUB_LANTERN_R",
     name: "Правый фонарь святилища",
-    x: 37,
-    y: 23,
+    x: 35,
+    y: 24,
     w: 1,
     h: 2,
     kind: "light",
@@ -273,7 +273,7 @@ const JUNGLE_OBJECTS = [
     room: "jungle_hub",
     lightRadius: 12,
     ceilingMounted: true,
-    desc: "Второй фонарь освещает телепортерный резерв и дверь к Шаману.",
+    desc: "Второй Jungle Lantern закреплён на правой части бамбуковой перемычки y23 и освещает резерв телепортера.",
   },
 
   {

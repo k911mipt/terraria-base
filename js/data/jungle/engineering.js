@@ -1,6 +1,6 @@
 // Jungle outpost v1 keeps both teleporters as future reserves until the Temple door is located.
 const ENG = {
-  stage: "Поверхностный джунглевый аванпост v1 · резерв телепортера к Храму",
+  stage: "Поверхностный джунглевый аванпост v2 · резерв телепортера к Храму",
   focus: {
     x1: 4,
     y1: 6,
