@@ -141,6 +141,31 @@ tileWall = function drawSurfaceJungleWall(ctx, mat, wx, wy) {
     return;
   }
 
+  if (mat === "living_wood_wall") {
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x, y, t, t);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = p[1];
+    ctx.lineWidth = 1;
+    for (const offset of [4, 11]) {
+      ctx.beginPath();
+      ctx.moveTo(x + offset, y);
+      ctx.bezierCurveTo(
+        x + offset - 3,
+        y + 5,
+        x + offset + 3,
+        y + 10,
+        x + offset - 1,
+        y + t,
+      );
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(31,22,16,.45)";
+    if (seeded(wx, wy, 71) > 0.45) ctx.fillRect(x + 7, y + 7, 3, 3);
+    return;
+  }
+
   if (mat === "bamboo_wall") {
     ctx.globalAlpha = 0.9;
     ctx.fillStyle = p[0];

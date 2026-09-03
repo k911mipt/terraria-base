@@ -35,6 +35,7 @@ Object.assign(MAT, {
 
 Object.assign(WALL, {
   rich_mahogany_wall: ["#5d3826", "#815139"],
+  living_wood_wall: ["#443426", "#765b3e"],
   jungle_leaf_wall: ["#2e5930", "#4d7c43"],
   bamboo_wall: ["#6f6837", "#948a47"],
   painter_yellow_wall: ["#8f712f", "#c6a44b"],
@@ -77,7 +78,7 @@ Object.assign(BLOCK_SPECS, {
     itemEn: "Living Mahogany",
     paintRu: "Без краски",
     paintEn: "None",
-    note: "Стены, подвесные стойки и четыре живых корня.",
+    note: "Наружные стены, перегородки и четыре живых корня; внутренние колонны святилища теперь находятся в фоновом слое.",
   },
   leaf_block: {
     layer: "Твёрдый блок",
@@ -113,6 +114,14 @@ Object.assign(WALL_SPECS, {
     paintRu: "Без краски",
     paintEn: "None",
     note: "Тёплый безопасный фон центрального павильона.",
+  },
+  living_wood_wall: {
+    layer: "Фоновая стена",
+    itemRu: "Стена из живого дерева",
+    itemEn: "Living Wood Wall",
+    paintRu: "Без краски",
+    paintEn: "None",
+    note: "Поставленная игроком безопасная и проходимая стена образует две декоративные колонны святилища.",
   },
   jungle_leaf_wall: {
     layer: "Фоновая стена",

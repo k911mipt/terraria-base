@@ -46,6 +46,7 @@ for (const key of [
 
 for (const key of [
   "rich_mahogany_wall",
+  "living_wood_wall",
   "jungle_leaf_wall",
   "bamboo_wall",
   "painter_yellow_wall",
@@ -89,7 +90,7 @@ for (const material of [
     `Jungle renderer must provide a texture branch for ${material}`,
   );
 }
-for (const wall of ["bamboo_wall", "jungle_stone_wall"]) {
+for (const wall of ["living_wood_wall", "bamboo_wall", "jungle_stone_wall"]) {
   assert(
     extension.includes(`mat === \"${wall}\"`),
     `Jungle renderer must provide a texture branch for ${wall}`,
@@ -138,7 +139,7 @@ console.log(
   JSON.stringify(
     {
       texturedBlocks: 6,
-      texturedWallFamilies: 7,
+      texturedWallFamilies: 8,
       navigationEntryPoints: 3,
       stylePalettes: 8,
     },

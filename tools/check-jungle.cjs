@@ -266,6 +266,91 @@ assert(
   "Every enclosed Rich Mahogany Platform tile must have a wall",
 );
 
+const expectedSideCanopies = [
+  [6, 21, 24, 21],
+  [8, 20, 22, 20],
+  [11, 19, 19, 19],
+  [37, 21, 54, 21],
+  [39, 20, 52, 20],
+  [42, 19, 49, 19],
+];
+for (const [x1, y1, x2, y2] of expectedSideCanopies) {
+  assert(
+    D.solids.some(
+      (solid) =>
+        solid.mat === "leaf_block" &&
+        solid.x1 === x1 &&
+        solid.y1 === y1 &&
+        solid.x2 === x2 &&
+        solid.y2 === y2,
+    ),
+    `Missing attached side-canopy row x${x1}…${x2} y${y1}`,
+  );
+}
+assert(
+  D.validation.sideCanopiesAttached === true &&
+    JSON.stringify(D.validation.sideCanopyLevels) === JSON.stringify([21, 20, 19]),
+  "Attached side-canopy snapshot mismatch",
+);
+
+for (const x of [23, 37]) {
+  for (let y = 24; y <= 29; y += 1) {
+    assert(!effectiveSolidAt(x, y), `Shrine pillar must be passable at x${x} y${y}`);
+    assert(
+      backgroundAt(x, y)?.mat === "living_wood_wall",
+      `Passable shrine pillar must use Living Wood Wall at x${x} y${y}`,
+    );
+  }
+}
+assert(
+  D.backgrounds.filter((background) => background.passablePillar).length === 2,
+  "Expected two passable background shrine pillars",
+);
+assert(
+  D.validation.hubPillarsPassable === true &&
+    D.validation.hubPillarWall === "Living Wood Wall",
+  "Passable shrine-pillar snapshot mismatch",
+);
+
+const leftHubBeam = D.solids.find(
+  (solid) => solid.name === "Левая часть бамбуковой перемычки святилища",
+);
+const rightHubBeam = D.solids.find(
+  (solid) => solid.name === "Правая часть бамбуковой перемычки святилища",
+);
+assert(
+  leftHubBeam?.x1 === 24 &&
+    leftHubBeam?.x2 === 29 &&
+    leftHubBeam?.y1 === 23 &&
+    leftHubBeam?.y2 === 23,
+  "Left Bamboo beam must be x24–29 y23",
+);
+assert(
+  rightHubBeam?.x1 === 34 &&
+    rightHubBeam?.x2 === 36 &&
+    rightHubBeam?.y1 === 23 &&
+    rightHubBeam?.y2 === 23,
+  "Right Bamboo beam must be x34–36 y23",
+);
+assert(D.validation.hubBeamY === 23, "Bamboo beam snapshot must be y23");
+
+const leftHubLantern = D.objects.find((object) => object.id === "JG_HUB_LANTERN_L");
+const rightHubLantern = D.objects.find((object) => object.id === "JG_HUB_LANTERN_R");
+assert(
+  leftHubLantern?.x === 25 && leftHubLantern?.y === 24,
+  "Left shrine lantern must be x25 y24",
+);
+assert(
+  rightHubLantern?.x === 35 && rightHubLantern?.y === 24,
+  "Right shrine lantern must be x35 y24",
+);
+for (const lantern of [leftHubLantern, rightHubLantern]) {
+  assert(
+    effectiveSolidAt(lantern.x, lantern.y - 1)?.mat === "bamboo_block",
+    `${lantern.id} must hang from the Bamboo beam`,
+  );
+}
+
 const teleporterReserves = D.objects.filter(
   (object) => object.kind === "teleporter" && object.future === true,
 );
@@ -395,7 +480,7 @@ for (const object of D.objects) {
 }
 
 const html = fs.readFileSync(path.join(root, "jungle.html"), "utf8");
-assert(html.includes("Джунглевый аванпост v1"), "Jungle v1 title is missing");
+assert(html.includes("Джунглевый аванпост v2"), "Jungle v2 title is missing");
 assert(html.includes("Дриада + Маляр + Шаман"), "Resident group is missing from HTML");
 assert(html.includes("Шахта / Храм"), "Temple-shaft focus button is missing");
 for (const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1])) {
