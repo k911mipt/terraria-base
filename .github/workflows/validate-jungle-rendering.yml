@@ -1,0 +1,89 @@
+name: Validate Jungle navigation and rendering
+
+on:
+  push:
+    branches:
+      - fix/jungle-navigation-textures
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate planner data and JavaScript
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node tools/check-jungle.cjs
+          node tools/check-jungle-rendering.cjs
+          node --check js/data/jungle/materials.js
+          node --check js/runtime/jungle-extensions.js
+          node --check js/runtime/start.js
+          node --check js/runtime/start-desert.js
+          node --check js/runtime/start-underground.js
+          node --check js/runtime/start-jungle.js
+          node --check js/runtime/prepare-jungle.js
+
+      - name: Render browser screenshots and verify navigation
+        run: |
+          mkdir -p browser-artifacts
+          python3 -m http.server 8000 >/tmp/terraria-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          sleep 1
+
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$chrome"
+
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=1800,1200 \
+            --virtual-time-budget=5000 \
+            --dump-dom \
+            http://127.0.0.1:8000/index.html \
+            > browser-artifacts/index-dom.html
+          grep -q "Джунглевый аванпост" browser-artifacts/index-dom.html
+
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=1800,1400 \
+            --virtual-time-budget=5000 \
+            --run-all-compositor-stages-before-draw \
+            --screenshot=browser-artifacts/jungle.png \
+            http://127.0.0.1:8000/jungle.html
+
+          "$chrome" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=1800,1400 \
+            --virtual-time-budget=5000 \
+            --dump-dom \
+            http://127.0.0.1:8000/jungle.html \
+            > browser-artifacts/jungle-dom.html
+          grep -q "Джунглевый аванпост" browser-artifacts/jungle-dom.html
+          test "$(wc -c < browser-artifacts/jungle.png)" -gt 50000
+
+      - name: Upload rendered pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: jungle-rendering
+          path: browser-artifacts/
+          if-no-files-found: error
