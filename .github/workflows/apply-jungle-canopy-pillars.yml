@@ -5,7 +5,7 @@ on:
     branches:
       - fix/jungle-canopies-passable-pillars
     paths:
-      - tools/apply-jungle-canopy-pillars.cjs
+      - tools/run-jungle-canopy-applicator.cjs
 
 permissions:
   contents: write
@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Apply canopy, wall-pillar and lantern changes
-        run: node tools/apply-jungle-canopy-pillars.cjs
+        run: node tools/run-jungle-canopy-applicator.cjs
 
       - name: Validate every planner scene
         run: |
@@ -47,9 +47,10 @@ jobs:
           node --check tools/check-jungle.cjs
           node --check tools/check-jungle-rendering.cjs
 
-      - name: Remove one-time applicator and commit
+      - name: Remove one-time applicators and commit
         run: |
           rm tools/apply-jungle-canopy-pillars.cjs
+          rm tools/run-jungle-canopy-applicator.cjs
           rm .github/workflows/apply-jungle-canopy-pillars.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
