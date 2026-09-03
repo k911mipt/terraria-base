@@ -87,3 +87,5 @@ jobs:
           name: jungle-rendering
           path: browser-artifacts/
           if-no-files-found: error
+
+# Re-run after the applied source commit so the real browser sees final files.
