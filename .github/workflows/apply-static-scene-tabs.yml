@@ -1,0 +1,51 @@
+name: Apply static scene tabs
+
+on:
+  push:
+    branches:
+      - fix/jungle-navigation-textures
+    paths:
+      - tools/apply-static-scene-tabs.cjs
+      - .github/workflows/apply-static-scene-tabs.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/jungle-navigation-textures
+          fetch-depth: 0
+
+      - name: Apply static navigation
+        run: node tools/apply-static-scene-tabs.cjs
+
+      - name: Validate all scenes and rendering contracts
+        run: |
+          node tools/check-data.cjs
+          node tools/check-desert.cjs
+          node tools/check-eternia.cjs
+          node tools/check-underground.cjs
+          node tools/check-lighting.cjs
+          node tools/check-jungle.cjs
+          node tools/check-jungle-rendering.cjs
+          node --check js/runtime/start.js
+          node --check tools/check-jungle-rendering.cjs
+
+      - name: Remove one-time files
+        run: |
+          rm tools/apply-static-scene-tabs.cjs
+          rm .github/workflows/apply-static-scene-tabs.yml
+
+      - name: Commit static navigation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: make all scene tabs static and cache-safe"
+          git pull --rebase origin fix/jungle-navigation-textures
+          git push origin HEAD:fix/jungle-navigation-textures
