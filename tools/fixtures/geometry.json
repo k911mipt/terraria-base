@@ -1,0 +1,9 @@
+{
+  "reason": "Reviewed #42 placement/wall corrections. Digest v2 additionally covers all non-spec object properties, room labels and engineering inputs; no model data changed when strengthening it for PR48 review.",
+  "scenes": {
+    "index.html": "75fd5ac00ce60822db016df6a55728dfad9becd020e0ab24cb6d1af81516f14f",
+    "desert.html": "92f2915966e3cdbdd42281e520f62eedd1d6214b613a842b5aa0b0a173bf414a",
+    "underground.html": "4753c544191fa7875b72e07a6484e92b451b35d7ddf0af8aea0aaa915bafb5ab",
+    "jungle.html": "d3d4c6444b1656ef093af02c2d65dd51b857ba42edb7907198866c552e771276"
+  }
+}

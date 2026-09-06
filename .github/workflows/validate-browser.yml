@@ -19,13 +19,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Contracts and construction regression tests
+      - name: Contracts, construction and independent geometry
         run: |
           node tools/check-materials.cjs
           node tools/check-renderers.cjs
           node tools/check-objects.cjs
           node tools/check-engineering-metadata.cjs
           node tools/check-building.cjs
+          node tools/check-placement-fixes.cjs
+          node tools/check-geometry.cjs
+          node tools/audit-building.cjs
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'

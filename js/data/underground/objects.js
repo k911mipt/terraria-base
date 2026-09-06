@@ -479,10 +479,10 @@ const UNDERGROUND_OBJECTS = [
   {
     "id": "UG_SHAFT_LIGHT",
     "name": "Свет короткого спуска",
-    "x": 37,
-    "y": 24,
+    "x": 38,
+    "y": 23,
     "w": 1,
-    "h": 1,
+    "h": 2,
     "kind": "light",
     "style": "lantern_warm",
     "short": "✦",
