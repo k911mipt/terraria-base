@@ -90,6 +90,39 @@ const effectiveSolidAt = (x, y) =>
     )
     .at(-1);
 
+// Six wall-mounted mushroom torches must occupy air, not the grass terraces.
+// Specific regression for #42; this is not a universal furniture/collision rule.
+const nodeAssert = require("node:assert/strict");
+function checkMushroomTorch(torch) {
+  const where = `main: mushroom-torch ${torch.id} X${torch.x} Y${torch.y}`;
+  assert(torch.kind === "light" && torch.w === 1 && torch.h === 1,
+    `${where}: expected a one-tile torch`);
+  assert(!effectiveSolidAt(torch.x, torch.y), `${where}: foreground overlap`);
+  const wall = D.backgrounds.filter(r => torch.x >= r.x1 && torch.x <= r.x2 &&
+    torch.y >= r.y1 && torch.y <= r.y2).at(-1);
+  assert(wall?.mat === "mushroom_wall", `${where}: missing Mushroom Wall attachment`);
+}
+const torchDataBefore = JSON.stringify(D);
+for (const [id, x, y] of [
+  ["MUSH_TL1", 119, 10], ["MUSH_TR1", 122, 10],
+  ["MUSH_TL2", 119, 17], ["MUSH_TR2", 122, 17],
+  ["MUSH_TL3", 119, 23], ["MUSH_TR3", 122, 23],
+]) {
+  const torch = D.objects.find(o => o.id === id);
+  assert(torch && torch.x === x && torch.y === y, `${id}: agreed torch position changed`);
+  checkMushroomTorch(torch);
+  // A valid attachment alone must not conceal the original overlap at Y9.
+  nodeAssert.throws(() => checkMushroomTorch({...torch, y: 9}), /foreground overlap/);
+  D.solids.push({x1: x, x2: x, y1: y, y2: y, mat: "gray_brick"});
+  try { nodeAssert.throws(() => checkMushroomTorch(torch), /foreground overlap/); }
+  finally { D.solids.pop(); }
+  const backgrounds = D.backgrounds;
+  D.backgrounds = [];
+  try { nodeAssert.throws(() => checkMushroomTorch(torch), /missing Mushroom Wall attachment/); }
+  finally { D.backgrounds = backgrounds; }
+}
+assert(JSON.stringify(D) === torchDataBefore, "Torch regressions mutated scene data");
+
 for (const x of [1, 2, 133, 134]) {
   assert(
     effectiveSolidAt(x, 54)?.mat === "gray_brick",
