@@ -1,9 +1,9 @@
 {
-  "reason": "Deliberate placement and wall-continuity corrections for #42, based on reviewed #47. No automatic snapshot update command.",
+  "reason": "Reviewed #42 placement/wall corrections. Digest v2 additionally covers all non-spec object properties, room labels and engineering inputs; no model data changed when strengthening it for PR48 review.",
   "scenes": {
-    "index.html": "8929ed469206d89effe9a7aa68bcfab106329a7a9069c5514ac328e51d0a04c1",
-    "desert.html": "c6ca8ee3af3b953100f4a38e0dd69714c4501ca9393c099103532d414023b584",
-    "underground.html": "616de994089141ce7dbd3e0b252742d643b48c0b1a5c023135a13fc760eca72c",
-    "jungle.html": "9f66045000bfcddbb4a90f3ccb10a03d76b8159dfcc54c78e1cbdcaabb76c629"
+    "index.html": "75fd5ac00ce60822db016df6a55728dfad9becd020e0ab24cb6d1af81516f14f",
+    "desert.html": "92f2915966e3cdbdd42281e520f62eedd1d6214b613a842b5aa0b0a173bf414a",
+    "underground.html": "4753c544191fa7875b72e07a6484e92b451b35d7ddf0af8aea0aaa915bafb5ab",
+    "jungle.html": "d3d4c6444b1656ef093af02c2d65dd51b857ba42edb7907198866c552e771276"
   }
 }
