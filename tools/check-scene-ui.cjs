@@ -12,6 +12,8 @@ for (const entry of SCENES) {
   const scriptPaths = [...html.matchAll(/<script\b[^>]*src="([^\"]+)"/g)].map(m => m[1].split("?")[0]);
   for (const file of ["scene-ui", "formatters", "tables", "prepare", "interactions", "start"])
     assert.equal(scriptPaths.filter(p => p === `./js/runtime/${file}.js`).length, 1, `${entry}: ${file}`);
+  for (const file of ["scene-ui", "formatters", "tables", "prepare", "interactions", "start"])
+    assert(html.includes(`./js/runtime/${file}.js?v=common-ui-20260907`), `${entry}: missing shared UI rollout version ${file}`);
   assert(!scriptPaths.some(p => /(?:start|prepare|tables|interactions)-(?:desert|underground|jungle)/.test(p)));
   assert(html.includes(`value="${ui.initialMode}"`));
   for (const [id, target] of Object.entries(ui.focus)) {

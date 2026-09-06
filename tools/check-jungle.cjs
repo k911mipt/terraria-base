@@ -483,7 +483,7 @@ assert(html.includes("Джунглевый аванпост v2"), "Jungle v2 tit
 assert(html.includes("Дриада + Маляр + Шаман"), "Resident group is missing from HTML");
 assert(html.includes("Шахта / Храм"), "Temple-shaft focus button is missing");
 for (const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1])) {
-  const relative = src.replace(/^\.\//, "");
+  const relative = src.split("?")[0].replace(/^\.\//, "");
   assert(fs.existsSync(path.join(root, relative)), `Missing script referenced by jungle.html: ${relative}`);
 }
 const navigationSources = Object.fromEntries(

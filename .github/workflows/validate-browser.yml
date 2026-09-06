@@ -42,7 +42,9 @@ jobs:
           python -m pip install -r requirements-dev.txt
           python -m playwright install --with-deps chromium
       - name: Real HTTP, four scenes, desktop, touch and audit regressions
-        run: python tools/check-browser.py
+        run: |
+          python tools/check-browser.py
+          python tools/check-ui-rollout.py
       - name: Upload screenshots, network logs and traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
