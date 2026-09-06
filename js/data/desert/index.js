@@ -1,5 +1,6 @@
 // Desert scene assembly. It deliberately uses the same D shape as the main planner.
 const D = {
+  sceneId: "desert",
   bounds: DESERT_BOUNDS,
   rooms: DESERT_ROOMS,
   solids: DESERT_SOLIDS,

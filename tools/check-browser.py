@@ -38,6 +38,9 @@ OBJECT_DATA_MUTATIONS = {
     "object-room": 'D.objects[0].room = "SMOKE_UNKNOWN_ROOM";',
     "object-spec": 'D.objects[0].foregroundItemRu = "SMOKE_PARTIAL_SPEC";',
     "object-color": 'D.objects[0].paintColor = "not a color";',
+    "object-size-large": 'D.objects[0].w = 1000000000;',
+    "object-aux-only": "D.objects.find(o=>objectRole(o)==='item'&&!objectSpecPrefix(o)).foregroundNote = 'SMOKE_PARTIAL';",
+    "object-other-scene": "D.sceneId = 'NOT_THE_ORIGINAL_SCENE';",
 }
 DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS, **OBJECT_DATA_MUTATIONS}
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},

@@ -1,6 +1,7 @@
 // Canonical data-model assembly.
 // The large datasets live in semantic modules; this index only preserves their order.
 const D = {
+  sceneId: "main",
   bounds: BASE_BOUNDS,
   rooms: ROOMS,
   solids: SOLIDS,

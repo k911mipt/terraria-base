@@ -30,7 +30,7 @@ for (const entry of SCENES) {
       rejected(`delete D.objects[currentIndex].${field}`, field);
       rejected(`D.objects[currentIndex].${field} = {}`, field);
     }
-    for (const change of ["w = 0", "h = -1", "x = NaN", "y = .5", "x = Number.MAX_SAFE_INTEGER"])
+    for (const change of ["w = 0", "h = -1", "x = NaN", "y = .5", "x = Number.MAX_SAFE_INTEGER", "w = 1000000000", "h = 1000000000"])
       rejected(`D.objects[currentIndex].${change}`, "rectangle");
     rejected('D.objects[currentIndex].room = "MISSING_ROOM"', "unknown room");
     rejected('D.objects[currentIndex].paintColor = "rgba(1,2,3,.5)"', "paintColor");
@@ -44,7 +44,7 @@ for (const entry of SCENES) {
       }
     }
     if (run("objectSpecPrefix(saved) !== null && objectRole(saved) === 'item'"))
-      rejected(`for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn'])
+      rejected(`for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn','Layer','Note'])
         delete D.objects[currentIndex][prefix+suffix]`, "missing item specification");
     const metadata = run("objectMetadata(saved)");
     if (metadata.role === "item") {
@@ -69,7 +69,7 @@ for (const entry of SCENES) {
   finally { run("D.objects.pop()"); }
   // Existing legacy holes stay visible warnings. Explicit partial specs fail.
   run(`globalThis.fixture = {id:'FIXTURE',name:'fixture',kind:'chest',style:'nature',x:1,y:1,w:2,h:2};
-    globalThis.scene = {title:'fixture',rooms:[],objects:[fixture]};`);
+    globalThis.scene = {title:'fixture',sceneId:'fixture',bounds:{xMin:0,xMax:10,yMin:0,yMax:10},rooms:[],objects:[fixture]};`);
   assert.equal(run("validateObjectData(scene).warnings.length"), 0);
   assert(run("validateObjectData(scene).errors.some(e=>e.includes('missing item specification'))"));
   run(`globalThis.legacy = D.objects.find(o => objectRole(o)==='item' && !objectSpecPrefix(o));
@@ -90,6 +90,15 @@ for (const entry of SCENES) {
   assert.match(run("inspectorObjectRoom(D, {...D.objects[0], room:'MISSING_ROOM'}).error"), /unknown room/);
   assert.throws(() => run("roomForObject(D, {...D.objects[0], room:'MISSING_ROOM'})"), /unknown room/);
   assert.equal(run("JSON.stringify(D)"), original, "checks mutated scene data");
+  for (const field of ["foregroundLayer", "foregroundNote"]) {
+    run(`globalThis.partial = {...legacy, [${JSON.stringify(field)}]: "only auxiliary data"};`);
+    assert(run("validateObjectData({...D, objects:[partial]}).errors.some(e=>e.includes('foregroundItemRu'))"));
+    mutations++;
+  }
+  // Reusing another scene's legacy key does not grandfather a new object.
+  run("globalThis.otherScene = {...D,sceneId:'not-'+D.sceneId, objects:[{...legacy}]};");
+  assert(run("validateObjectData(otherScene).errors.some(e=>e.includes('not a legacy exception'))"));
+  mutations++;
   // Rejection before the first Canvas access: actual complete runtime contract.
   run(`globalThis.elements = Object.fromEntries(['iname','idesc','ikv'].map(id=>[id,{}]));
     globalThis.document = {getElementById:id=>elements[id]};
@@ -104,20 +113,28 @@ for (const entry of SCENES) {
   // No current renderer/material failure can mask whole-spec deletion or a new
   // incomplete item: both must be rejected specifically by the object guard.
   for (const change of [
+    `D.objects[0] = {...D.objects[0], w:1000000000};`,
+    `const index = D.objects.findIndex(o=>objectRole(o)==='item' && !objectSpecPrefix(o));
+     D.objects[index] = {...D.objects[index], foregroundNote:'partial'};`,
+    `const other = {...D.objects.find(o=>objectRole(o)==='item' && !objectSpecPrefix(o))};
+     D.objects.push({...other,id:'ANOTHER_NEW_ITEM'});`,
     `const index = D.objects.findIndex(o=>objectRole(o)==='item' && objectSpecPrefix(o));
      D.objects[index] = {...D.objects[index]};
-     for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn'])
+     for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn','Layer','Note'])
        delete D.objects[index][prefix+suffix];`,
     `D.objects.push({...D.objects.find(o=>objectRole(o)==='item' && !objectSpecPrefix(o)),id:'NEW_INCOMPLETE'});`,
   ]) {
     run(`globalThis.savedObjects = D.objects; D.objects = [...D.objects]; startupComplete = true;`);
     try {
       run(`{ ${change} }`);
-      assert.throws(() => run("buildBaseCaches()"), /Object data contract:.*missing item specification/);
+      assert.throws(() => run("buildBaseCaches()"), /Object data contract:/);
       assert.equal(run("startupComplete"), false);
     } finally { run("D.objects = savedObjects;"); }
   }
   assert.deepEqual(check(), []);
+  for (const bounds of ["null", "{xMin:0,xMax:NaN,yMin:0,yMax:1}", "{xMin:1,xMax:0,yMin:0,yMax:1}"]) {
+    assert(run(`validateObjectData({...D,bounds:${bounds}}).errors.some(e=>e.includes('bounds'))`));
+  }
   assert.equal(run("JSON.stringify(D)"), original);
   console.log(`PASS ${entry}: ${count} objects; ${warningCount} explicitly incomplete item descriptions`);
 }

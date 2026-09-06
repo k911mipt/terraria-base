@@ -59,7 +59,7 @@ python tools/check-browser.py
 
 Playwright нужен только разработчикам; сайт его не загружает. На Linux для установки
 системных библиотек может потребоваться `python -m playwright install --with-deps chromium`.
-[Описание 68 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
+[Описание 80 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
 
 [Контракт используемых материалов](docs/material-contract.md) и
 [явная регистрация рендереров](docs/object-renderers.md) и
