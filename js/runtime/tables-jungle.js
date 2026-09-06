@@ -18,30 +18,7 @@ function escHtml(s) {
 }
 
 function populate() {
-  const v = D.validation;
-  document.getElementById("status").innerHTML = [
-    ["good", `NPC-дома: ${v.npcHouses}`],
-    ["good", `Jungle Pylon: ${v.pylonCount}`],
-    ["good", `слой: ${v.layer}`],
-    ["good", `Дриада ↔ Маляр: ${v.residentDistances.dryadPainter}`],
-    ["good", `Маляр ↔ Шаман: ${v.residentDistances.painterWitchDoctor}`],
-    ["good", `Дриада ↔ Шаман: ${v.residentDistances.dryadWitchDoctor}`],
-    ["good", `двери со стеной: ${v.doorsWithWall}/${v.totalDoors}`],
-    ["good", `двери открываются: ${v.openableDoors}/${v.totalDoors}`],
-    ["good", `уровни шахты: ${v.shaftPlatformLevels.join("/")}`],
-    ["good", `шаг шахты: ${v.shaftPlatformStep}`],
-    ["good", `резервы TP: ${v.teleporterReserves}`],
-    ["good", `зоны света: ${v.lightingZones}`],
-    ["", `сундуков: ${v.serviceChests}`],
-    ["", `сцена: ${v.sceneWidth}×${v.sceneHeight}`],
-    ["good", v.status],
-  ]
-    .map(
-      ([kind, text]) =>
-        `<span class="badge${kind ? ` ${kind}` : ""}">${escHtml(text)}</span>`,
-    )
-    .join("");
-
+  populateSceneAudit();
   document.getElementById("roomRows").innerHTML = D.rooms
     .filter(
       (room) =>

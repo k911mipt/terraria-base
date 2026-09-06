@@ -8,7 +8,7 @@ const D = {
   backgrounds: BACKGROUNDS,
   objects: OBJECTS,
   reserves: RESERVES,
-  validation: VALIDATION_SNAPSHOT,
+  designHistory: VALIDATION_SNAPSHOT,
   notes: DESIGN_NOTES,
   title: BASE_TITLE,
   museumChapters: MUSEUM_CHAPTERS,

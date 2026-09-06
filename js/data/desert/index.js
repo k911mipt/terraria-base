@@ -7,7 +7,7 @@ const D = {
   backgrounds: DESERT_BACKGROUNDS,
   objects: DESERT_OBJECTS,
   reserves: DESERT_RESERVES,
-  validation: DESERT_VALIDATION,
+  designHistory: DESERT_VALIDATION,
   notes: DESERT_NOTES,
   title: DESERT_TITLE,
   museumChapters: null,

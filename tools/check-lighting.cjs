@@ -123,8 +123,8 @@
   }
 
   assert(
-    D.validation.lightingCoveragePercent === 100 &&
-      D.validation.lightingZones === D.lightingZones.length,
+    D.designHistory.lightingCoveragePercent === 100 &&
+      D.designHistory.lightingZones === D.lightingZones.length,
     "Lighting validation snapshot mismatch",
   );
 

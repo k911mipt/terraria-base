@@ -8,7 +8,7 @@ const D = {
   objects: JUNGLE_OBJECTS,
   reserves: JUNGLE_RESERVES,
   lightingZones: JUNGLE_LIGHTING_ZONES,
-  validation: JUNGLE_VALIDATION,
+  designHistory: JUNGLE_VALIDATION,
   notes: JUNGLE_NOTES,
   title: JUNGLE_TITLE,
   museumChapters: null,
