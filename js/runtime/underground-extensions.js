@@ -184,13 +184,7 @@ function drawGoblinToolFrame(ctx, o) {
   ctx.restore();
 }
 
-const sharedUndergroundDrawPylon = drawPylon;
-drawPylon = function drawCavernPylon(ctx, o) {
-  if (o.style !== "cavern_pylon") {
-    sharedUndergroundDrawPylon(ctx, o);
-    return;
-  }
-
+function drawCavernPylon(ctx, o) {
   const b = objectBox(o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
@@ -223,26 +217,9 @@ drawPylon = function drawCavernPylon(ctx, o) {
   ctx.fillStyle = "#bd91ef";
   ctx.fillRect(cx - 2, cy - 8, 4, 13);
   pxRect(ctx, b.x + 3, b.y + b.h - 5, b.w - 6, 4, "#4b5055");
-};
+}
 
-const sharedUndergroundDrawLight = drawLight;
-drawLight = function drawUndergroundLight(ctx, o) {
-  if (o.id === "UG_GOBLIN_GREEN_TORCH") return drawGoblinGreenTorch(ctx, o);
-  if (o.id === "UG_GOBLIN_CHANDELIER") return drawGoblinCopperChandelier(ctx, o);
-  return sharedUndergroundDrawLight(ctx, o);
-};
-
-const sharedUndergroundDrawObjectSprite = drawObjectSprite;
-drawObjectSprite = function drawUndergroundObjectSprite(ctx, o) {
-  if (o.kind === "water") return drawUndergroundWater(ctx, o);
-  if (o.id === "UG_TOOL_FRAME_WRENCH" || o.id === "UG_TOOL_FRAME_CUTTER") {
-    return drawGoblinToolFrame(ctx, o);
-  }
-  return sharedUndergroundDrawObjectSprite(ctx, o);
-};
-
-
-// V3 room lighting and wall-display sprites. These overrides are scene-local.
+// Scene-local room lighting and wall-display sprites.
 function drawUndergroundV3IceLantern(ctx, o) {
   const b = objectBox(o), cx = b.x + b.w / 2;
   ctx.save();
@@ -325,17 +302,18 @@ function drawUndergroundV3MechanicFrame(ctx, o) {
   }
 }
 
-const sharedUndergroundV3DrawLight = drawLight;
-drawLight = function drawUndergroundV3Light(ctx, o) {
-  if (o.style === "copper_chandelier") return drawGoblinCopperChandelier(ctx, o);
-  if (o.style === "ice_lantern") return drawUndergroundV3IceLantern(ctx, o);
-  if (o.style === "crystal_chandelier") return drawUndergroundV3CrystalChandelier(ctx, o);
-  if (o.style === "crystal_candelabra") return drawUndergroundV3CrystalCandelabra(ctx, o);
-  return sharedUndergroundV3DrawLight(ctx, o);
-};
-
-const sharedUndergroundV3DrawObjectSprite = drawObjectSprite;
-drawObjectSprite = function drawUndergroundV3ObjectSprite(ctx, o) {
-  if (o.style === "mechanic_display") return drawUndergroundV3MechanicFrame(ctx, o);
-  return sharedUndergroundV3DrawObjectSprite(ctx, o);
-};
+registerObjectRenderer("water", ["fishing_ice"], drawUndergroundWater);
+registerObjectRenderer("pylon", ["cavern_pylon"], drawCavernPylon);
+registerObjectRenderer("light", ["green_torch"], drawGoblinGreenTorch);
+registerObjectRenderer("light", ["copper_chandelier"], drawGoblinCopperChandelier);
+registerObjectRenderer("light", ["ice_lantern"], drawUndergroundV3IceLantern);
+registerObjectRenderer("light", ["crystal_chandelier"], drawUndergroundV3CrystalChandelier);
+registerObjectRenderer("light", ["crystal_candelabra"], drawUndergroundV3CrystalCandelabra);
+registerObjectRenderer("display", ["goblin_display"], drawGoblinToolFrame);
+registerObjectRenderer("display", ["mechanic_display"], drawUndergroundV3MechanicFrame);
+registerObjectRenderer("npc", ["mechanic_npc", "goblin_npc", "princess_npc"], drawNpc);
+registerObjectRenderer("furniture", ["mechanic", "tinkerer_station", "princess_room", "fishing_blue"], drawFurniture);
+registerObjectRenderer("chest", ["special"], drawChest);
+registerObjectRenderer("station", ["tinkerer_station"], drawStation);
+registerObjectRenderer("personal_storage", ["special"], drawPersonal);
+registerObjectRenderer("bed", ["princess_room"], drawBed);

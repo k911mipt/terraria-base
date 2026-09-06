@@ -382,12 +382,7 @@ function drawJungleSign(ctx, o) {
   ctx.fillText("→ ХРАМ", b.x + b.w / 2, b.y + b.h / 2);
 }
 
-const sharedJungleDrawPylon = drawPylon;
-drawPylon = function drawSurfaceJunglePylon(ctx, o) {
-  if (o.style !== "jungle_pylon") {
-    sharedJungleDrawPylon(ctx, o);
-    return;
-  }
+function drawSurfaceJunglePylon(ctx, o) {
   const b = objectBox(o);
   const cx = b.x + b.w / 2;
   const cy = b.y + b.h / 2;
@@ -410,10 +405,9 @@ drawPylon = function drawSurfaceJunglePylon(ctx, o) {
   ctx.fill();
   jungleRect(ctx, cx - 2, b.y + b.h * 0.25, 4, b.h * 0.5, "#d7ef77");
   jungleRect(ctx, b.x + b.w * 0.18, b.y + b.h - 5, b.w * 0.64, 4, "#5a3e28");
-};
+}
 
-const sharedJungleDrawLight = drawLight;
-drawLight = function drawSurfaceJungleLight(ctx, o) {
+function drawSurfaceJungleLight(ctx, o) {
   if (o.style === "jungle_lantern") {
     drawJungleLanternSprite(ctx, o, {
       glow: "#a8ef75",
@@ -466,16 +460,21 @@ drawLight = function drawSurfaceJungleLight(ctx, o) {
     drawTikiTorchSprite(ctx, o);
     return;
   }
-  sharedJungleDrawLight(ctx, o);
-};
+  throw new Error(`Unregistered Jungle light style: ${o.style}`);
+}
 
-const sharedJungleDrawObjectSprite = drawObjectSprite;
-drawObjectSprite = function drawSurfaceJungleObjectSprite(ctx, o) {
-  if (o.kind === "jungle_plant") return drawJunglePlant(ctx, o);
-  if (o.kind === "jungle_canvas") return drawJungleCanvas(ctx, o);
-  if (o.kind === "jungle_totem") return drawJungleTotem(ctx, o);
-  if (o.kind === "jungle_vine") return drawJungleVine(ctx, o);
-  if (o.kind === "jungle_sign") return drawJungleSign(ctx, o);
-  if (o.id === "JG_WITCH_CAULDRON") return drawWitchCauldron(ctx, o);
-  return sharedJungleDrawObjectSprite(ctx, o);
-};
+registerObjectRenderer("pylon", ["jungle_pylon"], drawSurfaceJunglePylon);
+registerObjectRenderer("light", [
+  "jungle_lantern", "painter_lantern", "tiki_lantern", "jungle_torch", "painter_torch", "tiki_torch",
+], drawSurfaceJungleLight);
+registerObjectRenderer("jungle_plant", ["jungle_dryad"], drawJunglePlant);
+registerObjectRenderer("jungle_canvas", ["canvas_yellow", "canvas_teal", "canvas_magenta"], drawJungleCanvas);
+registerObjectRenderer("jungle_totem", ["jungle_witch"], drawJungleTotem);
+registerObjectRenderer("jungle_vine", ["jungle_dryad", "jungle_hub", "jungle_witch"], drawJungleVine);
+registerObjectRenderer("jungle_sign", ["jungle_hub"], drawJungleSign);
+registerObjectRenderer("station", ["witch_cauldron"], drawWitchCauldron);
+registerObjectRenderer("door", ["jungle_route"], drawDoor);
+registerObjectRenderer("hatch", ["jungle_route"], drawHatch);
+registerObjectRenderer("npc", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawNpc);
+registerObjectRenderer("furniture", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawFurniture);
+registerObjectRenderer("chest", ["jungle_dryad", "jungle_hub", "jungle_painter", "jungle_witch"], drawChest);

@@ -137,12 +137,7 @@ function drawPalmTree(ctx, o) {
   ctx.fillRect(cx + 1, cy + 1, 12, 4);
 }
 
-const sharedDrawPylon = drawPylon;
-drawPylon = function drawDesertPylon(ctx, o) {
-  if (o.style !== "desert_pylon") {
-    sharedDrawPylon(ctx, o);
-    return;
-  }
+function drawDesertPylon(ctx, o) {
   const b = objectBox(o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
@@ -165,12 +160,13 @@ drawPylon = function drawDesertPylon(ctx, o) {
   ctx.fillStyle = "#75d6d5";
   ctx.fillRect(cx - 2, cy - 8, 4, 15);
   pxRect(ctx, b.x + 3, b.y + b.h - 5, b.w - 6, 4, "#9f7135");
-};
+}
 
-const sharedDrawObjectSprite = drawObjectSprite;
-drawObjectSprite = function drawDesertObjectSprite(ctx, o) {
-  if (o.kind === "water") return drawWater(ctx, o);
-  if (o.kind === "cactus") return drawCactus(ctx, o);
-  if (o.kind === "palm_tree") return drawPalmTree(ctx, o);
-  return sharedDrawObjectSprite(ctx, o);
-};
+registerObjectRenderer("water", ["oasis_water"], drawWater);
+registerObjectRenderer("cactus", ["nature"], drawCactus);
+registerObjectRenderer("palm_tree", ["nature"], drawPalmTree);
+registerObjectRenderer("pylon", ["desert_pylon"], drawDesertPylon);
+registerObjectRenderer("npc", ["desert_npc", "desert_npc_alt"], drawNpc);
+registerObjectRenderer("furniture", ["desert_furniture"], drawFurniture);
+registerObjectRenderer("bed", ["desert_bed"], drawBed);
+registerObjectRenderer("station", ["desert_furniture"], drawStation);

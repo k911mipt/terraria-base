@@ -771,35 +771,77 @@ function drawMuseumItemFrame(ctx, o) {
   } else drawMuseumGlyph(ctx, o.icon, cx, cy, a, 6);
 }
 
-function drawObjectSprite(ctx, o) {
-  if (o.kind === "zone") return drawZone(ctx, o);
-  if (o.kind === "chest") return drawChest(ctx, o);
-  if (o.kind === "station") return drawStation(ctx, o);
-  if (o.kind === "npc") return drawNpc(ctx, o);
-  if (o.kind === "door") return drawDoor(ctx, o);
-  if (o.kind === "hatch") return drawHatch(ctx, o);
-  if (o.kind === "furniture") return drawFurniture(ctx, o);
-  if (o.kind === "bed") return drawBed(ctx, o);
-  if (o.kind === "personal_storage") return drawPersonal(ctx, o);
-  if (o.kind === "pylon") return drawPylon(ctx, o);
-  if (o.kind === "teleporter") return drawTeleporter(ctx, o);
-  if (o.kind === "planter") return drawPlanter(ctx, o);
-  if (o.kind === "light") return drawLight(ctx, o);
-  if (o.kind === "museum_trophy") return drawMuseumTrophy(ctx, o);
-  if (o.kind === "museum_mannequin") return drawMuseumMannequin(ctx, o);
-  if (o.kind === "museum_weapon_rack") return drawMuseumWeaponRack(ctx, o);
-  if (o.kind === "museum_item_frame") return drawMuseumItemFrame(ctx, o);
-  if (o.kind === "display") return drawDisplay(ctx, o);
-  if (o.kind === "panel") return drawPanel(ctx, o);
-  if (o.kind === "honey") return drawHoney(ctx, o);
-  if (o.kind === "lava") return drawLava(ctx, o);
-  if (o.kind === "honey_bubble") return drawHoneyBubble(ctx, o);
-  if (o.kind === "star_bottle") return drawStarBottle(ctx, o);
-  if (o.kind === "statue") return drawStatue(ctx, o);
-  if (o.kind === "campfire") return drawCampfire(ctx, o);
-  if (o.kind === "heart_lantern") return drawHeart(ctx, o);
-  return drawDisplay(ctx, o);
+// Explicit kind/style dispatch: validation and drawing resolve the SAME function.
+// A scene extends this small map instead of replacing shared drawing functions.
+const OBJECT_RENDERERS = new Map();
+
+function registerObjectRenderer(kind, styles, draw) {
+  if (typeof kind !== "string" || !kind || !Array.isArray(styles) || !styles.length ||
+      styles.some(style => typeof style !== "string" || !style) || typeof draw !== "function")
+    throw new Error("Invalid object renderer registration");
+  const registered = OBJECT_RENDERERS.get(kind) || new Map();
+  if (new Set(styles).size !== styles.length || styles.some(style => registered.has(style)))
+    throw new Error(`Duplicate object renderer: ${kind} / ${styles.join(", ")}`);
+  for (const style of styles) registered.set(style, draw);
+  OBJECT_RENDERERS.set(kind, registered);
 }
+
+function rendererForObject(object) {
+  const draw = OBJECT_RENDERERS.get(object?.kind)?.get(object?.style);
+  return typeof draw === "function" ? draw : null;
+}
+
+function validateObjectRenderers(scene) {
+  const errors = [];
+  for (const object of scene.objects) {
+    if (!rendererForObject(object))
+      errors.push(`${scene.title}: object ${object?.id} at X${object?.x} Y${object?.y}: ` +
+        `unregistered renderer ${object?.kind} / ${object?.style}`);
+  }
+  return errors;
+}
+
+function drawObjectSprite(ctx, object) {
+  const draw = rendererForObject(object);
+  if (!draw) throw new Error(`Unregistered object renderer: ${object?.id} (${object?.kind} / ${object?.style})`);
+  return draw(ctx, object);
+}
+
+registerObjectRenderer("zone", ["anchor1", "anchor2", "spawn", "summon"], drawZone);
+registerObjectRenderer("chest", [
+  "nature", "nature_teal", "curator", "player2", "ammo", "alchemy", "mushroom",
+  "tech_cyan", "accessory_cyan", "weapon_red", "tool_gray", "collector_white",
+  "engineer_orange", "resource_gray", "build_brown", "alchemy_purple", "food_orange",
+  "fishing_blue", "decor_white", "player1",
+], drawChest);
+registerObjectRenderer("station", ["special", "advanced", "buff", "alchemy", "food", "core", "summon"], drawStation);
+registerObjectRenderer("npc", ["npc", "clinic", "mushroom"], drawNpc);
+registerObjectRenderer("door", ["route"], drawDoor);
+registerObjectRenderer("hatch", ["route"], drawHatch);
+registerObjectRenderer("furniture", ["furniture"], drawFurniture);
+registerObjectRenderer("bed", ["player1", "player2"], drawBed);
+registerObjectRenderer("personal_storage", ["player1", "player2"], drawPersonal);
+registerObjectRenderer("pylon", ["pylon"], drawPylon);
+registerObjectRenderer("teleporter", ["teleporter_reserve"], drawTeleporter);
+registerObjectRenderer("planter", [
+  "planter_day", "planter_blink", "planter_moon", "planter_water", "planter_fire", "planter_death", "planter_shiver",
+], drawPlanter);
+registerObjectRenderer("light", [
+  "light", "lantern_warm", "star_light", "pink_torch", "ice_torch", "white_torch",
+  "red_torch", "purple_torch", "ultrabright_torch", "mushroom", "glass_lantern",
+], drawLight);
+registerObjectRenderer("museum_trophy", ["museum"], drawMuseumTrophy);
+registerObjectRenderer("museum_mannequin", ["museum"], drawMuseumMannequin);
+registerObjectRenderer("museum_weapon_rack", ["museum"], drawMuseumWeaponRack);
+registerObjectRenderer("museum_item_frame", ["museum"], drawMuseumItemFrame);
+registerObjectRenderer("display", ["player1", "player2"], drawDisplay);
+registerObjectRenderer("honey", ["honey"], drawHoney);
+registerObjectRenderer("lava", ["combat"], drawLava);
+registerObjectRenderer("honey_bubble", ["honey"], drawHoneyBubble);
+registerObjectRenderer("star_bottle", ["star_light"], drawStarBottle);
+registerObjectRenderer("statue", ["heart_statue", "bast"], drawStatue);
+registerObjectRenderer("campfire", ["buff"], drawCampfire);
+registerObjectRenderer("heart_lantern", ["heal"], drawHeart);
 
 function drawObjects() {
   clearCtx(octx);

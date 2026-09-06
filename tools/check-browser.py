@@ -27,6 +27,13 @@ MATERIAL_MUTATIONS = {
     "missing-spec": 'delete BLOCK_SPECS[D.solids[0].mat];',
     "invalid-palette": 'MAT[D.solids[0].mat] = ["#112233", "#445566"];',
 }
+RENDERER_MUTATIONS = {
+    "unknown-kind": 'D.objects[0].kind = "SMOKE_UNKNOWN_KIND";',
+    "unknown-style": 'D.objects[0].style = "SMOKE_UNKNOWN_STYLE";',
+    "missing-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).delete(D.objects[0].style);',
+    "invalid-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).set(D.objects[0].style, "not a function");',
+}
+DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS}
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},
              "mobile": {"width": 390, "height": 844}}
 
@@ -283,7 +290,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
     page = context.new_page()
     page.set_default_timeout(10000)
     watch(page, origin, log, failures)
-    if mutation in ("start-throw", "missing-js") or mutation in MATERIAL_MUTATIONS:
+    if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
         # Observe independently of the expected pageerror/404: catching an error
         # must not hide an incorrectly published (even transient) ready marker.
         page.add_init_script("""(() => {
@@ -299,9 +306,9 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             scripts = re.findall(r'<script\b[^>]*src="([^"]+)"', (ROOT / entry).read_text())
             startup = urlsplit(scripts[-1]).path.removeprefix("./")
-            if mutation == "start-throw" or mutation in MATERIAL_MUTATIONS:
+            if mutation == "start-throw" or mutation in DATA_MUTATIONS:
                 source = (ROOT / startup).read_text()
-                prefix = MATERIAL_MUTATIONS.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
+                prefix = DATA_MUTATIONS.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
                 page.route(f"**/{startup}*", lambda route: route.fulfill(
                     content_type="text/javascript", body=prefix + "\n" + source))
             else:
@@ -312,7 +319,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             # The static heading remains visible even in a broken startup.
             assert page.locator(".maphead b").inner_text()
-            if mutation in ("start-throw", "missing-js") or mutation in MATERIAL_MUTATIONS:
+            if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
                 settle(page)
                 assert not page.evaluate("window.__smokeReadyObserved"), "ready appeared before startup completed"
                 assert page.locator('#viewport[data-ready="true"]').count() == 0
@@ -320,14 +327,16 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                 healthy(page, failures)
             except SmokeFailure as error:
                 expected = ("Material contract:" if mutation in MATERIAL_MUTATIONS else
+                            "Object renderer contract:" if mutation in RENDERER_MUTATIONS else
                             "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404")
                 assert expected in str(error), f"wrong failure for {mutation}: {error}"
                 result["expected_failure"] = str(error)
-                if mutation in MATERIAL_MUTATIONS:
-                    assert page.locator("#iname").inner_text() == "Ошибка данных материалов"
+                if mutation in DATA_MUTATIONS:
+                    title = "Ошибка данных материалов" if mutation in MATERIAL_MUTATIONS else "Ошибка отрисовки объектов"
+                    assert page.locator("#iname").inner_text() == title
                     diagnostic = page.locator("#ikv").inner_text()
                     assert re.search(r"X-?\d+ Y-?\d+", diagnostic), "diagnostic lacks coordinates"
-                    assert "specification" in diagnostic or "palette" in diagnostic
+                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer"))
                     assert page.locator("#roomRows tr").count() == 0, "invalid data reached populate()"
             else:
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")
@@ -388,7 +397,7 @@ def main():
             for entry in SCENES:
                 for device in VIEWPORTS:
                     results.append(scenario(browser, origin, entry, device, args.artifacts))
-                for mutation in ("start-throw", "missing-js", "missing-css", *MATERIAL_MUTATIONS):
+                for mutation in ("start-throw", "missing-js", "missing-css", *DATA_MUTATIONS):
                     results.append(scenario(browser, origin, entry, "desktop", args.artifacts, mutation))
         finally:
             browser.close()

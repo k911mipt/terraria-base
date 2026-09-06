@@ -273,18 +273,21 @@ function applyTileShape(ctx, shape, wx, wy) {
   ctx.restore();
 }
 
+function rejectStartupData(title, prefix, errors) {
+  if (!errors.length) return;
+  startupComplete = false;
+  viewport.removeAttribute("data-ready");
+  document.getElementById("iname").textContent = title;
+  document.getElementById("idesc").textContent = "Отрисовка остановлена; исправьте данные.";
+  document.getElementById("ikv").textContent = errors.join("\n");
+  throw new Error(`${prefix}: ${errors.join("\n")}`);
+}
+
 function buildBaseCaches() {
-  const errors = validateUsedMaterialSpecs(D, BLOCK_SPECS, WALL_SPECS, MAT, WALL);
-  if (errors.length) {
-    // Report before drawing or publishing readiness. textContent also keeps
-    // malformed data from becoming HTML inside the error message.
-    startupComplete = false;
-    viewport.removeAttribute("data-ready");
-    document.getElementById("iname").textContent = "Ошибка данных материалов";
-    document.getElementById("idesc").textContent = "Отрисовка остановлена; исправьте спецификации.";
-    document.getElementById("ikv").textContent = errors.join("\n");
-    throw new Error(`Material contract: ${errors.join("\n")}`);
-  }
+  rejectStartupData("Ошибка данных материалов", "Material contract",
+    validateUsedMaterialSpecs(D, BLOCK_SPECS, WALL_SPECS, MAT, WALL));
+  rejectStartupData("Ошибка отрисовки объектов", "Object renderer contract",
+    validateObjectRenderers(D));
   const bg = caches.bg.getContext("2d"),
     sol = caches.solid.getContext("2d");
   bg.clearRect(0, 0, caches.bg.width, caches.bg.height);
