@@ -42,6 +42,7 @@ node tools/check-jungle.cjs
 node tools/check-jungle-rendering.cjs
 node tools/check-wall-specs.cjs
 node tools/check-rooms.cjs
+node tools/check-materials.cjs
 ```
 
 Проверка настоящего HTTP-запуска и взаимодействий всех четырёх сцен:
@@ -56,7 +57,9 @@ python tools/check-browser.py
 
 Playwright нужен только разработчикам; сайт его не загружает. На Linux для установки
 системных библиотек может потребоваться `python -m playwright install --with-deps chromium`.
-[Описание 20 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
+[Описание 36 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
+
+[Контракт используемых материалов](docs/material-contract.md) проверяется до рендера и в CLI.
 
 Эти проверки — не доказательство всех строительных правил Terraria. Полный контракт
 материалов, общие строительные инварианты и вычисляемый аудит ещё внедряются по

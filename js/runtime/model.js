@@ -274,6 +274,17 @@ function applyTileShape(ctx, shape, wx, wy) {
 }
 
 function buildBaseCaches() {
+  const errors = validateUsedMaterialSpecs(D, BLOCK_SPECS, WALL_SPECS, MAT, WALL);
+  if (errors.length) {
+    // Report before drawing or publishing readiness. textContent also keeps
+    // malformed data from becoming HTML inside the error message.
+    startupComplete = false;
+    viewport.removeAttribute("data-ready");
+    document.getElementById("iname").textContent = "Ошибка данных материалов";
+    document.getElementById("idesc").textContent = "Отрисовка остановлена; исправьте спецификации.";
+    document.getElementById("ikv").textContent = errors.join("\n");
+    throw new Error(`Material contract: ${errors.join("\n")}`);
+  }
   const bg = caches.bg.getContext("2d"),
     sol = caches.solid.getContext("2d");
   bg.clearRect(0, 0, caches.bg.width, caches.bg.height);
@@ -353,6 +364,24 @@ function objectsAtTile(x, y) {
   return out;
 }
 
+function inspectorMaterialSpec(id, background) {
+  const specs = background ? WALL_SPECS : BLOCK_SPECS;
+  const palettes = background ? WALL : MAT;
+  const spec = Object.hasOwn(specs, id) ? specs[id] : null;
+  const errors = materialSpecProblems(spec, background);
+  if (!Object.hasOwn(palettes, id) || !validMaterialPalette(palettes[id], background))
+    errors.push("missing or invalid palette");
+  if (!errors.length) return spec;
+  return {
+    layer: "Ошибка данных",
+    itemRu: `Ошибка данных: ${id}`,
+    itemEn: errors.join("; "),
+    paintRu: "—", paintEn: "None",
+    safe: typeof spec?.safe === "boolean" ? spec.safe : undefined,
+    note: errors.join("; "),
+  };
+}
+
 // The absence of a wall is separate from missing or malformed metadata.
 function wallSafetyLabel(spec, hasWall = true) {
   if (!hasWall) return null;
@@ -386,8 +415,8 @@ function inspect(o, wx, wy) {
       : null,
     bs = engDevice
       ? engineeringForegroundSpec(engDevice)
-      : objectSpec || (solid ? BLOCK_SPECS[solid.mat] : AIR_SPEC),
-    ws = bg ? WALL_SPECS[bg.mat] : NO_WALL_SPEC,
+      : objectSpec || (solid ? inspectorMaterialSpec(solid.mat, false) : AIR_SPEC),
+    ws = bg ? inspectorMaterialSpec(bg.mat, true) : NO_WALL_SPEC,
     cellObjects = objectsAtTile(tx, ty);
   document.getElementById("iname").textContent = o
     ? o.name
