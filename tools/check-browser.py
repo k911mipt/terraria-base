@@ -442,8 +442,10 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         else:
             healthy(page, failures)
             check_computed_audit(page, entry)
-            page.evaluate("""window.__auditRunCount=0; window.__auditFunction=computeSceneAudit;
-                computeSceneAudit=(...args)=>{window.__auditRunCount++;return window.__auditFunction(...args);};""")
+            page.evaluate("""() => {
+                window.__auditRunCount=0; window.__auditFunction=computeSceneAudit;
+                computeSceneAudit=(...args)=>{window.__auditRunCount++;return window.__auditFunction(...args);};
+            }""")
             interact(page, entry, device == "mobile")
             healthy(page, failures)
             assert page.evaluate("window.__auditRunCount") == 0, "audit was recalculated while interacting/rendering"
