@@ -7,7 +7,7 @@ const {loadAudit, SCENES} = require('./lib/load-audit.cjs');
 let cases = 0;
 for (const entry of SCENES) {
   const {run, runFile, compute} = loadAudit(entry);
-  runFile(`js/runtime/tables${entry === 'index.html' ? '' : '-' + entry.replace('.html', '')}.js`);
+  runFile("js/runtime/formatters.js");
   const original = run('JSON.stringify(D)');
   const baseline = JSON.stringify(compute());
   assert.equal(compute().errors.length, 0, entry);

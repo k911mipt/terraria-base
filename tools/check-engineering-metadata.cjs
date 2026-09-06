@@ -3,7 +3,7 @@
 const assert = require("node:assert/strict");
 const { loadScene } = require("./lib/load-scene.cjs");
 const { run, runFile } = loadScene("index.html");
-for (const file of ["core", "validation", "model", "tables"]) runFile(`js/runtime/${file}.js`);
+for (const file of ["core", "validation", "model", "formatters"]) runFile(`js/runtime/${file}.js`);
 run(`
   globalThis.elements = Object.fromEntries(['mode','iname','idesc','ikv'].map(id=>[id,{}]));
   elements.mode.value = 'visual';

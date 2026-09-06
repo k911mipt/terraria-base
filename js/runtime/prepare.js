@@ -1,6 +1,9 @@
-// Engineering indexes and invariant checks performed before interaction binding.
+// One preparation path, including the supported empty-engineering case.
 prepareEngineering();
-
-validateHeartWireTargets();
-
-validatePitConfiguration();
+if (plannerUI.engineering) {
+  validateHeartWireTargets();
+  validatePitConfiguration();
+} else {
+  ENG.validation.heartTargets = "не используется";
+  ENG.validation.pitStates = "не используется";
+}

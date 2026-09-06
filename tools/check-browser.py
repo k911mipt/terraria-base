@@ -253,6 +253,29 @@ def check_object_inspector(page, entry, mobile):
         assert expected in rows(page)["Передний материал"]
 
 
+def check_scene_controls(page, entry):
+    # Click real buttons. Expected rectangles/modes come from the explicit config.
+    controls = page.evaluate("plannerUI.focus")
+    for button_id, target in controls.items():
+        page.locator("#" + button_id).click()
+        settle(page)
+        actual = page.evaluate("({...cam})")
+        expected = page.evaluate("""bounds => {
+            const previous = {...cam};
+            focusRect(...bounds, 2, false);
+            const expected = {...cam};
+            cam = previous; schedule(); return expected;
+        }""", target["bounds"])
+        assert actual == expected, f"{button_id}: wrong focus rectangle"
+        if mode := target.get("mode"):
+            assert page.locator("#mode").input_value() == mode
+    page.locator("#search").fill(CONTROL_DOORS[SCENES.index(entry)])
+    settle(page)
+    assert page.evaluate("selected?.id") == CONTROL_DOORS[SCENES.index(entry)], "search no longer resolves object IDs"
+    page.locator("#search").fill("")
+    settle(page)
+
+
 def interact(page, entry, mobile):
     # Static navigation is required even without JavaScript; compare original
     # HTML independently of the dynamically initialized page.
@@ -446,6 +469,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                 window.__auditRunCount=0; window.__auditFunction=computeSceneAudit;
                 computeSceneAudit=(...args)=>{window.__auditRunCount++;return window.__auditFunction(...args);};
             }""")
+            check_scene_controls(page, entry)
             interact(page, entry, device == "mobile")
             healthy(page, failures)
             assert page.evaluate("window.__auditRunCount") == 0, "audit was recalculated while interacting/rendering"
