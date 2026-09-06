@@ -43,6 +43,9 @@ for (const entry of SCENES) {
         rejected(`D.objects[currentIndex].${prefix + suffix} = " "`, prefix + suffix);
       }
     }
+    if (run("objectSpecPrefix(saved) !== null && objectRole(saved) === 'item'"))
+      rejected(`for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn'])
+        delete D.objects[currentIndex][prefix+suffix]`, "missing item specification");
     const metadata = run("objectMetadata(saved)");
     if (metadata.role === "item") {
       assert(metadata.foreground, `${id} must not be represented as air`);
@@ -67,8 +70,13 @@ for (const entry of SCENES) {
   // Existing legacy holes stay visible warnings. Explicit partial specs fail.
   run(`globalThis.fixture = {id:'FIXTURE',name:'fixture',kind:'chest',style:'nature',x:1,y:1,w:2,h:2};
     globalThis.scene = {title:'fixture',rooms:[],objects:[fixture]};`);
-  assert.equal(run("validateObjectData(scene).warnings.length"), 1);
-  assert.equal(run("validateObjectData(scene).errors.length"), 0);
+  assert.equal(run("validateObjectData(scene).warnings.length"), 0);
+  assert(run("validateObjectData(scene).errors.some(e=>e.includes('missing item specification'))"));
+  run(`globalThis.legacy = D.objects.find(o => objectRole(o)==='item' && !objectSpecPrefix(o));
+    globalThis.legacyScene = {...D,objects:[{...legacy}]};`);
+  assert.equal(run("validateObjectData(legacyScene).warnings.length"), 1);
+  run(`Object.assign(legacyScene.objects[0], {foregroundItemRu:'Предмет',foregroundItemEn:'Item',foregroundPaintRu:'Без краски',foregroundPaintEn:'None'});`);
+  assert(run("validateObjectData(legacyScene).errors.some(e=>e.includes('remove the legacy exception'))"));
   run(`fixture.chestItemRu = 'Сундук'; fixture.chestItemEn = 'Chest';
        fixture.chestPaintRu = 'Без краски'; fixture.chestPaintEn = 'None';`);
   assert.equal(run("objectMetadata(fixture).foreground.paintEn"), "None");
@@ -93,7 +101,24 @@ for (const entry of SCENES) {
   assert.equal(run("removed"), "data-ready");
   assert.equal(run("elements.iname.textContent"), "Ошибка данных объектов");
   run("D.objects[0] = first");
+  // No current renderer/material failure can mask whole-spec deletion or a new
+  // incomplete item: both must be rejected specifically by the object guard.
+  for (const change of [
+    `const index = D.objects.findIndex(o=>objectRole(o)==='item' && objectSpecPrefix(o));
+     D.objects[index] = {...D.objects[index]};
+     for (const prefix of ['foreground','chest']) for (const suffix of ['ItemRu','ItemEn','PaintRu','PaintEn'])
+       delete D.objects[index][prefix+suffix];`,
+    `D.objects.push({...D.objects.find(o=>objectRole(o)==='item' && !objectSpecPrefix(o)),id:'NEW_INCOMPLETE'});`,
+  ]) {
+    run(`globalThis.savedObjects = D.objects; D.objects = [...D.objects]; startupComplete = true;`);
+    try {
+      run(`{ ${change} }`);
+      assert.throws(() => run("buildBaseCaches()"), /Object data contract:.*missing item specification/);
+      assert.equal(run("startupComplete"), false);
+    } finally { run("D.objects = savedObjects;"); }
+  }
   assert.deepEqual(check(), []);
+  assert.equal(run("JSON.stringify(D)"), original);
   console.log(`PASS ${entry}: ${count} objects; ${warningCount} explicitly incomplete item descriptions`);
 }
 console.log(`PASS ${mutations} object mutations; ${warnings} legacy metadata warnings are NOT a complete item catalogue`);

@@ -146,6 +146,222 @@ const PHYSICAL_OBJECT_KINDS = new Set([
   "heart_lantern", "jungle_sign",
 ]);
 
+// Frozen migration exceptions from 75db86cc, not inferred from current D.
+// Adding a new incomplete object or deleting a complete spec must fail.
+const LEGACY_ITEM_METADATA = new Map([
+  ["door", "route", [
+    "D_LT_TRANSPORT", "D_TRANSPORT_P1", "D_P1_CRAFT", "D_CRAFT_P2", "D_P2_PRE", "D_PRE_RT", "F_DOOR_1",
+    "F_DOOR_2", "C_DOOR_1", "C_DOOR_2", "M_DOOR", "D_LT_MUSEUM", "D_RT_MUSEUM", "D_OUTER_L",
+    "D_INNER_L", "D_INNER_R", "D_OUTER_R", "DESERT_ACCESS_INNER", "UG_OUTER_L", "UG_MECH_GOBLIN",
+    "UG_GOBLIN_PRINCESS", "UG_OUTER_R", "UG_FISHING_DOOR",
+  ]],
+  ["hatch", "route", [
+    "H_GREEN", "H_TOP_L", "H_TOP_C", "H_TOP_R", "H_MUS_L", "H_MUS_C", "H_MUS_R", "H_P1", "H_P2",
+    "H_MUSH", "D_HATCH", "UG_HATCH",
+  ]],
+  ["station", "special", [
+    "C_STMP", "C_LIZ", "C_BONE", "C_GLASS", "C_HONEY", "C_ICE", "C_LIVING", "C_SKY", "C_SOLID",
+    "C_FLESH",
+  ]],
+  ["station", "advanced", [
+    "C_ANCIENT", "C_AUTO", "C_ORB", "C_BOOK",
+  ]],
+  ["station", "buff", [
+    "C_SHARP", "C_BEWITCH", "C_WAR", "C_AMMO",
+  ]],
+  ["station", "alchemy", [
+    "C_ALCH", "C_IMBUE", "C_DYE", "C_SINK",
+  ]],
+  ["station", "food", [
+    "C_KITCH",
+  ]],
+  ["station", "core", [
+    "C_FURNACE", "C_SAW", "C_WB", "C_ANVIL", "C_TINKER", "C_HEAVY", "C_LOOM", "C_EXTRACT",
+  ]],
+  ["furniture", "furniture", [
+    "ZT", "ZC", "GT", "GC", "GUIDET", "GUIDEC", "MT", "MC", "AT", "AC", "NT", "NC", "TRUFFLE_T",
+    "TRUFFLE_C",
+  ]],
+  ["light", "light", [
+    "ZL", "GL", "GUIDEL", "ML", "AL", "NL", "TRAVEL_LIGHT", "PRE_LIGHT", "TRUFFLE_L",
+  ]],
+  ["pylon", "pylon", [
+    "PYLON",
+  ]],
+  ["personal_storage", "player1", [
+    "P1_PIGGY", "P1_SAFE", "P1_FORGE", "P1_VOID",
+  ]],
+  ["bed", "player1", [
+    "P1_BED",
+  ]],
+  ["display", "player1", [
+    "P1_MAN", "P1_RACK", "P1_FLAG",
+  ]],
+  ["chest", "curator", [
+    "P1_CHEST",
+  ]],
+  ["personal_storage", "player2", [
+    "P2_VOID", "P2_FORGE", "P2_SAFE", "P2_PIGGY",
+  ]],
+  ["bed", "player2", [
+    "P2_BED",
+  ]],
+  ["display", "player2", [
+    "P2_MAN", "P2_RACK", "P2_FLAG",
+  ]],
+  ["chest", "player2", [
+    "P2_CHEST",
+  ]],
+  ["light", "lantern_warm", [
+    "P1_LIGHT_UP", "P2_LIGHT_UP", "DESERT_ARMS_LIGHT", "DESERT_DYE_LIGHT", "DESERT_HUB_LIGHT_L",
+    "DESERT_HUB_LIGHT_R", "DESERT_SERVICE_LIGHT_L", "DESERT_SERVICE_LIGHT_R", "DESERT_ACCESS_LIGHT",
+    "DESERT_ACCESS_LIGHT_1", "DESERT_ACCESS_LIGHT_2", "DESERT_ACCESS_LIGHT_3", "DESERT_ACCESS_LIGHT_4",
+    "DESERT_ACCESS_LIGHT_5", "DESERT_ACCESS_LIGHT_6", "UG_SHAFT_LIGHT",
+  ]],
+  ["light", "star_light", [
+    "P1_LIGHT_LOW", "P2_LIGHT_LOW",
+  ]],
+  ["light", "pink_torch", [
+    "P1_TORCH_L", "P1_TORCH_R",
+  ]],
+  ["light", "ice_torch", [
+    "P2_TORCH_L", "P2_TORCH_R", "L_RACK_LIGHT_F2", "R_RACK_LIGHT_F4", "UG_MECH_WALL_LIGHT",
+  ]],
+  ["chest", "ammo", [
+    "AMMO_C",
+  ]],
+  ["chest", "alchemy", [
+    "POTION_C",
+  ]],
+  ["chest", "mushroom", [
+    "MUSH_CHEST",
+  ]],
+  ["light", "white_torch", [
+    "L_RACK_LIGHT_F1", "L_RACK_LIGHT_F4", "R_RACK_LIGHT_F2", "R_RACK_LIGHT_F5", "GH_WHITE_1",
+    "GH_WHITE_2", "GH_WHITE_3", "GH_WHITE_4", "GH_WHITE_5", "GH_WHITE_6",
+  ]],
+  ["light", "red_torch", [
+    "L_RACK_LIGHT_F3",
+  ]],
+  ["light", "purple_torch", [
+    "L_RACK_LIGHT_F5", "R_RACK_LIGHT_F3",
+  ]],
+  ["light", "ultrabright_torch", [
+    "R_RACK_LIGHT_F1",
+  ]],
+  ["planter", "planter_day", [
+    "HERB_1_DAY", "HERB_2_DAY", "HERB_3_DAY", "HERB_4_DAY",
+  ]],
+  ["planter", "planter_blink", [
+    "HERB_1_BLINK", "HERB_2_BLINK", "HERB_3_BLINK", "HERB_4_BLINK",
+  ]],
+  ["planter", "planter_moon", [
+    "HERB_1_MOON", "HERB_2_MOON", "HERB_3_MOON", "HERB_4_MOON",
+  ]],
+  ["planter", "planter_water", [
+    "HERB_1_WATER", "HERB_2_WATER", "HERB_3_WATER",
+  ]],
+  ["planter", "planter_fire", [
+    "HERB_1_FIRE", "HERB_2_FIRE", "HERB_3_FIRE", "HERB_4_FIRE",
+  ]],
+  ["planter", "planter_death", [
+    "HERB_1_DEATH", "HERB_2_DEATH", "HERB_3_DEATH", "HERB_4_DEATH",
+  ]],
+  ["planter", "planter_shiver", [
+    "HERB_1_SHIVER", "HERB_2_SHIVER", "HERB_3_SHIVER", "HERB_4_SHIVER",
+  ]],
+  ["light", "mushroom", [
+    "MUSH_TL1", "MUSH_TR1", "MUSH_TL2", "MUSH_TR2", "MUSH_TL3", "MUSH_TR3",
+  ]],
+  ["statue", "heart_statue", [
+    "HEART_STAT_L", "HEART_STAT_R",
+  ]],
+  ["heart_lantern", "heal", [
+    "HEART_C", "BOSS_HEART_LANTERN_L", "BOSS_HEART_LANTERN_R",
+  ]],
+  ["star_bottle", "star_light", [
+    "STAR_C", "BOSS_STAR_L", "BOSS_STAR_R",
+  ]],
+  ["campfire", "buff", [
+    "FIRE_C", "BOSS_FIRE_L", "BOSS_FIRE_R",
+  ]],
+  ["statue", "bast", [
+    "BAST_C", "BOSS_BAST_C",
+  ]],
+  ["furniture", "desert_furniture", [
+    "DESERT_ARMS_TABLE", "DESERT_ARMS_CHAIR", "DESERT_DYE_TABLE", "DESERT_DYE_CHAIR",
+  ]],
+  ["furniture", "mechanic", [
+    "UG_MECHANIC_TABLE", "UG_MECHANIC_CHAIR",
+  ]],
+  ["furniture", "tinkerer_station", [
+    "UG_GOBLIN_TABLE", "UG_GOBLIN_CHAIR",
+  ]],
+  ["personal_storage", "special", [
+    "UG_SAFE",
+  ]],
+  ["furniture", "princess_room", [
+    "UG_PRINCESS_TABLE", "UG_PRINCESS_CHAIR",
+  ]],
+  ["furniture", "fishing_blue", [
+    "UG_FISH_CHAIR",
+  ]],
+  ["light", "ice_lantern", [
+    "UG_FISH_LIGHT_L", "UG_FISH_LIGHT_R", "UG_FISH_SERVICE_LIGHT",
+  ]],
+  ["door", "jungle_route", [
+    "JG_OUTER_L", "JG_DRYAD_HUB", "JG_HUB_WITCH", "JG_WITCH_SHAFT",
+  ]],
+  ["hatch", "jungle_route", [
+    "JG_PAINTER_HATCH",
+  ]],
+  ["furniture", "jungle_dryad", [
+    "JG_DRYAD_TABLE", "JG_DRYAD_CHAIR",
+  ]],
+  ["chest", "jungle_dryad", [
+    "JG_DRYAD_CHEST",
+  ]],
+  ["light", "jungle_lantern", [
+    "JG_DRYAD_LANTERN", "JG_HUB_LANTERN_L", "JG_HUB_LANTERN_R",
+  ]],
+  ["light", "jungle_torch", [
+    "JG_DRYAD_TORCH", "JG_SHAFT_LIGHT_1", "JG_SHAFT_LIGHT_2", "JG_SHAFT_LIGHT_3", "JG_SHAFT_LIGHT_4",
+  ]],
+  ["chest", "jungle_hub", [
+    "JG_EXPEDITION_CHEST",
+  ]],
+  ["furniture", "jungle_painter", [
+    "JG_PAINTER_TABLE", "JG_PAINTER_CHAIR",
+  ]],
+  ["chest", "jungle_painter", [
+    "JG_PAINTER_CHEST",
+  ]],
+  ["light", "painter_lantern", [
+    "JG_PAINTER_LANTERN",
+  ]],
+  ["light", "painter_torch", [
+    "JG_PAINTER_TORCH",
+  ]],
+  ["furniture", "jungle_witch", [
+    "JG_WITCH_TABLE", "JG_WITCH_CHAIR",
+  ]],
+  ["station", "witch_cauldron", [
+    "JG_WITCH_CAULDRON",
+  ]],
+  ["chest", "jungle_witch", [
+    "JG_WITCH_CHEST",
+  ]],
+  ["light", "tiki_lantern", [
+    "JG_WITCH_LANTERN",
+  ]],
+  ["light", "tiki_torch", [
+    "JG_WITCH_TORCH",
+  ]],
+  ["jungle_sign", "jungle_hub", [
+    "JG_TEMPLE_SIGN",
+  ]],
+].flatMap(([kind, style, ids]) => ids.map(id => [id, `${kind}/${style}`])));
+
 function objectRole(object) {
   if (Object.hasOwn(NON_ITEM_ROLES, object?.kind)) return NON_ITEM_ROLES[object.kind];
   return PHYSICAL_OBJECT_KINDS.has(object?.kind) ? "item" : "unknown";
@@ -224,8 +440,15 @@ function validateObjectData(scene) {
       if (hasObjectSpec(object, prefix))
         for (const problem of objectSpecProblems(object, prefix)) error(problem);
     }
-    if (!objectSpecPrefix(object) && objectRole(object) === "item")
-      warnings.push(`${where}: ${objectSpecProblems(object)[0]}`);
+    if (objectRole(object) === "item") {
+      const legacy = LEGACY_ITEM_METADATA.get(object.id) === `${object.kind}/${object.style}`;
+      if (!objectSpecPrefix(object)) {
+        if (legacy) warnings.push(`${where}: ${objectSpecProblems(object)[0]}`);
+        else error("missing item specification (not a legacy exception)");
+      } else if (legacy && objectSpecProblems(object).length === 0) {
+        error("completed specification: remove the legacy exception");
+      }
+    }
     for (const field of ["foregroundLayer", "foregroundNote"]) {
       if (Object.hasOwn(object, field) && typeof object[field] !== "string")
         error(`invalid ${field}`);
