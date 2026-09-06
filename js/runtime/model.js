@@ -401,6 +401,13 @@ function inspectorObjectRoom(scene, object) {
   catch (error) { return { name: "Ошибка данных", error: error.message }; }
 }
 
+// Scene objects can also carry engineering annotations. Only synthetic overlay
+// selections bypass the scene metadata adapter (their specs come from ENG).
+function inspectorObjectMetadata(scene, object) {
+  return object && (!object.engineering || scene.objects.includes(object))
+    ? objectMetadata(object) : null;
+}
+
 function inspect(o, wx, wy) {
   selected = o || null;
   searchHit = null;
@@ -412,7 +419,7 @@ function inspect(o, wx, wy) {
     engDevice = engineeringDeviceAtTile(tx, ty),
     solid = rectAt(D.solids, tx, ty),
     bg = rectAt(D.backgrounds, tx, ty),
-    metadata = o && !o.engineering ? objectMetadata(o) : null,
+    metadata = inspectorObjectMetadata(D, o),
     objectSpec = metadata?.foreground,
     bs = engDevice
       ? engineeringForegroundSpec(engDevice)
