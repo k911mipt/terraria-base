@@ -255,6 +255,17 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
     page = context.new_page()
     page.set_default_timeout(10000)
     watch(page, origin, log, failures)
+    if mutation in ("start-throw", "missing-js"):
+        # Observe independently of the expected pageerror/404: catching an error
+        # must not hide an incorrectly published (even transient) ready marker.
+        page.add_init_script("""(() => {
+          window.__smokeReadyObserved = false;
+          new MutationObserver(() => {
+            if (document.querySelector('#viewport[data-ready="true"]'))
+              window.__smokeReadyObserved = true;
+          }).observe(document, { subtree: true, childList: true,
+            attributes: true, attributeFilter: ['data-ready'] });
+        })();""")
     result = {"scene": entry, "device": device, "mutation": mutation, "status": "FAIL"}
     try:
         if mutation:
@@ -272,6 +283,10 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             # The static heading remains visible even in a broken startup.
             assert page.locator(".maphead b").inner_text()
+            if mutation in ("start-throw", "missing-js"):
+                settle(page)
+                assert not page.evaluate("window.__smokeReadyObserved"), "ready appeared before startup completed"
+                assert page.locator('#viewport[data-ready="true"]').count() == 0
             try:
                 healthy(page, failures)
             except SmokeFailure as error:
@@ -288,9 +303,14 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
             if device == "mobile":
                 page.locator(".toolbar-toggle").tap()
             next_entry = SCENES[(SCENES.index(entry) + 1) % len(SCENES)]
-            page.locator(f'.scene-tab[href="./{next_entry}"]').click()
-            page.wait_for_url(f"**/{next_entry}")
+            target_url = f"{origin}/{next_entry}"
+            with page.expect_response(lambda response: response.url == target_url
+                                      and response.request.resource_type == "document") as navigation:
+                page.locator(f'.scene-tab[href="./{next_entry}"]').click()
+            assert navigation.value.status == 200, "tab did not load the target document"
+            page.wait_for_url(target_url)
             healthy(page, failures)
+            assert page.locator('.scene-tab[aria-current="page"]').get_attribute("href") == "./" + next_entry
             page.goto(f"{origin}/{entry}", wait_until="load")
             healthy(page, failures)
             page.evaluate("document.getElementById('mode').value = 'visual'; fit(false)")
