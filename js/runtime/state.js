@@ -15,6 +15,9 @@ const CACHE_TILE = 16,
   WX = D.bounds.xMax - D.bounds.xMin + 1,
   WY = D.bounds.yMax - D.bounds.yMin + 1;
 
+// Readiness is published only after startup and a successful scheduled render.
+let startupComplete = false;
+
 let dpr = 1,
   cam = { x: D.bounds.xMin, y: D.bounds.yMin, scale: 7 },
   history = [],

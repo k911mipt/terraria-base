@@ -77,6 +77,7 @@ function schedule() {
     raf = requestAnimationFrame(() => {
       raf = 0;
       draw();
+      if (startupComplete) viewport.dataset.ready = "true";
     });
 }
 

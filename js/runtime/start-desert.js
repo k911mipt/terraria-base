@@ -69,3 +69,6 @@ buildObjectCache();
 populate();
 document.getElementById("mode").value = "visual";
 fit(false);
+
+startupComplete = true;
+schedule();
