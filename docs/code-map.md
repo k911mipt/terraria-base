@@ -1,168 +1,116 @@
 # Карта исходного кода
 
-Исходник разделён без фреймворка и сборщика. Порядок массивов `solids`,
-`backgrounds`, `objects` и `ENG.devices` является частью модели и
-фиксируется файлами-сборщиками `index.js`.
+Текущее промежуточное состояние [рефакторинга #24](https://github.com/k911mipt/terraria-base/issues/24).
+Сайт статический, без сборщика. Пока используются обычные упорядоченные `<script>`
+и общие функции, **не ES-модули**. Полная модульная миграция — отдельная задача #33.
 
-## Данные
+## Точки входа и порядок данных
 
-- `js/data/layout.js` — границы мира, комнаты, резервы и главы музея.
-- `js/data/solids/` — верхний комплекс, улица/Y54 и нижний музейно-ловушечный слой.
-- `js/data/backgrounds/` — база, левая босс-арена, музей и технические проходы.
-- `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители, арены, отдельная разметка Этерии, музей и ямы.
-- `js/data/engineering/` — цепи, органы управления и 32 отдельные Dart Trap.
-- `js/data/desert/` — самостоятельная пустынная сцена.
-- `js/data/underground/` — снежная мастерская Гоблина, группа Механик/Гоблин/Принцесса и Cavern Pylon.
-- `js/data/materials.js` — палитры и точные Terraria-спецификации.
-- `js/data/index.js` — только сборка объекта `D`; больших массивов в нём намеренно нет.
+| HTML | Данные сцены | Сценические runtime-файлы |
+| --- | --- | --- |
+| `index.html` | `js/data/` | `prepare.js`, `tables.js`, `start.js` |
+| `desert.html` | `js/data/desert/` | `desert-extensions.js`, `prepare-desert.js`, `tables-desert.js`, `interactions-desert.js`, `start-desert.js` |
+| `underground.html` | `js/data/underground/` | `underground-extensions.js`, `prepare-underground.js`, `tables-underground.js`, `interactions-underground.js`, `start-underground.js` |
+| `jungle.html` | `js/data/jungle/` | `jungle-extensions.js`, `prepare-jungle.js`, `tables-jungle.js`, `interactions-jungle.js`, `start-jungle.js` |
 
-## Исполняемый код
+Все runtime-пути таблицы относительны `js/runtime/`. Общие стили — `styles.css`,
+статические вкладки — в каждом HTML, их оформление — `scene-tabs.css`, иконка —
+`favicon.svg`. Порядок загрузки нужно смотреть в соответствующем HTML, а не угадывать
+по именам файлов.
 
-### `js/runtime/core.js`
+Основная база:
 
-Small shared helpers.
+- `js/data/layout.js` — границы, комнаты, резервы и главы музея;
+- `js/data/solids/` — верхний комплекс, улица/Y54 и нижний музейно-ловушечный слой;
+- `js/data/backgrounds/` — база, босс-арена, музей и технические проходы;
+- `js/data/objects/` — маршруты, станции, комнаты, склад, теплица, красители,
+  арены/Этерия, музей и ямы; подробные описания сундуков являются частью данных;
+- `js/data/engineering/` — цепи, управление и 32 отдельные Dart Trap;
+- `js/data/materials.js` — общие палитры и Terraria-спецификации;
+- `js/data/metadata.js` — заметки и сохранённый снимок проверок;
+- `js/data/index.js` — сборка `D` из уже подготовленных массивов.
 
-- `cp()`
-- `cy()`
-- `seeded()`
-- `pstyle()`
-- `shade()`
-- `objectBox()`
-- `chestPalette()`
-- `saveCam()`
-- `engKey()`
-- `expandOrthPath()`
-- `schedule()`
-- `roomAt()`
+В каталоге каждого аванпоста находятся `layout.js`, `solids.js`, `backgrounds.js`,
+`objects.js`, `materials.js`, `engineering.js`, `index.js`. Палитры и спецификации
+сцены расширяют общие справочники. `D` — модель сцены, `ENG` — инженерные данные.
 
-### `js/runtime/validation.js`
+**Порядок** `solids`, `backgrounds`, `objects` и устройств является частью модели.
+Перекрывающиеся прямоугольники могут быть намеренными; нужно проверять эффективный
+тайл, а не запрещать любые пересечения. Файлы `index.js` сохраняют явный порядок.
 
-Runtime audits and engineering invariant checks.
+## Модель, состояние и запуск
 
-- `validatePitConfiguration()`
+| Файл в `js/runtime/` | Ответственность |
+| --- | --- |
+| `state.js` | DOM/Canvas-ссылки, камера, история, выбор, кэши, UI-константы, `startupComplete` |
+| `core.js` | Координаты кэша, цветовые helpers, пути проводов, `schedule()`, общие `roomAt(scene, x, y)` и `roomForObject(scene, object)` |
+| `model.js` | Поиск эффективного тайла/объекта, формы блоков, построение кэшей, `wallSafetyLabel()` и основной `inspect()` |
+| `validation.js` | Проверка ям и `validateUsedWallSpecs(scene, specs)` для всех используемых фоновых материалов |
+| `camera.js` | Resize, преобразования камеры, `focusRect()`, `fit()`, подписи |
+| `prepare*.js` | Подготовка инженерных индексов и сценических проверок |
+| `start*.js` | Проверка версии публикации, кэши, таблицы, начальный режим/фокус; затем завершение startup |
 
-### `js/runtime/model.js`
+`#viewport[data-ready="true"]` выставляет `schedule()` только после успешного `draw()`
+при завершённом startup. В исходном HTML готовность не объявлена. Это сигнал
+завершения запуска, а не замена перехвату последующих ошибок.
 
-Tile model, lookups, caches and geometry helpers.
+`roomAt` ищет географическую область тайла (минимальная площадь, затем исходный
+порядок). `roomForObject` предпочитает явную существующую комнату; неизвестная
+непустая ссылка — ошибка данных, отсутствие назначения и legacy `room: ""` дают
+геометрический fallback. Таблицы, tooltip и инспектор используют один helper.
+Инспектор различает **модуль объекта** и **область тайла**.
 
-- `rect()`
-- `tileMaterial()`
-- `tileWall()`
-- `applyTileShape()`
-- `buildBaseCaches()`
-- `pxRect()`
-- `buildObjectCache()`
-- `world()`
-- `objectAt()`
-- `rectAt()`
-- `objectsAtTile()`
-- `inspect()`
+Для стен `safe: true`, `safe: false`, отсутствие стены и недостающий `safe` — разные
+состояния. Общий wall-validator проверяет обязательные поля используемых спецификаций;
+полный контракт остальных материалов/предметов ещё относится к #27.
 
-### `js/runtime/render-base.js`
+## Рисование и интерфейс
 
-Base-layer and structural Canvas rendering.
+`render-base.js` рисует структурные слои и общие элементы, применяет кэши и объединяет
+кадр в `draw()`. `render-objects.js` рисует сундуки, станции, мебель, двери, музейные
+предметы и диспетчеризует `drawObjectSprite()`. Процедурные текстуры и их цвета
+сохраняются при рефакторинге. `*-extensions.js` добавляют особенности аванпостов;
+пока часть поведения расширяется через существующие глобальные функции.
 
-- `drawPlatformTile()`
-- `drawGlassPlatformTile()`
-- `drawBed()`
-- `drawPersonal()`
-- `drawPylon()`
-- `drawTeleporter()`
-- `drawLight()`
-- `drawDisplay()`
-- `drawPanel()`
-- `drawZone()`
-- `drawHoney()`
-- `drawLava()`
-- `drawHoneyBubble()`
-- `drawStarBottle()`
-- `drawStatue()`
-- `drawCampfire()`
-- `drawHeart()`
-- `drawCached()`
-- `drawBase()`
-- `draw()`
+`overlay.js` готовит инженерные индексы, рисует сетку, подписи, устройства и проводку,
+даёт поиск инженерного устройства/материала под тайлом. `inspector.js` содержит
+`showTip()`/`hideTip()`; основная таблица выбранного тайла формируется **в `model.js`**.
+`tables*.js` наполняют таблицы конкретной сцены, включая склад основной базы.
 
-### `js/runtime/render-objects.js`
+`interactions.js` обслуживает общие кнопки, поиск, mouse/pointer/touch, pan,
+pinch-to-zoom, колесо и мобильную шторку. `interactions-*.js` задают сценические
+варианты управления. Объединение запуска/таблиц/контролов — #32, не результат
+текущей уборки.
 
-Foreground objects, furniture and museum rendering.
+## Проверки и диагностика
 
-- `drawChest()`
-- `drawStation()`
-- `drawNpc()`
-- `drawDoor()`
-- `drawHatch()`
-- `drawFurniture()`
-- `drawPlanter()`
-- `drawMuseumGlyph()`
-- `drawMuseumTrophy()`
-- `drawMuseumMannequin()`
-- `drawMuseumWeaponRack()`
-- `drawMuseumItemFrame()`
-- `drawObjectSprite()`
-- `drawObjects()`
+Точные команды запуска и все девять Node checker-ов перечислены в [README](../README.md#проверки).
 
-### `js/runtime/overlay.js`
+| Проверка | Что проверяет сейчас |
+| --- | --- |
+| `tools/check-data.cjs` | Данные/инженерия основной базы и её регрессии |
+| `tools/check-desert.cjs`, `tools/check-underground.cjs`, `tools/check-jungle.cjs` | Сценические правила, координаты, двери и другие регрессии аванпостов |
+| `tools/check-eternia.cjs` | Совмещённая арена и Этерия |
+| `tools/check-lighting.cjs` | Локальная проектная эвристика освещения **подземной** сцены; это не единый аудит всех четырёх сцен |
+| `tools/check-jungle-rendering.cjs` | Jungle-текстуры и связанные source-level регрессии |
+| `tools/check-wall-specs.cjs` | Используемые wall-spec всех сцен; отрицательные мутации полей и целой спецификации |
+| `tools/check-rooms.cjs` | Общая принадлежность объектов, пограничные двери, ошибочные ссылки и стабильный fallback |
+| `tools/check-browser.py` | Реальный HTTP/Chromium: четыре сцены, desktop/mobile, startup и отрицательные JS/CSS-сценарии |
 
-Grid, labels, engineering devices and wiring overlay.
+`tools/lib/load-scene.cjs` читает реальные HTML и исполняет их data-скрипты в том же
+порядке в изолированном Node VM. Браузерный тест сам поднимает loopback HTTP-сервер;
+его закреплённая test-only зависимость — в `requirements-dev.txt`.
+[Установка, trace, PNG/JSON и ограничения эмуляции телефона](browser-tests.md).
 
-- `prepareEngineering()`
-- `validateHeartWireTargets()`
-- `engWireAt()`
-- `engineeringAt()`
-- `engineeringDeviceAtTile()`
-- `engineeringForegroundSpec()`
-- `directionLabel()`
-- `wireOffset()`
-- `drawWirePath()`
-- `drawEngDevice()`
-- `drawEngLabels()`
-- `drawEngineeringLayer()`
-- `drawOverlay()`
+`.github/workflows/validate-jungle.yml` и `validate-jungle-rendering.yml` сохраняют
+существующие проверки; `validate-browser.yml` выполняет полноценный browser smoke.
+Объединение CI и обязательный merge-gate — #35. Старые одноразовые финализаторы
+удалены; они не являются способом публикации или частью runtime.
 
-### `js/runtime/inspector.js`
+`docs/refactor-manifest.json` — исторический снимок первого разделения исходника,
+**не текущий вычисляемый аудит**. Аналогично сохранённые `D.validation` ещё нельзя
+считать доказательством всех строительных свойств. Замена на вычисляемые результаты,
+общие строительные правила и единая эвристика света выполняются в #28/#29/#31.
 
-Tile inspector and tooltip presentation.
-
-- `showTip()`
-- `hideTip()`
-
-### Таблицы отдельных сцен
-
-- `js/runtime/tables.js` — основная база;
-- `js/runtime/tables-desert.js` — пустынный аванпост;
-- `js/runtime/tables-underground.js` — снежная мастерская Гоблина.
-
-### `js/runtime/camera.js`
-
-Camera transforms, viewport fitting and render scheduling.
-
-- `resize()`
-- `viewRect()`
-- `clearCtx()`
-- `sx()`
-- `sy()`
-- `textLabel()`
-- `focusRect()`
-- `fit()`
-
-### Упорядоченный запуск
-
-- `js/runtime/state.js` — DOM/Canvas-ссылки, камера, кэши и UI-константы.
-- `js/runtime/prepare.js` и сценические варианты — подготовка инженерных индексов.
-- `js/runtime/interactions.js` — общие обработчики мыши, pinch zoom, кнопок и поиска.
-- `js/runtime/interactions-*.js` — координаты кнопок отдельных сцен.
-- `js/runtime/start*.js` — построение кэшей, таблиц, вкладок и начальный фокус.
-
-## Проверка
-
-```bash
-node tools/check-data.cjs
-node tools/check-eternia.cjs
-node tools/check-desert.cjs
-node tools/check-underground.cjs
-python3 -m http.server 8000
-```
-
-После запуска сервера основная схема открывается на `http://localhost:8000/`,
-а отдельные сцены — на `desert.html` и `underground.html`.
+Перед изменением геометрии читайте [строительные правила](building-rules.md).
+При дальнейшей миграции меняйте эту карту в том же PR, что и код.
