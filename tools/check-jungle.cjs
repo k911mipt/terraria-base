@@ -483,19 +483,13 @@ assert(html.includes("Джунглевый аванпост v2"), "Jungle v2 tit
 assert(html.includes("Дриада + Маляр + Шаман"), "Resident group is missing from HTML");
 assert(html.includes("Шахта / Храм"), "Temple-shaft focus button is missing");
 for (const src of [...html.matchAll(/<script\s+src="([^"]+)"/g)].map((match) => match[1])) {
-  const relative = src.replace(/^\.\//, "");
+  const relative = src.split("?")[0].replace(/^\.\//, "");
   assert(fs.existsSync(path.join(root, relative)), `Missing script referenced by jungle.html: ${relative}`);
 }
-const navigationSources = {
-  "index.html": fs.readFileSync(path.join(root, "js/runtime/start.js"), "utf8"),
-  "desert.html":
-    fs.readFileSync(path.join(root, "desert.html"), "utf8") +
-    fs.readFileSync(path.join(root, "js/runtime/start-desert.js"), "utf8"),
-  "underground.html":
-    fs.readFileSync(path.join(root, "underground.html"), "utf8") +
-    fs.readFileSync(path.join(root, "js/runtime/start-underground.js"), "utf8"),
-  "jungle.html": html,
-};
+const navigationSources = Object.fromEntries(
+  ["index.html", "desert.html", "underground.html", "jungle.html"]
+    .map(page => [page, fs.readFileSync(path.join(root, page), "utf8")]),
+);
 for (const [page, source] of Object.entries(navigationSources)) {
   assert(source.includes("./jungle.html"), `${page} is missing the Jungle scene tab`);
 }

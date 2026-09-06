@@ -45,6 +45,7 @@ node tools/check-rooms.cjs
 node tools/check-materials.cjs
 node tools/check-renderers.cjs
 node tools/check-objects.cjs
+node tools/check-scene-ui.cjs
 node tools/check-engineering-metadata.cjs
 node tools/check-building.cjs
 node tools/check-placement-fixes.cjs
@@ -72,8 +73,9 @@ Playwright нужен только разработчикам; сайт его �
 [явная регистрация рендереров](docs/object-renderers.md) и
 [метаданные объектов](docs/object-contract.md) проверяются до рендера и в CLI.
 
-Эти проверки — не доказательство всех строительных правил Terraria. Полный контракт
-материалов, общие строительные инварианты и вычисляемый аудит ещё внедряются по
+Эти проверки — не доказательство всех строительных правил Terraria. Общий
+строительный и вычисляемый аудит уже работают; полный предметный контракт
+и архитектурные этапы продолжаются по
 [плану #24](https://github.com/k911mipt/terraria-base/issues/24).
 Единая команда и обязательный merge-gate выделены в
 [#35](https://github.com/k911mipt/terraria-base/issues/35); до их замены сохранены
@@ -113,3 +115,5 @@ WARN означает неполные предметные данные, а н�
 после инвентаризации уникальных изменений и открытых PR; история остаётся в Git.
 Не добавляйте сборщик или зависимости без необходимости и не плодите копии
 `final`, `fixed`, `latest`, `v2`. Карта кода обновляется вместе с архитектурой.
+
+Общий запуск, настройки фокуса и таблицы описаны в [common-ui.md](docs/common-ui.md).

@@ -6,17 +6,12 @@
 
 ## Точки входа и порядок данных
 
-| HTML | Данные сцены | Сценические runtime-файлы |
-| --- | --- | --- |
-| `index.html` | `js/data/` | `prepare.js`, `tables.js`, `start.js` |
-| `desert.html` | `js/data/desert/` | `desert-extensions.js`, `prepare-desert.js`, `tables-desert.js`, `interactions-desert.js`, `start-desert.js` |
-| `underground.html` | `js/data/underground/` | `underground-extensions.js`, `prepare-underground.js`, `tables-underground.js`, `interactions-underground.js`, `start-underground.js` |
-| `jungle.html` | `js/data/jungle/` | `jungle-extensions.js`, `prepare-jungle.js`, `tables-jungle.js`, `interactions-jungle.js`, `start-jungle.js` |
+`index.html`, `desert.html`, `underground.html`, `jungle.html` загружают свои
+данные и общие `scene-ui.js`, `formatters.js`, `prepare.js`, `tables.js`,
+`interactions.js`, `start.js`. Только процедурные `*-extensions.js` остаются
+сценическими; порядок скриптов пока явный, до #33.
 
-Все runtime-пути таблицы относительны `js/runtime/`. Общие стили — `styles.css`,
-статические вкладки — в каждом HTML, их оформление — `scene-tabs.css`, иконка —
-`favicon.svg`. Порядок загрузки нужно смотреть в соответствующем HTML, а не угадывать
-по именам файлов.
+[Общий UI и его проверки](common-ui.md). Все ссылки на сцены статические.
 
 Основная база:
 
@@ -47,8 +42,8 @@
 | `model.js` | Поиск эффективного тайла/объекта, формы блоков, построение кэшей, `inspectorMaterialSpec()`, `wallSafetyLabel()` и основной `inspect()` |
 | `validation.js` | Проверка ям; чистые `validateUsedMaterialSpecs()` / `validateUsedWallSpecs()` и общие правила спецификаций/палитр; роли объектов, адаптер foreground/chest и `validateObjectData()` |
 | `camera.js` | Resize, преобразования камеры, `focusRect()`, `fit()`, подписи |
-| `prepare*.js` | Подготовка инженерных индексов и сценических проверок |
-| `start*.js` | Проверка версии публикации, кэши, таблицы, начальный режим/фокус; затем завершение startup |
+| `prepare.js` | Подготовка инженерных индексов и сценических проверок |
+| `start.js` | Проверка версии публикации, кэши, таблицы, начальный режим/фокус; затем завершение startup |
 
 `#viewport[data-ready="true"]` выставляет `schedule()` только после успешного `draw()`
 при завершённом startup. В исходном HTML готовность не объявлена. Это сигнал
@@ -84,16 +79,17 @@
 `overlay.js` готовит инженерные индексы, рисует сетку, подписи, устройства и проводку,
 даёт поиск инженерного устройства/материала под тайлом. `inspector.js` содержит
 `showTip()`/`hideTip()`; основная таблица выбранного тайла формируется **в `model.js`**.
-`tables*.js` наполняют таблицы конкретной сцены, включая склад основной базы.
+`tables.js` наполняет таблицы конкретной сцены, включая склад основной базы.
 
-`interactions.js` обслуживает общие кнопки, поиск, mouse/pointer/touch, pan,
-pinch-to-zoom, колесо и мобильную шторку. `interactions-*.js` задают сценические
-варианты управления. Объединение запуска/таблиц/контролов — #32, не результат
-текущей уборки.
+`interactions.js` обслуживает поиск, mouse/pointer/touch, pan, pinch-to-zoom,
+колесо, историю камеры и мобильную шторку. Кнопки получают поведение один раз
+из `plannerUI.focus`; скрытых чужих кнопок и последующих переназначений нет.
+`formatters.js` — общие экранирование и двуязычные подписи; `tables.js` использует
+настройки таблиц из `scene-ui.js`. Подробности — [common-ui.md](common-ui.md).
 
 ## Проверки и диагностика
 
-Точные команды запуска и все семнадцать Node checker-ов перечислены в [README](../README.md#проверки).
+Точные команды запуска и все восемнадцать Node checker-ов перечислены в [README](../README.md#проверки).
 
 | Проверка | Что проверяет сейчас |
 | --- | --- |
@@ -106,6 +102,7 @@ pinch-to-zoom, колесо и мобильную шторку. `interactions-*.
 | `tools/check-renderers.cjs` | Все пары kind/style, реальные зарегистрированные функции, отрицательные мутации и startup guard |
 | `tools/check-objects.cjs` | Структура, метаданные, роли и отрицательные мутации объектов; предупреждения о невыбранных предметах |
 | `tools/check-materials.cjs` | Контракт блоков/стен, палитры, отрицательные мутации, защита запуска и инспектора |
+| `tools/check-scene-ui.cjs` | Общая конфигурация, форматтеры, статические ссылки и отсутствие чужих кнопок |
 | `tools/check-rooms.cjs` | Общая принадлежность объектов, пограничные двери, ошибочные ссылки и стабильный fallback |
 | `tools/check-browser.py` | Реальный HTTP/Chromium: четыре сцены, desktop/mobile, startup, отрицательные JS/CSS-сценарии и повреждённые материалы |
 

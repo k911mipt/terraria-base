@@ -31,8 +31,12 @@ jobs:
           for file in \
             js/data/jungle/*.js \
             js/runtime/jungle-extensions.js \
-            js/runtime/interactions-jungle.js \
-            js/runtime/tables-jungle.js \
+            js/runtime/interactions.js \
+            js/runtime/tables.js \
+            js/runtime/scene-ui.js \
+            js/runtime/formatters.js \
+            js/runtime/prepare.js \
+            js/runtime/start.js \
             tools/check-jungle.cjs; do
             node --check "$file"
           done

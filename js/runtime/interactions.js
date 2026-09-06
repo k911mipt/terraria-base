@@ -215,37 +215,14 @@ for (const id of ["mode", "grid", "labels", "roomNames", "reserves"])
 
 document.getElementById("fit").onclick = () => fit();
 
-document.getElementById("upper").onclick = () => focusRect(0, -7, 135, 41, 2);
-
-document.getElementById("greenhouse").onclick = () =>
-  focusRect(43, -8, 92, 7, 2);
-
-document.getElementById("craft").onclick = () => focusRect(43, -7, 92, 42, 2);
-
-document.getElementById("bossLeft").onclick = () => {
-  document.getElementById("mode").value = "arena";
-  focusRect(-202, 0, -31, 55, 2);
-};
-
-document.getElementById("arena").onclick = () => {
-  document.getElementById("mode").value = "arena";
-  focusRect(-4, 40, 139, 55, 2);
-};
-
-document.getElementById("pitsBtn").onclick = () => {
-  document.getElementById("mode").value = "arena";
-  focusRect(-34, 40, 169, 69, 2);
-};
-
-document.getElementById("museumBtn").onclick = () => {
-  document.getElementById("mode").value = "visual";
-  focusRect(6, 52, 129, 69, 2);
-};
-
-document.getElementById("wiringBtn").onclick = () => {
-  document.getElementById("mode").value = "wiring";
-  focusRect(-34, 40, 169, 69, 2);
-};
+for (const [id, target] of Object.entries(plannerUI.focus)) {
+  const button = document.getElementById(id);
+  if (!button) throw new Error(`Missing configured focus button: ${id}`);
+  button.onclick = () => {
+    if (target.mode) document.getElementById("mode").value = target.mode;
+    focusRect(...target.bounds, 2);
+  };
+}
 
 document.getElementById("back").onclick = () => {
   const c = history.pop();

@@ -50,49 +50,12 @@ function reloadIfDeploymentChanged() {
 
 reloadIfDeploymentChanged();
 
-// Browser-tab icon. Kept local so the page does not depend on wiki.gg assets.
-const favicon = document.createElement("link");
-favicon.rel = "icon";
-favicon.type = "image/svg+xml";
-favicon.href = "./favicon.svg";
-favicon.sizes = "any";
-document.head.append(favicon);
-
-// Scene navigation is present in HTML so a cached JavaScript file cannot hide
-// a newly deployed scene. The fallback keeps standalone/local copies resilient.
-let sceneTabs = document.querySelector(".scene-tabs");
-if (!sceneTabs) {
-  const sceneTabsCss = document.createElement("link");
-  sceneTabsCss.rel = "stylesheet";
-  sceneTabsCss.href = "./scene-tabs.css";
-  document.head.append(sceneTabsCss);
-
-  sceneTabs = document.createElement("nav");
-  sceneTabs.className = "scene-tabs";
-  sceneTabs.setAttribute("aria-label", "Сцены проекта");
-  document.querySelector(".toolbar").prepend(sceneTabs);
-}
-
-const sceneLinks = [
-  ["./index.html", "Основная база"],
-  ["./desert.html", "Пустынный аванпост"],
-  ["./underground.html", "Мастерская Гоблина"],
-  ["./jungle.html", "Джунглевый аванпост"],
-];
-for (const [href, label] of sceneLinks) {
-  if (sceneTabs.querySelector('a[href="' + href + '"]')) continue;
-  sceneTabs.insertAdjacentHTML(
-    "beforeend",
-    '<a class="scene-tab" href="' + href + '">' + label + '</a>',
-  );
-}
-
-// Cache construction, table population and initial arena focus.
+// Navigation is static HTML. It does not need JavaScript repair or hidden buttons.
 buildBaseCaches();
 buildObjectCache();
 populate();
-document.getElementById("mode").value = "arena";
-focusRect(-34, 40, 169, 71, 2, false);
-
+document.getElementById("mode").value = plannerUI.initialMode;
+if (plannerUI.initialFocus) focusRect(...plannerUI.initialFocus, 2, false);
+else fit(false);
 startupComplete = true;
 schedule();
