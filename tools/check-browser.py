@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
-from functools import partial
+from functools import partial, lru_cache
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import threading
 import traceback
 from urllib.parse import urlsplit
@@ -43,6 +44,16 @@ OBJECT_DATA_MUTATIONS = {
     "object-other-scene": "D.sceneId = 'NOT_THE_ORIGINAL_SCENE';",
 }
 DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS, **OBJECT_DATA_MUTATIONS}
+# Valid data and startup, but invalid construction. These must remain inspectable
+# and display FAIL even when somebody forges an old stored PASS.
+AUDIT_MUTATIONS = {
+    "audit-walls": 'D.backgrounds=[]; D.validation={status:"PASS",materialAudit:{status:"PASS"}};',
+    "audit-object": "{const d=D.objects.find(o=>o.kind==='door');D.solids.push({x1:d.x,x2:d.x,y1:d.y,y2:d.y,mat:'gray_brick'});}",
+    "audit-resident": "D.objects=D.objects.filter(o=>o!==D.objects.find(item=>item.kind==='npc'));",
+    "audit-water": "D.objects=D.objects.map(o=>o.kind==='water'?{...o,w:19}:o);",
+    "audit-water-removed": "D.objects=D.objects.filter(o=>o.kind!=='water');",
+}
+
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},
              "mobile": {"width": 390, "height": 844}}
 
@@ -340,6 +351,28 @@ def interact(page, entry, mobile):
     settle(page)
 
 
+
+@lru_cache(maxsize=None)
+def expected_audit(entry, mutation=None):
+    source = AUDIT_MUTATIONS.get(mutation, "")
+    command = ("const {loadAudit}=require('./tools/lib/load-audit.cjs');"
+               f"const a=loadAudit({json.dumps(entry)});a.run({json.dumps(source)});"
+               "process.stdout.write(JSON.stringify(a.compute()));")
+    result = subprocess.run(["node", "-e", command], cwd=ROOT, check=True,
+                            capture_output=True, text=True, timeout=30)
+    return json.loads(result.stdout)
+
+
+def check_computed_audit(page, entry, mutation=None):
+    report = page.evaluate("sceneAudit")
+    assert report == expected_audit(entry, mutation), "browser and CLI computed different audits"
+    assert page.locator("#status").get_attribute("data-audit-status") == report["status"]
+    if report["status"] != "PASS":
+        assert page.locator("#status > .badge.good").count() == 0, "incomplete or failed audit is green"
+    assert "Цели проекта — не результаты аудита" in page.locator("#status").inner_text()
+    return report
+
+
 def scenario(browser, origin, entry, device, artifacts, mutation=None):
     name = f"{Path(entry).stem}-{device}" + (f"-{mutation}" if mutation else "")
     log, failures = [], []
@@ -365,9 +398,9 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             scripts = re.findall(r'<script\b[^>]*src="([^"]+)"', (ROOT / entry).read_text())
             startup = urlsplit(scripts[-1]).path.removeprefix("./")
-            if mutation == "start-throw" or mutation in DATA_MUTATIONS:
+            if mutation == "start-throw" or mutation in DATA_MUTATIONS or mutation in AUDIT_MUTATIONS:
                 source = (ROOT / startup).read_text()
-                prefix = DATA_MUTATIONS.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
+                prefix = {**DATA_MUTATIONS, **AUDIT_MUTATIONS}.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
                 page.route(f"**/{startup}*", lambda route: route.fulfill(
                     content_type="text/javascript", body=prefix + "\n" + source))
             else:
@@ -375,7 +408,12 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                 page.route(f"**/{target}*", lambda route: route.fulfill(status=404, body="Smoke-test missing resource"))
         response = page.goto(f"{origin}/{entry}", wait_until="load")
         assert response and response.status == 200
-        if mutation:
+        if mutation in AUDIT_MUTATIONS:
+            healthy(page, failures)
+            report = check_computed_audit(page, entry, mutation)
+            assert report["status"] == "FAIL", "forged PASS concealed a construction error"
+            result["expected_audit_failure"] = report["errors"]
+        elif mutation:
             # The static heading remains visible even in a broken startup.
             assert page.locator(".maphead b").inner_text()
             if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
@@ -403,8 +441,13 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")
         else:
             healthy(page, failures)
+            check_computed_audit(page, entry)
+            page.evaluate("""window.__auditRunCount=0; window.__auditFunction=computeSceneAudit;
+                computeSceneAudit=(...args)=>{window.__auditRunCount++;return window.__auditFunction(...args);};""")
             interact(page, entry, device == "mobile")
             healthy(page, failures)
+            assert page.evaluate("window.__auditRunCount") == 0, "audit was recalculated while interacting/rendering"
+            page.evaluate("computeSceneAudit=window.__auditFunction;delete window.__auditFunction;")
             if entry == "index.html":
                 page.evaluate("inspect(null, 110, 10); selectedTile = null; focusRect(102, 6, 128, 27, 2, false)")
                 settle(page)
@@ -459,6 +502,10 @@ def main():
                 for device in VIEWPORTS:
                     results.append(scenario(browser, origin, entry, device, args.artifacts))
                 for mutation in ("start-throw", "missing-js", "missing-css", *DATA_MUTATIONS):
+                    results.append(scenario(browser, origin, entry, "desktop", args.artifacts, mutation))
+                for mutation in AUDIT_MUTATIONS:
+                    if mutation.startswith("audit-water") and entry not in ("desert.html", "underground.html"):
+                        continue
                     results.append(scenario(browser, origin, entry, "desktop", args.artifacts, mutation))
         finally:
             browser.close()

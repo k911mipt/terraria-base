@@ -56,17 +56,16 @@ const effectiveSolidAt = (x, y) =>
 const backgroundAt = (x, y) =>
   [...D.backgrounds].reverse().find((background) => rectContains(background, x, y));
 
-assert(D.validation.status === "PASS", "Frozen underground status is not PASS");
 assert(D.bounds.xMin === 0 && D.bounds.xMax === 65, "Scene X bounds changed");
 assert(D.bounds.yMin === 0 && D.bounds.yMax === 50, "Scene Y bounds must be 0–50");
-assert(D.validation.sceneWidth === 66, "Scene width snapshot changed");
-assert(D.validation.sceneHeight === 51, "Scene height snapshot must be 51");
+assert(D.designHistory.sceneWidth === 66, "Scene width snapshot changed");
+assert(D.designHistory.sceneHeight === 51, "Scene height snapshot must be 51");
 assert(D.rooms.length === 7, `Expected 7 modules, found ${D.rooms.length}`);
 assert(
   D.rooms.some((room) => room.id === "underground_fishing"),
   "Fishing module is missing",
 );
-assert(D.validation.npcHouses === 3, "Expected three NPC houses");
+assert(D.designHistory.npcHouses === 3, "Expected three NPC houses");
 
 const ids = D.objects.map((object) => object.id);
 assert(new Set(ids).size === ids.length, "Object IDs must be unique");
@@ -96,9 +95,9 @@ assert(
   mechanicDistance <= 25 && princessDistance <= 25,
   "Goblin neighbors must stay within 25 tiles",
 );
-assert(D.validation.goblinPriceModifier === 0.75, "Goblin price target must stay at 0.75");
+assert(D.designHistory.goblinPriceModifier === 0.75, "Goblin price target must stay at 0.75");
 assert(princess.futureResident === true, "Princess must remain marked as a future resident");
-assert(D.validation.pylonWorksBeforePrincess === true, "Pylon must work before Princess arrives");
+assert(D.designHistory.pylonWorksBeforePrincess === true, "Pylon must work before Princess arrives");
 
 const pylons = D.objects.filter((object) => object.kind === "pylon");
 assert(pylons.length === 1, `Expected one pylon, found ${pylons.length}`);
@@ -170,7 +169,7 @@ for (const door of doors) {
 }
 assert(coveredDoorTiles === 15, `Expected 15 covered door tiles, found ${coveredDoorTiles}`);
 assert(
-  D.validation.doorsWithWall === 5 && D.validation.doorWallTiles === 15,
+  D.designHistory.doorsWithWall === 5 && D.designHistory.doorWallTiles === 15,
   "Door-wall validation snapshot mismatch",
 );
 
@@ -210,7 +209,7 @@ for (const door of doors) {
 assert(openableDoors === 5, `Expected five openable doors, found ${openableDoors}`);
 assert(doorClearance.UG_MECH_GOBLIN.left && doorClearance.UG_MECH_GOBLIN.right, "Mechanic/Goblin door must be clear on both sides");
 assert(doorClearance.UG_GOBLIN_PRINCESS.left && doorClearance.UG_GOBLIN_PRINCESS.right, "Goblin/Princess door must be clear on both sides");
-assert(D.validation.openableDoors === 5, "Openable-door validation snapshot mismatch");
+assert(D.designHistory.openableDoors === 5, "Openable-door validation snapshot mismatch");
 
 const expectedDoorModules = {
   UG_OUTER_L: "underground_mechanic",
@@ -266,8 +265,8 @@ assert(
   "Artificial fishing pool must be 20×16 at x15 y29",
 );
 assert(water.room === "underground_fishing", "Pool must belong to the fishing module");
-assert(D.validation.fishingWaterTiles === 320, "Water validation snapshot must be 320");
-assert(D.validation.artificialPool === true, "Pool must stay marked as artificial");
+assert(D.designHistory.fishingWaterTiles === 320, "Water validation snapshot must be 320");
+assert(D.designHistory.artificialPool === true, "Pool must stay marked as artificial");
 
 const fishingDeck = D.solids
   .filter((solid) => solid.platformGroup === "fishing_dock")
@@ -369,11 +368,11 @@ const snowFloorTiles = D.solids
 assert(iceBlocks === 1960, `Expected 1960 Ice tiles, found ${iceBlocks}`);
 assert(snowFloorTiles === 24, `Expected 24 Snow floor tiles, found ${snowFloorTiles}`);
 assert(iceBiomeBlocks === 1984, `Expected 1984 Snow/Ice tiles, found ${iceBiomeBlocks}`);
-assert(D.validation.iceBiomeBlocks === iceBiomeBlocks, "Ice-biome snapshot mismatch");
+assert(D.designHistory.iceBiomeBlocks === iceBiomeBlocks, "Ice-biome snapshot mismatch");
 assert(
-  iceBiomeBlocks >= D.validation.iceBiomeThreshold &&
-    D.validation.iceBiomeThreshold === 1500 &&
-    D.validation.iceBiomeGuaranteed === true,
+  iceBiomeBlocks >= D.designHistory.iceBiomeThreshold &&
+    D.designHistory.iceBiomeThreshold === 1500 &&
+    D.designHistory.iceBiomeGuaranteed === true,
   "Ice biome must remain guaranteed by at least 1500 Snow/Ice blocks",
 );
 
@@ -472,7 +471,7 @@ console.log(
     {
       rooms: D.rooms.length,
       residents: residents.map((npc) => npc.name),
-      goblinPriceModifier: D.validation.goblinPriceModifier,
+      goblinPriceModifier: D.designHistory.goblinPriceModifier,
       neighborDistances: { mechanic: mechanicDistance, princess: princessDistance },
       pylon: pylons[0].name,
       doors: doors.length,

@@ -52,17 +52,12 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(D.validation.status === "PASS", "Frozen base validation is not PASS");
+assert(D.designHistory.craftWidth === 46, "Crafting hall width changed");
 assert(
-  D.validation.materialAudit.status === "PASS",
-  "Material audit is not PASS",
-);
-assert(D.validation.craftWidth === 46, "Crafting hall width changed");
-assert(
-  D.validation.workingStorageChests === 86,
+  D.designHistory.workingStorageChests === 86,
   "Working storage count changed",
 );
-assert(D.validation.allChestsDetailed === 93, "Detailed chest count changed");
+assert(D.designHistory.allChestsDetailed === 93, "Detailed chest count changed");
 
 const traps = ENG.devices.filter((device) => device.kind === "trap");
 assert(traps.length === 32, "Expected exactly 32 engineering Dart Traps");

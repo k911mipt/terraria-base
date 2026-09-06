@@ -60,12 +60,12 @@ assert(
   "Separate access room must be removed",
 );
 assert(
-  D.validation.separateFishingHall === false,
+  D.designHistory.separateFishingHall === false,
   "Fishing hall snapshot must be false",
 );
-assert(D.validation.shaftUnderHatch === true, "Shaft must be under hatch");
+assert(D.designHistory.shaftUnderHatch === true, "Shaft must be under hatch");
 assert(
-  JSON.stringify(D.validation.shaftX) === JSON.stringify([49, 54]),
+  JSON.stringify(D.designHistory.shaftX) === JSON.stringify([49, 54]),
   "Shaft X snapshot mismatch",
 );
 assert(
@@ -97,7 +97,7 @@ for (const door of doors) {
 }
 assert(coveredDoorTiles === 15, "All 15 door tiles must have background walls");
 assert(
-  D.validation.doorsWithWall === 5 && D.validation.doorWallTiles === 15,
+  D.designHistory.doorsWithWall === 5 && D.designHistory.doorWallTiles === 15,
   "Door-wall validation snapshot mismatch",
 );
 
@@ -179,8 +179,8 @@ assert(
   "Right hatch support must be a solid block, not a platform",
 );
 assert(
-  D.validation.hatchShiftedBelowFloor === true &&
-    D.validation.hatchPlatformY === 20,
+  D.designHistory.hatchShiftedBelowFloor === true &&
+    D.designHistory.hatchPlatformY === 20,
   "Hatch validation snapshot mismatch",
 );
 
@@ -258,15 +258,15 @@ assert(
   "Natural sand support under Arms Dealer is missing",
 );
 assert(
-  D.validation.emptyUnderArms === false,
+  D.designHistory.emptyUnderArms === false,
   "Under-Arms empty-space snapshot must be false",
 );
 assert(
-  D.validation.naturalSupportTiles === 84,
+  D.designHistory.naturalSupportTiles === 84,
   "Natural support must contain 84 tiles",
 );
 assert(
-  D.validation.lowerRoomInterior === "20×6",
+  D.designHistory.lowerRoomInterior === "20×6",
   "Service-zone size snapshot mismatch",
 );
 assert(
@@ -354,7 +354,7 @@ console.log(
     {
       rooms: D.rooms.length,
       waterTiles: water.tiles,
-      shaftX: D.validation.shaftX,
+      shaftX: D.designHistory.shaftX,
       platformLevels: levels.map((solid) => solid.platformLevel),
       platformTilesRequiringWall,
       platformTilesWithWall,

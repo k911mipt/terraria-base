@@ -8,7 +8,7 @@ const D = {
   objects: UNDERGROUND_OBJECTS,
   reserves: UNDERGROUND_RESERVES,
   lightingZones: UNDERGROUND_LIGHTING_ZONES,
-  validation: UNDERGROUND_VALIDATION,
+  designHistory: UNDERGROUND_VALIDATION,
   notes: UNDERGROUND_NOTES,
   title: UNDERGROUND_TITLE,
   museumChapters: null,

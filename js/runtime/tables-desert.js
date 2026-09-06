@@ -18,33 +18,7 @@ function escHtml(s) {
 }
 
 function populate() {
-  const v = D.validation;
-  document.getElementById("status").innerHTML = [
-    ["good", `NPC-дома: ${v.npcHouses}`],
-    ["good", `Desert Pylon: ${v.pylonCount}`],
-    ["good", `вода: ${v.fishingWaterTiles} тайлов`],
-    ["good", `резервуар: ${v.fishingWaterWidth}×${v.fishingWaterDepth}`],
-    ["good", `проём заброса: ${v.fishingOpeningWidth}`],
-    ["good", `зазор слева: ${v.leftPoolGap}`],
-    ["good", `локальных сундуков: ${v.serviceChests}`],
-    ["good", `дверей к спуску: ${v.accessDoors}`],
-    ["good", `двери со стеной: ${v.doorsWithWall}/${v.totalDoors}`],
-    ["good", `люк: platform y${v.hatchPlatformY} / hatch y${v.hatch.y}`],
-    ["good", `шаг платформ: ${v.platformStep}`],
-    ["good", `фундамент: ${v.foundationTiles}`],
-    ["good", `сервисная зона: ${v.lowerRoomInterior}`],
-    ["good", `под Оружейником пусто: ${v.emptyUnderArms ? "да" : "нет"}`],
-    ["good", `одноблочный пол: y${v.oneTileFloorY}`],
-    ["", `павильон: ${v.surfaceWidth} тайлов`],
-    ["", `сцена: ${v.sceneWidth} тайлов`],
-    ["good", v.status],
-  ]
-    .map(
-      ([kind, text]) =>
-        `<span class="badge${kind ? ` ${kind}` : ""}">${escHtml(text)}</span>`,
-    )
-    .join("");
-
+  populateSceneAudit();
   document.getElementById("roomRows").innerHTML = D.rooms
     .map(
       (r) =>

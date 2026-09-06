@@ -18,36 +18,7 @@ function escHtml(s) {
 }
 
 function populate() {
-  const v = D.validation;
-  document.getElementById("status").innerHTML = [
-    ["good", `NPC-дома: ${v.npcHouses}`],
-    ["good", `цель Гоблина: ${Math.round(v.goblinPriceModifier * 100)}% цены`],
-    ["good", `Механик: ${v.goblinNeighborDistances.mechanic} тайлов`],
-    ["good", `Принцесса: ${v.goblinNeighborDistances.princess} тайлов`],
-    ["good", `ледяной биом: ${v.iceBiomeBlocks}/${v.iceBiomeThreshold}`],
-    ["good", `вода: ${v.fishingWaterTiles} тайлов`],
-    ["good", `резервуар: ${v.fishingWaterWidth}×${v.fishingWaterDepth}`],
-    ["good", `проём заброса: ${v.fishingOpeningWidth}`],
-    ["good", `пилон уже работает: ${v.currentResidentsRequired} NPC`],
-    ["good", `Пилон пещер: ${v.pylonCount}`],
-    ["good", `двери со стеной: ${v.doorsWithWall}/${v.totalDoors}`],
-    ["good", `открываемые двери: ${v.openableDoors}/${v.totalDoors}`],
-    ["good", `освещение: ${v.lightingCoveragePercent}% · ${v.lightingZones} зоны`],
-    ["good", `Мастерская инженера: ${v.tinkerersWorkshops}`],
-    ["good", `Сейф: ${v.personalStorage}`],
-    ["good", `локальных сундуков: ${v.serviceChests}`],
-    ["good", `платформенных тайлов / люков: ${v.platformTiles}/${v.hatches}`],
-    ["good", `стилевых панелей Гоблина: ${v.goblinStylePanels}`],
-    ["", `мастерская: ${v.workshopWidth} тайла`],
-    ["", `сцена: ${v.sceneWidth}×${v.sceneHeight}`],
-    ["good", v.status],
-  ]
-    .map(
-      ([kind, text]) =>
-        `<span class="badge${kind ? ` ${kind}` : ""}">${escHtml(text)}</span>`,
-    )
-    .join("");
-
+  populateSceneAudit();
   document.getElementById("roomRows").innerHTML = D.rooms
     .filter((room) => room.id !== "underground_context")
     .map(

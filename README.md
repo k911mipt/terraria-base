@@ -45,6 +45,13 @@ node tools/check-rooms.cjs
 node tools/check-materials.cjs
 node tools/check-renderers.cjs
 node tools/check-objects.cjs
+node tools/check-engineering-metadata.cjs
+node tools/check-building.cjs
+node tools/check-placement-fixes.cjs
+node tools/check-geometry.cjs
+node tools/check-audit.cjs
+node tools/audit-building.cjs
+node tools/audit-scene.cjs
 ```
 
 Проверка настоящего HTTP-запуска и взаимодействий всех четырёх сцен:
@@ -59,7 +66,7 @@ python tools/check-browser.py
 
 Playwright нужен только разработчикам; сайт его не загружает. На Linux для установки
 системных библиотек может потребоваться `python -m playwright install --with-deps chromium`.
-[Описание 80 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
+[Описание 96 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
 
 [Контракт используемых материалов](docs/material-contract.md) и
 [явная регистрация рендереров](docs/object-renderers.md) и
@@ -71,6 +78,9 @@ Playwright нужен только разработчикам; сайт его �
 Единая команда и обязательный merge-gate выделены в
 [#35](https://github.com/k911mipt/terraria-base/issues/35); до их замены сохранены
 рабочие validation-workflow и публикация Pages.
+
+[Вычисляемый аудит](docs/computed-audit.md) одинаков в CLI и интерфейсе.
+WARN означает неполные предметные данные, а не полный PASS; цели проекта показаны отдельно.
 
 ## Структура и проектные документы
 

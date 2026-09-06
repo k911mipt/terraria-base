@@ -58,13 +58,12 @@ const backgroundAt = (x, y) =>
     .reverse()
     .find((background) => rectContains(background, x, y));
 
-assert(D.validation.status === "PASS", "Frozen Jungle status is not PASS");
 assert(D.bounds.xMin === 0 && D.bounds.xMax === 72, "Jungle X bounds changed");
 assert(D.bounds.yMin === 0 && D.bounds.yMax === 62, "Jungle Y bounds changed");
-assert(D.validation.sceneWidth === 73, "Scene width snapshot changed");
-assert(D.validation.sceneHeight === 63, "Scene height snapshot changed");
-assert(D.validation.layer === "Surface Jungle", "Scene must remain on Surface Jungle");
-assert(D.validation.naturalJungleRequired === true, "Scene must require an existing Jungle biome");
+assert(D.designHistory.sceneWidth === 73, "Scene width snapshot changed");
+assert(D.designHistory.sceneHeight === 63, "Scene height snapshot changed");
+assert(D.designHistory.layer === "Surface Jungle", "Scene must remain on Surface Jungle");
+assert(D.designHistory.naturalJungleRequired === true, "Scene must require an existing Jungle biome");
 assert(D.rooms.length === 7, `Expected seven modules, found ${D.rooms.length}`);
 
 const ids = D.objects.map((object) => object.id);
@@ -98,11 +97,11 @@ assert(
   "All three Jungle residents must remain within 25 tiles",
 );
 assert(
-  JSON.stringify(residentDistances) === JSON.stringify(D.validation.residentDistances),
+  JSON.stringify(residentDistances) === JSON.stringify(D.designHistory.residentDistances),
   "Resident-distance snapshot mismatch",
 );
 assert(
-  JSON.stringify(D.validation.priceTargets) ===
+  JSON.stringify(D.designHistory.priceTargets) ===
     JSON.stringify({ dryad: 0.84, painter: 0.79, witchDoctor: 0.84 }),
   "Jungle price targets changed",
 );
@@ -130,7 +129,7 @@ for (const door of doors) {
 }
 assert(coveredDoorTiles === 12, `Expected 12 covered door tiles, found ${coveredDoorTiles}`);
 assert(
-  D.validation.doorsWithWall === 4 && D.validation.doorWallTiles === 12,
+  D.designHistory.doorsWithWall === 4 && D.designHistory.doorWallTiles === 12,
   "Door-wall validation snapshot mismatch",
 );
 
@@ -175,7 +174,7 @@ for (const id of ["JG_DRYAD_HUB", "JG_HUB_WITCH", "JG_WITCH_SHAFT"]) {
     `${id} must have free three-tile columns on both sides`,
   );
 }
-assert(D.validation.openableDoors === openableDoors, "Openable-door snapshot mismatch");
+assert(D.designHistory.openableDoors === openableDoors, "Openable-door snapshot mismatch");
 
 const expectedDoorModules = {
   JG_OUTER_L: "jungle_dryad",
@@ -223,7 +222,7 @@ assert(
   "Painter access platforms must be y22/y28",
 );
 assert(
-  JSON.stringify(D.validation.symmetricAccessLevels) === JSON.stringify([22, 28, 34]),
+  JSON.stringify(D.designHistory.symmetricAccessLevels) === JSON.stringify([22, 28, 34]),
   "Painter access snapshot must stay 22/28/34",
 );
 
@@ -288,8 +287,8 @@ for (const [x1, y1, x2, y2] of expectedSideCanopies) {
   );
 }
 assert(
-  D.validation.sideCanopiesAttached === true &&
-    JSON.stringify(D.validation.sideCanopyLevels) === JSON.stringify([21, 20, 19]),
+  D.designHistory.sideCanopiesAttached === true &&
+    JSON.stringify(D.designHistory.sideCanopyLevels) === JSON.stringify([21, 20, 19]),
   "Attached side-canopy snapshot mismatch",
 );
 
@@ -307,8 +306,8 @@ assert(
   "Expected two passable background shrine pillars",
 );
 assert(
-  D.validation.hubPillarsPassable === true &&
-    D.validation.hubPillarWall === "Living Wood Wall",
+  D.designHistory.hubPillarsPassable === true &&
+    D.designHistory.hubPillarWall === "Living Wood Wall",
   "Passable shrine-pillar snapshot mismatch",
 );
 
@@ -332,7 +331,7 @@ assert(
     rightHubBeam?.y2 === 23,
   "Right Bamboo beam must be x34–36 y23",
 );
-assert(D.validation.hubBeamY === 23, "Bamboo beam snapshot must be y23");
+assert(D.designHistory.hubBeamY === 23, "Bamboo beam snapshot must be y23");
 
 const leftHubLantern = D.objects.find((object) => object.id === "JG_HUB_LANTERN_L");
 const rightHubLantern = D.objects.find((object) => object.id === "JG_HUB_LANTERN_R");
@@ -361,7 +360,7 @@ assert(
   "Both surface and Temple teleporter reserves are required",
 );
 assert(
-  D.validation.activeTeleporterWire === false &&
+  D.designHistory.activeTeleporterWire === false &&
     ENG.circuits.length === 0 &&
     ENG.devices.length === 0,
   "Universal Jungle plan must not contain active world-specific wiring",
@@ -440,8 +439,8 @@ for (const zone of D.lightingZones) {
 }
 assert(D.lightingZones.length === 5, "Expected five Jungle lighting zones");
 assert(
-  D.validation.lightingCoveragePercent === 100 &&
-    D.validation.lightingZones === D.lightingZones.length,
+  D.designHistory.lightingCoveragePercent === 100 &&
+    D.designHistory.lightingZones === D.lightingZones.length,
   "Lighting validation snapshot mismatch",
 );
 
@@ -520,7 +519,7 @@ console.log(
       openableDoors,
       doorClearance,
       hatch: { x: hatch.x, y: hatch.y, platformY: hatchPlatform.y1 },
-      painterAccessLevels: D.validation.symmetricAccessLevels,
+      painterAccessLevels: D.designHistory.symmetricAccessLevels,
       shaftLevels,
       enclosedPlatformTiles,
       enclosedPlatformTilesWithWall,
