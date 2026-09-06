@@ -1,5 +1,6 @@
 // Assemble the standalone Surface Jungle scene for the shared Canvas runtime.
 const D = {
+  sceneId: "jungle",
   bounds: JUNGLE_BOUNDS,
   rooms: JUNGLE_ROOMS,
   solids: JUNGLE_SOLIDS,

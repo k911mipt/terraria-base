@@ -33,7 +33,16 @@ RENDERER_MUTATIONS = {
     "missing-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).delete(D.objects[0].style);',
     "invalid-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).set(D.objects[0].style, "not a function");',
 }
-DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS}
+OBJECT_DATA_MUTATIONS = {
+    "object-rectangle": 'D.objects[0].w = 0;',
+    "object-room": 'D.objects[0].room = "SMOKE_UNKNOWN_ROOM";',
+    "object-spec": 'D.objects[0].foregroundItemRu = "SMOKE_PARTIAL_SPEC";',
+    "object-color": 'D.objects[0].paintColor = "not a color";',
+    "object-size-large": 'D.objects[0].w = 1000000000;',
+    "object-aux-only": "D.objects.find(o=>objectRole(o)==='item'&&!objectSpecPrefix(o)).foregroundNote = 'SMOKE_PARTIAL';",
+    "object-other-scene": "D.sceneId = 'NOT_THE_ORIGINAL_SCENE';",
+}
+DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS, **OBJECT_DATA_MUTATIONS}
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},
              "mobile": {"width": 390, "height": 844}}
 
@@ -184,6 +193,55 @@ def touch_gesture(page, pinch):
     assert page.evaluate("viewportPointers.size === 0 && pinchGesture === null"), "gesture state leaked"
 
 
+def check_object_inspector(page, entry, mobile):
+    missing_ids = ("P1_LIGHT_UP", "DESERT_ACCESS_LIGHT_1", "UG_SHAFT_LIGHT", "JG_HUB_LANTERN_L")
+    object_id = missing_ids[SCENES.index(entry)]
+    obj = page.evaluate("id => D.objects.find(o => o.id === id)", object_id)
+    click_tile(page, obj["x"], obj["y"], mobile)
+    assert page.evaluate("selected?.id") == object_id
+    assert rows(page)["Роль элемента"] == "Предмет"
+    assert rows(page)["Передний тип"] == "Объект · неполная спецификация"
+    assert "Предмет не указан" in rows(page)["Передний материал"]
+    assert "Краска не указана" in rows(page)["Краска блока"]
+    assert "Диагностика предмета" in rows(page)
+    # An invalid explicit room must remain inspectable, including mouse hover.
+    page.evaluate("id => { window.savedRoom = D.objects.find(o=>o.id===id).room; D.objects.find(o=>o.id===id).room = '<MISSING_ROOM>'; }", object_id)
+    try:
+        click_tile(page, obj["x"], obj["y"], mobile)
+        assert "unknown room" in rows(page)["Ошибка привязки"]
+        assert "<MISSING_ROOM>" in rows(page)["Ошибка привязки"]
+        assert page.locator("#ikv missing_room").count() == 0
+    finally:
+        page.evaluate("id => { D.objects.find(o=>o.id===id).room = window.savedRoom; delete window.savedRoom; }", object_id)
+    # Reuse the actual chest metadata instead of naming the chest's tile air.
+    chest_ids = {"index.html": "SEED", "desert.html": "DESERT_QUICK_FISH", "underground.html": "UG_WIRE_CHEST"}
+    if chest_id := chest_ids.get(entry):
+        chest = page.evaluate("id=>D.objects.find(o=>o.id===id)", chest_id)
+        click_tile(page, chest["x"], chest["y"], mobile)
+        assert page.evaluate("selected?.id") == chest_id
+        assert chest["chestItemRu"] in rows(page)["Передний материал"]
+        assert chest["chestPaintRu"] in rows(page)["Краска блока"]
+    # Explicit non-items must not pretend to be ordinary foreground furniture.
+    cases = {
+        "index.html": [("ZOO", "Маркер жителя"), ("TP1", "Будущий резерв")],
+        "desert.html": [("DESERT_WATER", "Жидкость")],
+        "underground.html": [("UG_FISH_WATER", "Жидкость")],
+        "jungle.html": [("JG_CANVAS_YELLOW", "Эскиз декора — предмет не выбран"), ("JG_SURFACE_TELEPORTER", "Будущий резерв")],
+    }
+    for item_id, label in cases[entry]:
+        item = page.evaluate("id=>D.objects.find(o=>o.id===id)", item_id)
+        x, y = item["x"], item["y"] + (1 if item["h"] > 1 else 0)
+        click_tile(page, x, y, mobile)
+        assert page.evaluate("selected?.id") == item_id
+        assert rows(page)["Роль элемента"] == label
+        if label == "Жидкость":
+            assert "Жидкость" in rows(page)
+        else:
+            assert "Установка предмета" in rows(page)
+        expected = page.evaluate("([x,y])=>{const r=rectAt(D.solids,x,y);return (r?inspectorMaterialSpec(r.mat,false):AIR_SPEC).itemRu}", [x,y])
+        assert expected in rows(page)["Передний материал"]
+
+
 def interact(page, entry, mobile):
     # Static navigation is required even without JavaScript; compare original
     # HTML independently of the dynamically initialized page.
@@ -258,6 +316,7 @@ def interact(page, entry, mobile):
             assert page.evaluate("selected?.id") == torch_id, "mushroom torch is not selectable at its corrected tile"
             assert page.evaluate("([x, y]) => rectAt(D.solids, x, y) === null", [x, 10]), "torch overlaps a foreground block"
             assert page.evaluate("([x, y]) => rectAt(D.backgrounds, x, y)?.mat", [x, 10]) == "mushroom_wall"
+    check_object_inspector(page, entry, mobile)
     empty = page.evaluate("[D.bounds.xMax + 10, D.bounds.yMax + 10]")
     click_tile(page, *empty, mobile)
     assert page.evaluate("selected === null && selectedTile !== null")
@@ -328,15 +387,17 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
             except SmokeFailure as error:
                 expected = ("Material contract:" if mutation in MATERIAL_MUTATIONS else
                             "Object renderer contract:" if mutation in RENDERER_MUTATIONS else
+                            "Object data contract:" if mutation in OBJECT_DATA_MUTATIONS else
                             "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404")
                 assert expected in str(error), f"wrong failure for {mutation}: {error}"
                 result["expected_failure"] = str(error)
                 if mutation in DATA_MUTATIONS:
-                    title = "Ошибка данных материалов" if mutation in MATERIAL_MUTATIONS else "Ошибка отрисовки объектов"
+                    title = ("Ошибка данных материалов" if mutation in MATERIAL_MUTATIONS else
+                             "Ошибка отрисовки объектов" if mutation in RENDERER_MUTATIONS else "Ошибка данных объектов")
                     assert page.locator("#iname").inner_text() == title
                     diagnostic = page.locator("#ikv").inner_text()
                     assert re.search(r"X-?\d+ Y-?\d+", diagnostic), "diagnostic lacks coordinates"
-                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer"))
+                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer", "rectangle", "unknown room", "foregroundItemEn"))
                     assert page.locator("#roomRows tr").count() == 0, "invalid data reached populate()"
             else:
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")

@@ -288,6 +288,8 @@ function buildBaseCaches() {
     validateUsedMaterialSpecs(D, BLOCK_SPECS, WALL_SPECS, MAT, WALL));
   rejectStartupData("Ошибка отрисовки объектов", "Object renderer contract",
     validateObjectRenderers(D));
+  rejectStartupData("Ошибка данных объектов", "Object data contract",
+    validateObjectData(D).errors);
   const bg = caches.bg.getContext("2d"),
     sol = caches.solid.getContext("2d");
   bg.clearRect(0, 0, caches.bg.width, caches.bg.height);
@@ -393,6 +395,19 @@ function wallSafetyLabel(spec, hasWall = true) {
   return "Ошибка данных: не указано safe";
 }
 
+// Keep the data helper strict, but keep a damaged room reference inspectable.
+function inspectorObjectRoom(scene, object) {
+  try { return roomForObject(scene, object); }
+  catch (error) { return { name: "Ошибка данных", error: error.message }; }
+}
+
+// Scene objects can also carry engineering annotations. Only synthetic overlay
+// selections bypass the scene metadata adapter (their specs come from ENG).
+function inspectorObjectMetadata(scene, object) {
+  return object && (!object.engineering || scene.objects.includes(object))
+    ? objectMetadata(object) : null;
+}
+
 function inspect(o, wx, wy) {
   selected = o || null;
   searchHit = null;
@@ -400,22 +415,12 @@ function inspect(o, wx, wy) {
     ty = Math.floor(wy);
   selectedTile = o ? null : { x: tx, y: ty };
   const room = roomAt(D, tx, ty),
-    objectRoom = roomForObject(D, o),
+    objectRoom = inspectorObjectRoom(D, o),
     engDevice = engineeringDeviceAtTile(tx, ty),
     solid = rectAt(D.solids, tx, ty),
     bg = rectAt(D.backgrounds, tx, ty),
-    objectSpec = o?.foregroundItemRu
-      ? {
-          layer: o.foregroundLayer || "Объект",
-          itemRu: o.foregroundItemRu,
-          itemEn: o.foregroundItemEn || "",
-          paintRu: o.foregroundPaintRu || "Без краски",
-          paintEn: o.foregroundPaintEn || "None",
-          note: o.foregroundNote || "",
-          surfaceRu: null,
-          surfaceEn: null,
-        }
-      : null,
+    metadata = inspectorObjectMetadata(D, o),
+    objectSpec = metadata?.foreground,
     bs = engDevice
       ? engineeringForegroundSpec(engDevice)
       : objectSpec || (solid ? inspectorMaterialSpec(solid.mat, false) : AIR_SPEC),
@@ -441,6 +446,14 @@ function inspect(o, wx, wy) {
       ["Тип объекта", o.kind],
       ["Модуль объекта", objectRoom?.name || "—"],
     );
+    if (metadata) {
+      rows.push(["Роль элемента", OBJECT_ROLE_LABELS[metadata.role]]);
+      if (metadata.problems.length) rows.push(["Диагностика предмета", metadata.problems.join("; ")]);
+      if (metadata.role === "liquid" && o.kind !== "lava") rows.push(["Жидкость", o.foregroundItemRu || o.name]);
+      if (["reserve", "proposal", "npc", "zone", "landscape"].includes(metadata.role))
+        rows.push(["Установка предмета", "Этот элемент не подменяет передний блок тайла."]);
+    }
+    if (objectRoom?.error) rows.push(["Ошибка привязки", objectRoom.error]);
     if (o.engineering) {
       rows.push(["Инженерный этап", o.stage || ENG.stage]);
       if (o.wireColor)

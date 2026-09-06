@@ -32,7 +32,7 @@
 
 В каталоге каждого аванпоста находятся `layout.js`, `solids.js`, `backgrounds.js`,
 `objects.js`, `materials.js`, `engineering.js`, `index.js`. Палитры и спецификации
-сцены расширяют общие справочники. `D` — модель сцены, `ENG` — инженерные данные.
+сцены расширяют общие справочники. `D` — модель сцены со стабильным `sceneId`, `ENG` — инженерные данные.
 
 **Порядок** `solids`, `backgrounds`, `objects` и устройств является частью модели.
 Перекрывающиеся прямоугольники могут быть намеренными; нужно проверять эффективный
@@ -45,7 +45,7 @@
 | `state.js` | DOM/Canvas-ссылки, камера, история, выбор, кэши, UI-константы, `startupComplete` |
 | `core.js` | Координаты кэша, цветовые helpers, пути проводов, `schedule()`, общие `roomAt(scene, x, y)` и `roomForObject(scene, object)` |
 | `model.js` | Поиск эффективного тайла/объекта, формы блоков, построение кэшей, `inspectorMaterialSpec()`, `wallSafetyLabel()` и основной `inspect()` |
-| `validation.js` | Проверка ям; чистые `validateUsedMaterialSpecs()` / `validateUsedWallSpecs()` и общие правила спецификаций/палитр |
+| `validation.js` | Проверка ям; чистые `validateUsedMaterialSpecs()` / `validateUsedWallSpecs()` и общие правила спецификаций/палитр; роли объектов, адаптер foreground/chest и `validateObjectData()` |
 | `camera.js` | Resize, преобразования камеры, `focusRect()`, `fit()`, подписи |
 | `prepare*.js` | Подготовка инженерных индексов и сценических проверок |
 | `start*.js` | Проверка версии публикации, кэши, таблицы, начальный режим/фокус; затем завершение startup |
@@ -89,7 +89,7 @@ pinch-to-zoom, колесо и мобильную шторку. `interactions-*.
 
 ## Проверки и диагностика
 
-Точные команды запуска и все одиннадцать Node checker-ов перечислены в [README](../README.md#проверки).
+Точные команды запуска и все двенадцать Node checker-ов перечислены в [README](../README.md#проверки).
 
 | Проверка | Что проверяет сейчас |
 | --- | --- |
@@ -100,6 +100,7 @@ pinch-to-zoom, колесо и мобильную шторку. `interactions-*.
 | `tools/check-jungle-rendering.cjs` | Jungle-текстуры и связанные source-level регрессии |
 | `tools/check-wall-specs.cjs` | Используемые wall-spec всех сцен; отрицательные мутации полей и целой спецификации |
 | `tools/check-renderers.cjs` | Все пары kind/style, реальные зарегистрированные функции, отрицательные мутации и startup guard |
+| `tools/check-objects.cjs` | Структура, метаданные, роли и отрицательные мутации объектов; предупреждения о невыбранных предметах |
 | `tools/check-materials.cjs` | Контракт блоков/стен, палитры, отрицательные мутации, защита запуска и инспектора |
 | `tools/check-rooms.cjs` | Общая принадлежность объектов, пограничные двери, ошибочные ссылки и стабильный fallback |
 | `tools/check-browser.py` | Реальный HTTP/Chromium: четыре сцены, desktop/mobile, startup, отрицательные JS/CSS-сценарии и повреждённые материалы |

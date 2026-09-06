@@ -1,5 +1,6 @@
 // Underground scene assembly. It deliberately uses the same D shape as other scenes.
 const D = {
+  sceneId: "underground",
   bounds: UNDERGROUND_BOUNDS,
   rooms: UNDERGROUND_ROOMS,
   solids: UNDERGROUND_SOLIDS,
