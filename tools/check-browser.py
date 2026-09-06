@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import threading
+import traceback
 from urllib.parse import urlsplit
 
 from playwright.sync_api import sync_playwright
@@ -318,6 +319,10 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                 page.locator(".toolbar-toggle").tap()
             settle(page)
         result["status"] = "PASS"
+    except Exception as error:
+        result["error"] = {"type": type(error).__name__, "message": str(error),
+                           "traceback": traceback.format_exc()}
+        raise
     finally:
         try:
             page.screenshot(path=str(artifacts / f"{name}.png"), full_page=False)
