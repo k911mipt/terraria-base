@@ -80,6 +80,18 @@ for (const entry of SCENES) {
   assert.equal(run('auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.length'),0,'wall continues behind platform');cases++;
   run(`fixture.objects=[{id:'torch',kind:'light',style:'white_torch',x:5,y:7,w:1,h:1}];`);
   assert.equal(run('auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.length'),0,'passable wall-mounted torch');cases++;
+  for (const mat of ['boreal_platform','bubble']) {
+    run(`fixture.solids.push({x1:5,x2:5,y1:7,y2:7,mat:${JSON.stringify(mat)}});`);
+    try { assert(run("auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.some(e=>e.rule==='object-overlap' && e.id==='torch')")); cases++; }
+    finally {run('fixture.solids.pop()');}
+  }
+  run("fixture.objects.push({id:'second-torch',kind:'light',style:'white_torch',x:5,y:7,w:1,h:1})");
+  try { assert(run("auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.some(e=>e.rule==='object-object-overlap' && e.id==='second-torch' && e.message.includes('torch'))")); cases++; }
+  finally {run('fixture.objects.pop()');}
+  // Non-physical planning annotations are allowed to overlap the same tile.
+  run("fixture.objects.push({id:'annotation',kind:'zone',style:'spawn',x:5,y:7,w:1,h:1})");
+  assert.equal(run('auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.length'),0); cases++;
+  run('fixture.objects.pop()');
   run(`fixture.objects=[{id:'hatch',kind:'hatch',style:'route',x:5,y:9,w:2,h:1}];
     fixture.solids.push({x1:4,x2:4,y1:9,y2:9,mat:'gray_brick'},{x1:7,x2:7,y1:9,y2:9,mat:'gray_brick'});`);
   assert.equal(run('auditBuilding(fixture,BLOCK_SPECS,emptyConfig).errors.length'),0,'correct platform and solid hatch anchors');cases++;

@@ -151,6 +151,7 @@ function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId
     if (grid.platform(x,y) && (grid.wall(x,y-1) || grid.wall(x,y+1)))
       checkWall(x,y,region.id || region.name || 'platform','platform-wall');
   }
+  const occupiedObjects = new Map();
   let openableDoors=0, attachedObjects=0, physicalObjects=0;
   for (const object of scene.objects) {
     const traits = buildingObjectTraits(object);
@@ -162,8 +163,14 @@ function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId
     physicalObjects++;
     const before = errors.length;
     if (traits.collision) {
-      for (let y=object.y;y<object.y+object.h;y++) for (let x=object.x;x<object.x+object.w;x++)
-        if (grid.solid(x,y)) add('object-overlap',x,y,object.id,`Physical object overlaps ${grid.foreground(x,y).mat}`);
+      for (let y=object.y;y<object.y+object.h;y++) for (let x=object.x;x<object.x+object.w;x++) {
+        // Passable foreground still occupies a cell: platforms and Bubble cannot
+        // share it with furniture. Explicit embedded/non-item elements are excluded above.
+        if (grid.foreground(x,y)) add('object-overlap',x,y,object.id,`Physical object overlaps ${grid.foreground(x,y).mat}`);
+        const key = buildingTileKey(x,y), previous = occupiedObjects.get(key);
+        if (previous) add('object-object-overlap',x,y,object.id,`Physical object overlaps ${previous}`);
+        else occupiedObjects.set(key,object.id);
+      }
     }
     if (traits.attachment === 'wall') {
       for (let y=object.y;y<object.y+object.h;y++) for (let x=object.x;x<object.x+object.w;x++)
