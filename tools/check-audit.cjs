@@ -66,6 +66,13 @@ const cli = spawnSync(process.execPath, [path.join(__dirname, 'audit-scene.cjs')
 assert.ifError(cli.error);
 assert.equal(cli.status, 0, cli.stderr);
 const reports = JSON.parse(cli.stdout);
+const textCli = spawnSync(process.execPath, [path.join(__dirname, 'audit-scene.cjs')], {encoding:'utf8', maxBuffer:16*1024*1024});
+assert.ifError(textCli.error);
+assert.equal(textCli.status, 0, textCli.stderr);
+for (const report of Object.values(reports)) {
+  for (const warning of report.warnings) assert(textCli.stdout.includes(warning.message), 'Default CLI must identify every incomplete record');
+}
+
 for (const entry of SCENES) assert.equal(JSON.stringify(reports[entry]), JSON.stringify(loadAudit(entry).compute()));
 console.log(`PASS ${cases} computed-audit regressions and CLI parity`);
 
