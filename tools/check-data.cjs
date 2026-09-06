@@ -14,6 +14,7 @@ const files = [
   "js/data/solids/index.js",
   "js/data/backgrounds/core.js",
   "js/data/backgrounds/boss-arena.js",
+  "js/data/backgrounds/boss-platform-joins.js",
   "js/data/backgrounds/museum-pits.js",
   "js/data/backgrounds/index.js",
   "js/data/objects/routes.js",

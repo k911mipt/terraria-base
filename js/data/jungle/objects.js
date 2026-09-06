@@ -479,10 +479,10 @@ const JUNGLE_OBJECTS = [
   {
     id: "JG_WITCH_TORCH",
     name: "Правый ритуальный факел",
-    x: 50,
-    y: 29,
+    x: 48,
+    y: 31,
     w: 1,
-    h: 2,
+    h: 3,
     kind: "light",
     style: "tiki_torch",
     short: "✦",
