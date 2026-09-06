@@ -3,7 +3,8 @@ function showTip(e, o) {
   if (drag?.moved) return;
   tip.style.display = "block";
   const parts = [`<b>${escHtml(o.name)}</b>`];
-  const room = roomForObject(D, o);
+  const room = inspectorObjectRoom(D, o);
+  if (room?.error) parts.push(`<div class="tip-section"><strong>Ошибка привязки:</strong> ${escHtml(room.error)}</div>`);
   if (room)
     parts.push(
       `<div class="tip-section"><strong>Модуль объекта:</strong> ${escHtml(room.name)}</div>`,

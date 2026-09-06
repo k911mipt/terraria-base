@@ -127,3 +127,115 @@ function validateUsedMaterialSpecs(scene, blockSpecs, wallSpecs, materials, wall
   }
   return errors;
 }
+
+// Small adapter for existing object metadata. No item names or paints are guessed.
+const OBJECT_ROLE_LABELS = {
+  item: "Предмет", zone: "Планировочная зона", npc: "Маркер жителя",
+  liquid: "Жидкость", reserve: "Будущий резерв", landscape: "Элемент ландшафта",
+  proposal: "Эскиз декора — предмет не выбран", unknown: "Неизвестный тип",
+};
+const NON_ITEM_ROLES = {
+  zone: "zone", npc: "npc", water: "liquid", lava: "liquid", honey: "liquid",
+  teleporter: "reserve", palm_tree: "landscape", cactus: "landscape", jungle_vine: "landscape",
+  jungle_plant: "proposal", jungle_canvas: "proposal", jungle_totem: "proposal",
+};
+const PHYSICAL_OBJECT_KINDS = new Set([
+  "chest", "station", "door", "hatch", "furniture", "bed", "personal_storage", "pylon",
+  "planter", "light", "museum_trophy", "museum_mannequin", "museum_weapon_rack",
+  "museum_item_frame", "display", "honey_bubble", "star_bottle", "statue", "campfire",
+  "heart_lantern", "jungle_sign",
+]);
+
+function objectRole(object) {
+  if (Object.hasOwn(NON_ITEM_ROLES, object?.kind)) return NON_ITEM_ROLES[object.kind];
+  return PHYSICAL_OBJECT_KINDS.has(object?.kind) ? "item" : "unknown";
+}
+
+function hasObjectSpec(object, prefix) {
+  return !!object && ["ItemRu", "ItemEn", "PaintRu", "PaintEn"].some(suffix =>
+    Object.hasOwn(object, prefix + suffix));
+}
+
+function objectSpecPrefix(object) {
+  // Preserve foreground priority, then reuse existing chest specifications.
+  return ["foreground", "chest"].find(prefix => hasObjectSpec(object, prefix)) || null;
+}
+
+function objectSpecProblems(object, prefix = objectSpecPrefix(object)) {
+  if (!prefix) return ["Не указана предметная спецификация; название и краска не выбираются автоматически."];
+  const errors = [];
+  for (const suffix of ["ItemRu", "ItemEn", "PaintRu", "PaintEn"]) {
+    const field = prefix + suffix;
+    if (!object || !Object.hasOwn(object, field) || typeof object[field] !== "string" || !object[field].trim())
+      errors.push(`Отсутствует или некорректно поле ${field}`);
+  }
+  return errors;
+}
+
+function objectMetadata(object) {
+  const role = objectRole(object), prefix = objectSpecPrefix(object);
+  const problems = role === "item" || prefix ? objectSpecProblems(object) : [];
+  if (role === "unknown") problems.push("Неизвестный тип объекта; проверьте данные.");
+  // Markers, liquids, landscapes and future/decorative proposals do not replace
+  // the effective foreground block. They get their own explicit inspector row.
+  if (!["item", "unknown"].includes(role)) return { role, problems, foreground: null };
+  const text = (suffix, fallback) => {
+    const field = prefix + suffix;
+    return prefix && Object.hasOwn(object, field) && typeof object[field] === "string" && object[field].trim()
+      ? object[field] : fallback;
+  };
+  return {
+    role, problems,
+    foreground: {
+      layer: role === "unknown" ? "Ошибка данных" : problems.length
+        ? "Объект · неполная спецификация" : object.foregroundLayer || "Объект",
+      itemRu: text("ItemRu", "Предмет не указан"),
+      itemEn: text("ItemEn", "Unspecified item"),
+      paintRu: text("PaintRu", "Краска не указана"),
+      paintEn: text("PaintEn", "Unspecified"),
+      note: object?.foregroundNote || problems.join("; "),
+      surfaceRu: null, surfaceEn: null,
+    },
+  };
+}
+
+function validateObjectData(scene) {
+  const errors = [], warnings = [], ids = new Set();
+  for (const object of scene.objects) {
+    const where = `${scene.title}: object ${object?.id} at X${object?.x} Y${object?.y}`;
+    const error = message => errors.push(`${where}: ${message}`);
+    if (!object || typeof object !== "object" || Array.isArray(object)) {
+      error("expected object record");
+      continue;
+    }
+    for (const field of ["id", "name", "kind", "style"]) {
+      if (!Object.hasOwn(object, field) || typeof object[field] !== "string" || !object[field].trim())
+        error(`missing or invalid ${field}`);
+    }
+    if (ids.has(object.id)) error("duplicate object id");
+    ids.add(object.id);
+    if (!["x", "y", "w", "h"].every(field => Object.hasOwn(object, field) && Number.isSafeInteger(object[field])) ||
+        object.w < 1 || object.h < 1 || !Number.isSafeInteger(object.x + object.w) || !Number.isSafeInteger(object.y + object.h))
+      error("invalid object rectangle");
+    if (objectRole(object) === "unknown") error(`unknown object kind ${object.kind}`);
+    if (Object.hasOwn(object, "room") && object.room !== "" &&
+        !scene.rooms.some(room => room.id === object.room)) error(`unknown room ${object.room}`);
+    for (const prefix of ["foreground", "chest"]) {
+      if (hasObjectSpec(object, prefix))
+        for (const problem of objectSpecProblems(object, prefix)) error(problem);
+    }
+    if (!objectSpecPrefix(object) && objectRole(object) === "item")
+      warnings.push(`${where}: ${objectSpecProblems(object)[0]}`);
+    for (const field of ["foregroundLayer", "foregroundNote"]) {
+      if (Object.hasOwn(object, field) && typeof object[field] !== "string")
+        error(`invalid ${field}`);
+    }
+    // Colors passed to shade() or directly to Canvas must use the existing
+    // supported format; this does not turn a procedural style into an item.
+    for (const field of ["paintColor", "accent"]) {
+      if (Object.hasOwn(object, field) && (typeof object[field] !== "string" || !/^#[0-9a-f]{6}$/i.test(object[field])))
+        error(`invalid ${field} palette color`);
+    }
+  }
+  return { errors, warnings };
+}
