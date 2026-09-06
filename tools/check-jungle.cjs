@@ -28,16 +28,16 @@ const { D, ENG } = vm.runInContext(
 );
 
 vm.runInContext(
-  fs.readFileSync(path.join(root, "js/runtime/tables-jungle.js"), "utf8"),
+  fs.readFileSync(path.join(root, "js/runtime/core.js"), "utf8"),
   context,
-  { filename: "js/runtime/tables-jungle.js" },
+  { filename: "js/runtime/core.js" },
 );
 
 const displayedDoorModules = vm.runInContext(
   `Object.fromEntries(
     D.objects
       .filter((object) => object.kind === "door")
-      .map((object) => [object.id, moduleForObject(object)?.id || null])
+      .map((object) => [object.id, roomForObject(D, object)?.id || null])
   )`,
   context,
 );

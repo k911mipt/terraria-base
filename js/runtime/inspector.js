@@ -3,6 +3,11 @@ function showTip(e, o) {
   if (drag?.moved) return;
   tip.style.display = "block";
   const parts = [`<b>${escHtml(o.name)}</b>`];
+  const room = roomForObject(D, o);
+  if (room)
+    parts.push(
+      `<div class="tip-section"><strong>Модуль объекта:</strong> ${escHtml(room.name)}</div>`,
+    );
   if (o.engineering && o.kind !== "wire" && o.kind !== "futureTrap") {
     const fs = engineeringForegroundSpec(o);
     if (fs)

@@ -20,6 +20,8 @@ jobs:
       - name: Validate planner data and JavaScript
         run: |
           node tools/check-data.cjs
+          node tools/check-wall-specs.cjs
+          node tools/check-rooms.cjs
           node tools/check-desert.cjs
           node tools/check-eternia.cjs
           node tools/check-underground.cjs
