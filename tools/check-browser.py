@@ -245,6 +245,12 @@ def interact(page, entry, mobile):
         for x, y in ((24, 8), (29, 10), (44, 9)):
             click_tile(page, x, y, mobile)
             assert rows(page)["Безопасная стена"] == "Да, поставленная игроком"
+    if entry == "index.html":
+        for torch_id, x in (("MUSH_TL1", 119), ("MUSH_TR1", 122)):
+            click_tile(page, x, 10, mobile)
+            assert page.evaluate("selected?.id") == torch_id, "mushroom torch is not selectable at its corrected tile"
+            assert page.evaluate("([x, y]) => rectAt(D.solids, x, y) === null", [x, 10]), "torch overlaps a foreground block"
+            assert page.evaluate("([x, y]) => rectAt(D.backgrounds, x, y)?.mat", [x, 10]) == "mushroom_wall"
     empty = page.evaluate("[D.bounds.xMax + 10, D.bounds.yMax + 10]")
     click_tile(page, *empty, mobile)
     assert page.evaluate("selected === null && selectedTile !== null")
@@ -329,6 +335,10 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
             healthy(page, failures)
             interact(page, entry, device == "mobile")
             healthy(page, failures)
+            if entry == "index.html":
+                page.evaluate("inspect(null, 110, 10); selectedTile = null; focusRect(102, 6, 128, 27, 2, false)")
+                settle(page)
+                page.screenshot(path=str(artifacts / f"mushroom-{device}.png"))
             # Follow an actual tab, not just inspect its label or href.
             if device == "mobile":
                 page.locator(".toolbar-toggle").tap()
