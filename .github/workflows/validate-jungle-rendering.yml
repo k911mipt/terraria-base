@@ -31,10 +31,10 @@ jobs:
           node --check js/data/jungle/materials.js
           node --check js/runtime/jungle-extensions.js
           node --check js/runtime/start.js
-          node --check js/runtime/start-desert.js
-          node --check js/runtime/start-underground.js
-          node --check js/runtime/start-jungle.js
-          node --check js/runtime/prepare-jungle.js
+          node --check js/runtime/scene-ui.js
+          node --check js/runtime/formatters.js
+          node --check js/runtime/tables.js
+          node --check js/runtime/prepare.js
 
       - name: Render browser screenshots and verify navigation
         run: |
