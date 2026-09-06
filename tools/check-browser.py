@@ -19,6 +19,14 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 SCENES = ("index.html", "desert.html", "underground.html", "jungle.html")
 CONTROL_DOORS = ("D_P1_CRAFT", "D_INNER_L", "UG_MECH_GOBLIN", "JG_DRYAD_HUB")
+# Prefix the real startup script; the shared runtime guard must reject these
+# before any first render, independently of pageerror/HTTP listeners.
+MATERIAL_MUTATIONS = {
+    "unknown-block": 'D.solids[0] = {...D.solids[0], mat: "AUDIT_UNKNOWN_MATERIAL"};',
+    "unknown-wall": 'D.backgrounds[0] = {...D.backgrounds[0], mat: "AUDIT_UNKNOWN_MATERIAL"};',
+    "missing-spec": 'delete BLOCK_SPECS[D.solids[0].mat];',
+    "invalid-palette": 'MAT[D.solids[0].mat] = ["#112233", "#445566"];',
+}
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},
              "mobile": {"width": 390, "height": 844}}
 
@@ -242,6 +250,19 @@ def interact(page, entry, mobile):
     assert page.evaluate("selected === null && selectedTile !== null")
     assert "Безопасная стена" not in rows(page)
     assert "Фоновой стены нет" in page.locator("#ikv").inner_text()
+    # Corrupt a previously empty tile after startup. The inspector must give
+    # diagnostics rather than throw or label an unknown material as air.
+    page.evaluate("""([x, y]) => {
+      D.solids.push({x1: x, x2: x, y1: y, y2: y, mat: 'AUDIT_UNKNOWN_MATERIAL'});
+      D.backgrounds.push({x1: x, x2: x, y1: y, y2: y, mat: 'AUDIT_UNKNOWN_WALL'});
+    }""", empty)
+    try:
+        click_tile(page, *empty, mobile)
+        assert rows(page)["Передний тип"] == "Ошибка данных"
+        assert "AUDIT_UNKNOWN_MATERIAL" in rows(page)["Передний материал"]
+        assert "AUDIT_UNKNOWN_WALL" in rows(page)["Фоновая стена"]
+    finally:
+        page.evaluate("D.solids.pop(); D.backgrounds.pop();")
     # Reproducible final screenshots: visual, fit, unselected, DPR 1.
     page.evaluate("selected = null; selectedTile = null; hideTip(); fit(false)")
     settle(page)
@@ -256,7 +277,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
     page = context.new_page()
     page.set_default_timeout(10000)
     watch(page, origin, log, failures)
-    if mutation in ("start-throw", "missing-js"):
+    if mutation in ("start-throw", "missing-js") or mutation in MATERIAL_MUTATIONS:
         # Observe independently of the expected pageerror/404: catching an error
         # must not hide an incorrectly published (even transient) ready marker.
         page.add_init_script("""(() => {
@@ -272,10 +293,11 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             scripts = re.findall(r'<script\b[^>]*src="([^"]+)"', (ROOT / entry).read_text())
             startup = urlsplit(scripts[-1]).path.removeprefix("./")
-            if mutation == "start-throw":
+            if mutation == "start-throw" or mutation in MATERIAL_MUTATIONS:
                 source = (ROOT / startup).read_text()
+                prefix = MATERIAL_MUTATIONS.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
                 page.route(f"**/{startup}*", lambda route: route.fulfill(
-                    content_type="text/javascript", body='throw new Error("SMOKE_START_FAILURE");\n' + source))
+                    content_type="text/javascript", body=prefix + "\n" + source))
             else:
                 target = startup if mutation == "missing-js" else "styles.css"
                 page.route(f"**/{target}*", lambda route: route.fulfill(status=404, body="Smoke-test missing resource"))
@@ -284,16 +306,23 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         if mutation:
             # The static heading remains visible even in a broken startup.
             assert page.locator(".maphead b").inner_text()
-            if mutation in ("start-throw", "missing-js"):
+            if mutation in ("start-throw", "missing-js") or mutation in MATERIAL_MUTATIONS:
                 settle(page)
                 assert not page.evaluate("window.__smokeReadyObserved"), "ready appeared before startup completed"
                 assert page.locator('#viewport[data-ready="true"]').count() == 0
             try:
                 healthy(page, failures)
             except SmokeFailure as error:
-                expected = "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404"
+                expected = ("Material contract:" if mutation in MATERIAL_MUTATIONS else
+                            "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404")
                 assert expected in str(error), f"wrong failure for {mutation}: {error}"
                 result["expected_failure"] = str(error)
+                if mutation in MATERIAL_MUTATIONS:
+                    assert page.locator("#iname").inner_text() == "Ошибка данных материалов"
+                    diagnostic = page.locator("#ikv").inner_text()
+                    assert re.search(r"X-?\d+ Y-?\d+", diagnostic), "diagnostic lacks coordinates"
+                    assert "specification" in diagnostic or "palette" in diagnostic
+                    assert page.locator("#roomRows tr").count() == 0, "invalid data reached populate()"
             else:
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")
         else:
@@ -349,7 +378,7 @@ def main():
             for entry in SCENES:
                 for device in VIEWPORTS:
                     results.append(scenario(browser, origin, entry, device, args.artifacts))
-                for mutation in ("start-throw", "missing-js", "missing-css"):
+                for mutation in ("start-throw", "missing-js", "missing-css", *MATERIAL_MUTATIONS):
                     results.append(scenario(browser, origin, entry, "desktop", args.artifacts, mutation))
         finally:
             browser.close()
