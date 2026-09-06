@@ -17,11 +17,6 @@ function escHtml(s) {
   );
 }
 
-function moduleForObject(object) {
-  const declaredRoom = D.rooms.find((room) => room.id === object.room);
-  return declaredRoom || roomAt(object.x, object.y);
-}
-
 function populate() {
   const v = D.validation;
   document.getElementById("status").innerHTML = [
@@ -63,7 +58,7 @@ function populate() {
     .filter((object) => !hiddenKinds.has(object.kind))
     .map(
       (object) =>
-        `<tr><td><span class="mat-code">${escHtml(object.short || object.id)}</span></td><td>x${object.x}…${object.x + object.w - 1}, y${object.y}…${object.y + object.h - 1}</td><td>${escHtml(moduleForObject(object)?.short || "—")}</td><td>${escHtml(object.name)}</td><td>${escHtml(object.desc || "—")}</td></tr>`,
+        `<tr><td><span class="mat-code">${escHtml(object.short || object.id)}</span></td><td>x${object.x}…${object.x + object.w - 1}, y${object.y}…${object.y + object.h - 1}</td><td>${escHtml(roomForObject(D, object)?.short || "—")}</td><td>${escHtml(object.name)}</td><td>${escHtml(object.desc || "—")}</td></tr>`,
     )
     .join("");
 

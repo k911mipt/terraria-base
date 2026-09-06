@@ -30,7 +30,7 @@ function populate() {
     )
     .join("");
   const storage = D.objects
-    .filter((o) => o.kind === "chest" && o.room === "craft" && o.storageFloor)
+    .filter((o) => o.kind === "chest" && roomForObject(D, o)?.id === "craft" && o.storageFloor)
     .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   document.getElementById("storageRows").innerHTML = storage
     .map(

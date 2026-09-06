@@ -66,6 +66,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Gray Brick Wall",
     paintRu: "Зелёная краска",
     paintEn: "Green Paint",
+    safe: true,
     note: "Главная безопасная стена мастерской Гоблина и короткого спуска к водоёму.",
   },
   copper_wall_plain: {
@@ -73,6 +74,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Copper Brick Wall",
     paintRu: "Без краски",
     paintEn: "None",
+    safe: true,
     note: "Тёплая рабочая панель за инструментами и зоной перековки.",
   },
 });
@@ -96,6 +98,7 @@ Object.assign(WALL_SPECS, {
     itemEn: "Smooth Marble Wall",
     paintRu: "Розовая краска",
     paintEn: "Pink Paint",
+    safe: true,
     note: "Основная декоративная панель комнаты Принцессы и фон её настенной полки.",
   },
 });

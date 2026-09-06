@@ -353,13 +353,22 @@ function objectsAtTile(x, y) {
   return out;
 }
 
+// The absence of a wall is separate from missing or malformed metadata.
+function wallSafetyLabel(spec, hasWall = true) {
+  if (!hasWall) return null;
+  if (spec?.safe === true) return "Да, поставленная игроком";
+  if (spec?.safe === false) return "Нет";
+  return "Ошибка данных: не указано safe";
+}
+
 function inspect(o, wx, wy) {
   selected = o || null;
   searchHit = null;
   const tx = Math.floor(wx),
     ty = Math.floor(wy);
   selectedTile = o ? null : { x: tx, y: ty };
-  const room = roomAt(tx, ty),
+  const room = roomAt(D, tx, ty),
+    objectRoom = roomForObject(D, o),
     engDevice = engineeringDeviceAtTile(tx, ty),
     solid = rectAt(D.solids, tx, ty),
     bg = rectAt(D.backgrounds, tx, ty),
@@ -398,6 +407,7 @@ function inspect(o, wx, wy) {
       ],
       ["Размер", `${o.w}×${o.h}`],
       ["Тип объекта", o.kind],
+      ["Модуль объекта", objectRoom?.name || "—"],
     );
     if (o.engineering) {
       rows.push(["Инженерный этап", o.stage || ENG.stage]);
@@ -466,7 +476,7 @@ function inspect(o, wx, wy) {
   }
   rows.push(
     ["Тайл", `x${tx}, y${ty}`],
-    ["Модуль", room?.name || "—"],
+    ["Область тайла", room?.name || "—"],
     ["Передний тип", bs.layer],
     ["Передний материал", biName(bs)],
     ["Краска блока", paintName(bs)],
@@ -488,11 +498,8 @@ function inspect(o, wx, wy) {
       ["Фоновый элемент", bg.name],
       ["Назначение фона", bg.desc || "—"],
     );
-  if (ws.safe !== null)
-    rows.push([
-      "Безопасная стена",
-      ws.safe ? "Да, поставленная игроком" : "Нет",
-    ]);
+  const safety = wallSafetyLabel(ws, Boolean(bg));
+  if (safety !== null) rows.push(["Безопасная стена", safety]);
   rows.push([
     "Объекты в тайле",
     cellObjects.length ? cellObjects.map((x) => x.id).join(", ") : "нет",

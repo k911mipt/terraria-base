@@ -80,12 +80,25 @@ function schedule() {
     });
 }
 
-function roomAt(wx, wy) {
+function roomAt(scene, wx, wy) {
   return (
-    D.rooms
+    scene.rooms
       .filter((r) => wx >= r.x1 && wx <= r.x2 && wy >= r.y1 && wy <= r.y2)
       .sort(
         (a, b) => (a.x2 - a.x1) * (a.y2 - a.y1) - (b.x2 - b.x1) * (b.y2 - b.y1),
       )[0] || null
   );
+}
+
+// Ownership and tile location are different at shared doors and room borders.
+function roomForObject(scene, object) {
+  if (!object) return null;
+  // Legacy base doors use room: "" to mean no declared ownership.
+  if (Object.hasOwn(object, "room") && object.room !== "") {
+    const room = scene.rooms.find((candidate) => candidate.id === object.room);
+    if (!room)
+      throw new Error(`${scene.title}: object ${object.id} references unknown room ${object.room}`);
+    return room;
+  }
+  return roomAt(scene, object.x, object.y);
 }

@@ -58,7 +58,7 @@ function populate() {
   document.getElementById("arenaRows").innerHTML = specObjects
     .map(
       (o) =>
-        `<tr><td><span class="mat-code">${escHtml(o.short || o.id)}</span></td><td>x${o.x}…${o.x + o.w - 1}, y${o.y}…${o.y + o.h - 1}</td><td>${escHtml(roomAt(o.x, o.y)?.short || "—")}</td><td>${escHtml(o.name)}</td><td>${escHtml(o.desc || "—")}</td></tr>`,
+        `<tr><td><span class="mat-code">${escHtml(o.short || o.id)}</span></td><td>x${o.x}…${o.x + o.w - 1}, y${o.y}…${o.y + o.h - 1}</td><td>${escHtml(roomForObject(D, o)?.short || "—")}</td><td>${escHtml(o.name)}</td><td>${escHtml(o.desc || "—")}</td></tr>`,
     )
     .join("");
 

@@ -54,3 +54,26 @@ function validatePitConfiguration() {
     ENG.validation.errors.push("Таймеры должны стоять x1/y55 и x134/y55");
   ENG.validation.status = ENG.validation.errors.length ? "FAIL" : "PASS";
 }
+
+// Only materials actually referenced by the scene need a complete wall spec.
+// A missing boolean is a data error, never evidence that a wall is unsafe.
+function validateUsedWallSpecs(scene, specs) {
+  const errors = [], checked = new Set();
+  for (const region of scene.backgrounds) {
+    if (checked.has(region.mat)) continue;
+    checked.add(region.mat);
+    const spec = specs[region.mat];
+    const where = `${scene.title}: wall ${region.mat} at X${region.x1} Y${region.y1}`;
+    if (!spec) {
+      errors.push(`${where}: missing wall specification`);
+      continue;
+    }
+    for (const field of ["itemRu", "itemEn", "paintRu", "paintEn", "note"]) {
+      if (typeof spec[field] !== "string" || !spec[field].trim())
+        errors.push(`${where}: missing or invalid ${field}`);
+    }
+    if (typeof spec.safe !== "boolean")
+      errors.push(`${where}: missing or invalid safe (expected boolean)`);
+  }
+  return errors;
+}
