@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location("planner_validate", Path(__file__).with_name("validate.py"))
 validate = importlib.util.module_from_spec(spec)
@@ -47,6 +48,23 @@ class ValidationCommandTests(unittest.TestCase):
             root = Path(temporary)
             self.assertEqual(validate.run_steps([("missing", [str(root / "absent")])], root, root / "logs"), 1)
             self.assertEqual(json.loads((root / "logs/summary.json").read_text())[0]["status"], "FAIL")
+
+    def test_timeout_retains_partial_stdout_and_stderr(self):
+        for stdout, stderr in ((b"partial stdout\n", b"partial stderr\n"),
+                               ("partial stdout\n", "partial stderr\n"),
+                               (None, None)):
+            with self.subTest(stdout=stdout), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                error = validate.subprocess.TimeoutExpired(["test"], 600, output=stdout, stderr=stderr)
+                with patch.object(validate.subprocess, "run", side_effect=error), \
+                     contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(validate.run_steps([("timeout", ["test"])], root, root / "logs"), 1)
+                output = (root / "logs/timeout.log").read_text()
+                self.assertIn("TimeoutExpired", output)
+                if stdout is not None:
+                    self.assertIn("partial stdout", output)
+                    self.assertIn("partial stderr", output)
+                self.assertEqual(json.loads((root / "logs/summary.json").read_text())[0]["status"], "FAIL")
 
     def test_success_returns_zero_and_records_evidence(self):
         with tempfile.TemporaryDirectory() as temporary, contextlib.redirect_stdout(io.StringIO()):

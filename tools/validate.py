@@ -42,7 +42,14 @@ def run_steps(steps: list[tuple[str, list[str]]], root: Path, artifacts: Path) -
                                         errors="replace", timeout=600)
                 output = result.stdout + result.stderr
                 code = result.returncode
-            except (OSError, subprocess.TimeoutExpired) as error:
+            except subprocess.TimeoutExpired as error:
+                # TimeoutExpired can retain bytes even when text=True was used.
+                parts = [error.stdout, error.stderr]
+                output = "".join(part.decode("utf-8", errors="replace") if isinstance(part, bytes)
+                                 else part or "" for part in parts)
+                output += f"\nTimeoutExpired: {error}\n"
+                code = 1
+            except OSError as error:
                 output, code = f"{type(error).__name__}: {error}\n", 1
             print(output, end="" if output.endswith("\n") else "\n", flush=True)
             (artifacts / f"{name}.log").write_text(output, encoding="utf-8")
