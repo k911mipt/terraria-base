@@ -53,6 +53,7 @@ node tools/check-geometry.cjs
 node tools/check-audit.cjs
 node tools/audit-building.cjs
 node tools/audit-scene.cjs
+node tools/audit-lighting.cjs
 ```
 
 Проверка настоящего HTTP-запуска и взаимодействий всех четырёх сцен:
@@ -63,6 +64,8 @@ python3 -m venv .venv
 python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
 python tools/check-browser.py
+python tools/check-ui-rollout.py
+python tools/check-lighting-browser.py
 ```
 
 Playwright нужен только разработчикам; сайт его не загружает. На Linux для установки
@@ -82,7 +85,8 @@ Playwright нужен только разработчикам; сайт его �
 рабочие validation-workflow и публикация Pages.
 
 [Вычисляемый аудит](docs/computed-audit.md) одинаков в CLI и интерфейсе.
-WARN означает неполные предметные данные, а не полный PASS; цели проекта показаны отдельно.
+WARN означает неполные предметные данные или недостигнутые проектные цели,
+а не полный PASS; ограничения модели показаны отдельно.
 
 ## Структура и проектные документы
 
@@ -117,3 +121,6 @@ WARN означает неполные предметные данные, а н�
 `final`, `fixed`, `latest`, `v2`. Карта кода обновляется вместе с архитектурой.
 
 Общий запуск, настройки фокуса и таблицы описаны в [common-ui.md](docs/common-ui.md).
+
+[Проектное покрытие светом](docs/project-lighting.md): общий расчёт 30 зон,
+реальные влияющие источники, тёмные контрольные точки и отдельный строгий режим.

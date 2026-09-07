@@ -102,7 +102,7 @@ function computeSceneAudit(scene, inputs) {
     }
   }
   // A liquid object's declared 'tiles' is not evidence of its current dimensions.
-  if (!errors.some(error => ['audit-input', 'material-contract', 'object-contract', 'geometry'].includes(error.rule))) {
+  if (!errors.some(error => ['audit-input', 'material-contract', 'object-contract', 'renderer-contract', 'geometry'].includes(error.rule))) {
     try {
       const grid = buildingGrid(scene, inputs.blockSpecs), water = new Set();
       for (const pool of objects.filter(object => object.kind === 'water')) {
@@ -119,8 +119,14 @@ function computeSceneAudit(scene, inputs) {
       metrics.waterTiles = water.size;
     } catch (error) { add('audit-input', error.message); }
   }
+  let lighting = {status: 'NOT_RUN', errors: [], warnings: [], zones: [], sources: [], excludedSources: []};
+  if (!errors.some(error => ['audit-input', 'material-contract', 'object-contract', 'renderer-contract', 'geometry'].includes(error.rule))) {
+    lighting = auditLighting(scene, inputs.blockSpecs, lightingZonesFor(scene), building);
+    errors.push(...lighting.errors);
+    warnings.push(...lighting.warnings);
+  }
   return {
-    version: 1, scene: scene.sceneId,
+    version: 2, scene: scene.sceneId, lighting,
     status: errors.length ? 'FAIL' : warnings.length ? 'WARN' : 'PASS',
     errors, warnings, metrics, requirements,
     goals: config?.goals || [],
@@ -148,7 +154,7 @@ function renderSceneAudit(report, element) {
   const badge = (text, kind = '') => `<span class="badge${kind ? ` ${kind}` : ''}">${escHtml(text)}</span>`;
   const entries = items => items.map(item => `<li>${escHtml(typeof item === 'string' ? item : item.message)}</li>`).join('');
   const summary = report.status === 'FAIL' ? `FAIL · ошибок: ${report.errors.length}`
-    : report.status === 'WARN' ? `WARN · неполных данных: ${report.warnings.length}` : 'PASS · проверенный объём';
+    : report.status === 'WARN' ? `WARN · предупреждений: ${report.warnings.length}` : 'PASS · проверенный объём';
   element.innerHTML = badge(summary, report.status === 'PASS' ? 'good' : report.status === 'FAIL' ? 'bad' : 'warn') +
     badge(`Объектов: ${m.objects}`) + badge(`Маркеров жителей: ${m.residents} · будущих: ${m.futureResidents}`) +
     badge(`Сундуков: ${m.chests}`) + badge(`Пилонов: ${m.pylons} · резервов TP: ${m.reserves}`) +
@@ -157,7 +163,8 @@ function renderSceneAudit(report, element) {
     (m.pools.length ? badge(`Вода: ${m.waterTiles} тайлов`) : '') +
     `<p class="sub">${escHtml(report.scope)}</p>` +
     (report.errors.length ? `<details open><summary>Ошибки конструкции и данных (${report.errors.length})</summary><ul class="audit-messages">${entries(report.errors)}</ul></details>` : '') +
-    (report.warnings.length ? `<details><summary>Неполные данные (${report.warnings.length})</summary><ul class="audit-messages">${entries(report.warnings)}</ul></details>` : '') +
+    (report.warnings.length ? `<details><summary>Предупреждения модели (${report.warnings.length})</summary><ul class="audit-messages">${entries(report.warnings)}</ul></details>` : '') +
+    renderLightingAudit(report.lighting) +
     `<details><summary>Проверенные требования (${report.requirements.filter(item => item.passed).length}/${report.requirements.length})</summary><ul class="audit-messages">${report.requirements.map(item => `<li>${escHtml(item.label)}: ${escHtml(JSON.stringify(item.actual))} · ${item.passed ? 'PASS' : 'FAIL'}</li>`).join('')}</ul></details>` +
     `<details><summary>Цели проекта — не результаты аудита</summary><ul class="audit-messages">${entries(report.goals)}</ul></details>` +
     `<details><summary>Что модель не проверяет</summary><ul class="audit-messages">${entries(report.unverified)}</ul></details>`;
