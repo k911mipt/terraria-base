@@ -29,48 +29,22 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 ## Проверки
 
-Для проверок данных нужен современный Node.js (проверено на Node 22).
-Все текущие проверки данных, координат и регрессий:
-
-```bash
-node tools/check-data.cjs
-node tools/check-desert.cjs
-node tools/check-eternia.cjs
-node tools/check-underground.cjs
-node tools/check-lighting.cjs
-node tools/check-jungle.cjs
-node tools/check-jungle-rendering.cjs
-node tools/check-wall-specs.cjs
-node tools/check-rooms.cjs
-node tools/check-materials.cjs
-node tools/check-renderers.cjs
-node tools/check-objects.cjs
-node tools/check-scene-ui.cjs
-node tools/check-engineering-metadata.cjs
-node tools/check-building.cjs
-node tools/check-placement-fixes.cjs
-node tools/check-geometry.cjs
-node tools/check-audit.cjs
-node tools/audit-building.cjs
-node tools/audit-scene.cjs
-node tools/audit-lighting.cjs
-```
-
-Проверка настоящего HTTP-запуска и взаимодействий всех четырёх сцен:
+Полная команда совпадает с GitHub Actions. Node.js 22 закреплён в `.nvmrc`;
+Python 3.10+, в CI 3.12. Установка зависимостей и запуск:
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements-dev.txt
 python -m playwright install chromium
-python tools/check-browser.py
-python tools/check-ui-rollout.py
-python tools/check-lighting-browser.py
+python tools/validate.py
 ```
 
-Playwright нужен только разработчикам; сайт его не загружает. На Linux для установки
-системных библиотек может потребоваться `python -m playwright install --with-deps chromium`.
-[Описание 96 сценариев, условий снимков, артефактов и ограничений](docs/browser-tests.md).
+Playwright — только для тестов; сайт его не загружает. Все транзитивные зависимости
+закреплены. На Linux может понадобиться `python -m playwright install --with-deps chromium`.
+`python tools/validate.py --list` показывает точные этапы; отдельные checker-ы
+остаются доступными для диагностики. [Полная команда, логи, CI и статус защиты main](docs/validation.md).
+[HTTP-сценарии и ограничения эмуляции](docs/browser-tests.md).
 
 [Контракт используемых материалов](docs/material-contract.md) и
 [явная регистрация рендереров](docs/object-renderers.md) и
@@ -80,9 +54,9 @@ Playwright нужен только разработчикам; сайт его �
 строительный и вычисляемый аудит уже работают; полный предметный контракт
 и архитектурные этапы продолжаются по
 [плану #24](https://github.com/k911mipt/terraria-base/issues/24).
-Единая команда и обязательный merge-gate выделены в
-[#35](https://github.com/k911mipt/terraria-base/issues/35); до их замены сохранены
-рабочие validation-workflow и публикация Pages.
+Единая команда и read-only CI уже объединены. Административная настройка
+обязательного merge-gate остаётся в [#35](https://github.com/k911mipt/terraria-base/issues/35);
+публикация Pages сохранена.
 
 [Вычисляемый аудит](docs/computed-audit.md) одинаков в CLI и интерфейсе.
 WARN означает неполные предметные данные или недостигнутые проектные цели,
