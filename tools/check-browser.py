@@ -23,6 +23,9 @@ CONTROL_DOORS = ("D_P1_CRAFT", "D_INNER_L", "UG_MECH_GOBLIN", "JG_DRYAD_HUB")
 # Prefix the real startup script; the shared runtime guard must reject these
 # before any first render, independently of pageerror/HTTP listeners.
 MATERIAL_MUTATIONS = {
+    "unknown-block-name": 'BLOCK_SPECS[D.solids[0].mat].itemEn = "UNREGISTERED_SELECTED_ITEM";',
+    "unknown-paint-name": 'WALL_SPECS[D.backgrounds[0].mat].paintEn = "UNREGISTERED_PAINT";',
+
     "unknown-block": 'D.solids[0] = {...D.solids[0], mat: "AUDIT_UNKNOWN_MATERIAL"};',
     "unknown-wall": 'D.backgrounds[0] = {...D.backgrounds[0], mat: "AUDIT_UNKNOWN_MATERIAL"};',
     "missing-spec": 'delete BLOCK_SPECS[D.solids[0].mat];',
@@ -35,6 +38,9 @@ RENDERER_MUTATIONS = {
     "invalid-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).set(D.objects[0].style, "not a function");',
 }
 OBJECT_DATA_MUTATIONS = {
+    "unknown-item-name": "{const o=D.objects.find(o=>objectSpecPrefix(o)&&objectRole(o)==='item');o[objectSpecPrefix(o)+'ItemEn']='UNREGISTERED_SELECTED_ITEM';}",
+    "unknown-item-paint": "{const o=D.objects.find(o=>objectSpecPrefix(o)&&objectRole(o)==='item');o[objectSpecPrefix(o)+'PaintEn']='UNREGISTERED_PAINT';}",
+
     "object-rectangle": 'D.objects[0].w = 0;',
     "object-room": 'D.objects[0].room = "SMOKE_UNKNOWN_ROOM";',
     "object-spec": 'D.objects[0].foregroundItemRu = "SMOKE_PARTIAL_SPEC";',
@@ -224,6 +230,20 @@ def check_object_inspector(page, entry, mobile):
         assert page.locator("#ikv missing_room").count() == 0
     finally:
         page.evaluate("id => { D.objects.find(o=>o.id===id).room = window.savedRoom; delete window.savedRoom; }", object_id)
+    carrier_ids = {"index.html": "M5_FRAME_PICKSAW", "underground.html": "UG_TOOL_FRAME_WRENCH"}
+    if carrier_id := carrier_ids.get(entry):
+        item = page.evaluate("id=>D.objects.find(o=>o.id===id)", carrier_id)
+        click_tile(page, item["x"], item["y"], mobile)
+        assert page.evaluate("selected?.id") == carrier_id
+        assert rows(page)["Носитель"] == "Item Frame · Item ID 3270"
+        assert item["foregroundItemEn"] in rows(page)["Передний материал"]
+        page.evaluate("id=>{D.objects.find(o=>o.id===id).foregroundItemEn='UNREGISTERED_SELECTED_ITEM';}", carrier_id)
+        try:
+            click_tile(page, item["x"], item["y"], mobile)
+            assert "UNREGISTERED_SELECTED_ITEM" in rows(page)["Диагностика предмета"]
+            assert "Носитель" not in rows(page)
+        finally:
+            page.evaluate("item=>{D.objects.find(o=>o.id===item.id).foregroundItemEn=item.foregroundItemEn;}", item)
     # Reuse the actual chest metadata instead of naming the chest's tile air.
     chest_ids = {"index.html": "SEED", "desert.html": "DESERT_QUICK_FISH", "underground.html": "UG_WIRE_CHEST"}
     if chest_id := chest_ids.get(entry):
@@ -458,7 +478,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                     assert page.locator("#iname").inner_text() == title
                     diagnostic = page.locator("#ikv").inner_text()
                     assert re.search(r"X-?\d+ Y-?\d+", diagnostic), "diagnostic lacks coordinates"
-                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer", "rectangle", "unknown room", "foregroundItemEn"))
+                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer", "rectangle", "unknown room", "foregroundItemEn", "UNREGISTERED_SELECTED_ITEM", "UNREGISTERED_PAINT"))
                     assert page.locator("#roomRows tr").count() == 0, "invalid data reached populate()"
             else:
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")

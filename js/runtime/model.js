@@ -446,6 +446,8 @@ function inspect(o, wx, wy) {
       ["Тип объекта", o.kind],
       ["Модуль объекта", objectRoom?.name || "—"],
     );
+    const carrier = installedDisplayItem(o);
+    if (carrier) rows.push(["Носитель", `${carrier.itemEn} · Item ID ${carrier.itemId}`]);
     if (metadata) {
       rows.push(["Роль элемента", OBJECT_ROLE_LABELS[metadata.role]]);
       if (metadata.problems.length) rows.push(["Диагностика предмета", metadata.problems.join("; ")]);

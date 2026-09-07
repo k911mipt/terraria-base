@@ -75,7 +75,7 @@ for (const entry of SCENES) {
   run(`globalThis.legacy = D.objects.find(o => objectRole(o)==='item' && !objectSpecPrefix(o));
     globalThis.legacyScene = {...D,objects:[{...legacy}]};`);
   assert.equal(run("validateObjectData(legacyScene).warnings.length"), 1);
-  run(`Object.assign(legacyScene.objects[0], {foregroundItemRu:'Предмет',foregroundItemEn:'Item',foregroundPaintRu:'Без краски',foregroundPaintEn:'None'});`);
+  run(`Object.assign(legacyScene.objects[0], {foregroundItemRu:'Предмет',foregroundItemEn:'Wooden Door',foregroundPaintRu:'Без краски',foregroundPaintEn:'None'});`);
   assert(run("validateObjectData(legacyScene).errors.some(e=>e.includes('remove the legacy exception'))"));
   run(`fixture.chestItemRu = 'Сундук'; fixture.chestItemEn = 'Chest';
        fixture.chestPaintRu = 'Без краски'; fixture.chestPaintEn = 'None';`);
