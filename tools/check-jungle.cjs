@@ -383,66 +383,17 @@ assert(
   "Do not replace the open root level with a solid artificial foundation",
 );
 
-const ceilingMountedLights = D.objects.filter(
-  (object) => object.kind === "light" && object.ceilingMounted === true,
-);
-assert(ceilingMountedLights.length === 5, "Expected five ceiling-mounted room lights");
-for (const light of ceilingMountedLights) {
-  const supportX = Math.floor(light.x + light.w / 2);
-  const supportY = light.y - 1;
-  assert(
-    Boolean(effectiveSolidAt(supportX, supportY)),
-    `${light.id} lacks a real ceiling support at x${supportX} y${supportY}`,
-  );
+for (const relative of ["js/data/materials.js", "js/data/jungle/materials.js",
+  "js/runtime/building-audit.js", "js/runtime/lighting-audit.js"]) {
+  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {filename: relative});
 }
-
-const lights = D.objects.filter((object) => object.kind === "light");
-const lightCenter = (light) => ({
-  x: light.x + light.w / 2,
-  y: light.y + light.h / 2,
-});
-const covers = (light, x, y) => {
-  const center = lightCenter(light);
-  return Math.hypot(x - center.x, y - center.y) <= light.lightRadius;
-};
-const lightingResults = [];
-for (const zone of D.lightingZones) {
-  const tiles = [];
-  for (let y = zone.y1; y <= zone.y2; y += 1) {
-    for (let x = zone.x1; x <= zone.x2; x += 1) {
-      tiles.push({ x: x + 0.5, y: y + 0.5, tileX: x, tileY: y });
-    }
-  }
-  const localLights = lights.filter((light) => light.room === zone.room);
-  const influencingLights = localLights.filter((light) =>
-    tiles.some((tile) => covers(light, tile.x, tile.y)),
-  );
-  const uncovered = tiles.filter(
-    (tile) => !influencingLights.some((light) => covers(light, tile.x, tile.y)),
-  );
-  const coverage = tiles.length
-    ? (tiles.length - uncovered.length) / tiles.length
-    : 0;
-  assert(
-    coverage >= zone.minCoverage,
-    `${zone.name}: lighting coverage ${(coverage * 100).toFixed(1)}%, first dark tile ${uncovered[0] ? `x${uncovered[0].tileX} y${uncovered[0].tileY}` : "n/a"}`,
-  );
-  assert(
-    influencingLights.length >= zone.minSources,
-    `${zone.name}: expected ${zone.minSources} influencing local lights, found ${influencingLights.length}`,
-  );
-  lightingResults.push({
-    id: zone.id,
-    coveragePercent: Number((coverage * 100).toFixed(1)),
-    influencingLights: influencingLights.map((light) => light.id),
-  });
-}
-assert(D.lightingZones.length === 5, "Expected five Jungle lighting zones");
-assert(
-  D.designHistory.lightingCoveragePercent === 100 &&
-    D.designHistory.lightingZones === D.lightingZones.length,
-  "Lighting validation snapshot mismatch",
-);
+const construction = vm.runInContext("auditBuilding(D, BLOCK_SPECS)", context);
+const lighting = vm.runInContext("auditLighting(D, BLOCK_SPECS)", context);
+for (const error of construction.errors) assert(false, `${error.rule}: ${error.message}`);
+for (const error of lighting.errors) assert(false, error.message);
+for (const warning of lighting.warnings) assert(false, warning.message);
+const lightingResults = lighting.zones;
+assert(lightingResults.length === 5, "Expected five Jungle lighting zones");
 
 for (const solid of D.solids) {
   assert(
@@ -470,12 +421,6 @@ for (const object of D.objects) {
       object.y + object.h - 1 <= D.bounds.yMax,
     `${object.id} lies outside scene bounds`,
   );
-  if (object.kind === "light") {
-    assert(
-      Number.isFinite(object.lightRadius) && object.lightRadius > 0,
-      `${object.id} must declare a positive lightRadius`,
-    );
-  }
 }
 
 const html = fs.readFileSync(path.join(root, "jungle.html"), "utf8");

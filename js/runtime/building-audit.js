@@ -121,7 +121,8 @@ function buildingDoorClearance(scene, grid, door) {
 
 function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId]) {
   const errors = [], warnings = [], checkedWalls = new Set();
-  const add = (rule,x,y,id,message) => errors.push({scene:scene.sceneId,rule,x,y,id,message});
+  const add = (rule,x,y,id,message,relatedId) => errors.push({scene:scene.sceneId,rule,x,y,id,message,
+    ...(relatedId === undefined ? {} : {relatedId})});
   let grid;
   try { grid = buildingGrid(scene,blockSpecs); }
   catch (error) { add('geometry',null,null,null,error.message); return {errors,warnings,metrics:{}}; }
@@ -168,7 +169,7 @@ function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId
         // share it with furniture. Explicit embedded/non-item elements are excluded above.
         if (grid.foreground(x,y)) add('object-overlap',x,y,object.id,`Physical object overlaps ${grid.foreground(x,y).mat}`);
         const key = buildingTileKey(x,y), previous = occupiedObjects.get(key);
-        if (previous) add('object-object-overlap',x,y,object.id,`Physical object overlaps ${previous}`);
+        if (previous) add('object-object-overlap',x,y,object.id,`Physical object overlaps ${previous}`,previous);
         else occupiedObjects.set(key,object.id);
       }
     }

@@ -96,7 +96,7 @@
 | `tools/check-data.cjs` | Данные/инженерия основной базы и её регрессии |
 | `tools/check-desert.cjs`, `tools/check-underground.cjs`, `tools/check-jungle.cjs` | Сценические правила, координаты, двери и другие регрессии аванпостов |
 | `tools/check-eternia.cjs` | Совмещённая арена и Этерия |
-| `tools/check-lighting.cjs` | Локальная проектная эвристика освещения **подземной** сцены; это не единый аудит всех четырёх сцен |
+| `tools/check-lighting.cjs` | Общий расчёт всех четырёх сцен, отрицательные мутации, реальные влияющие источники и CLI parity |
 | `tools/check-jungle-rendering.cjs` | Jungle-текстуры и связанные source-level регрессии |
 | `tools/check-wall-specs.cjs` | Используемые wall-spec всех сцен; отрицательные мутации полей и целой спецификации |
 | `tools/check-renderers.cjs` | Все пары kind/style, реальные зарегистрированные функции, отрицательные мутации и startup guard |
@@ -119,7 +119,7 @@
 `docs/refactor-manifest.json` — исторический снимок первого разделения исходника,
 **не текущий вычисляемый аудит**. Старые декларации находятся в `D.designHistory`, не используются для аудита.
 `building-audit.js` проверяет конструкцию, `scene-audit.js` — общий вычисляемый результат,
-`tools/check-geometry.cjs` — независимый golden. Общая эвристика света продолжается в #31.
+`tools/check-geometry.cjs` — независимый golden. `lighting-audit.js` вычисляет покрытие 30 зон; [модель и ограничения](project-lighting.md).
 
 Перед изменением геометрии читайте [строительные правила](building-rules.md).
 При дальнейшей миграции меняйте эту карту в том же PR, что и код.
