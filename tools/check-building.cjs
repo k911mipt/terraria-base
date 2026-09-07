@@ -5,7 +5,7 @@ const {loadScene,SCENES}=require('./lib/load-scene.cjs');
 let cases=0;
 for (const entry of SCENES) {
   const {run,runFile}=loadScene(entry);
-  runFile('js/runtime/building-audit.js');
+  runFile('js/runtime/placement-contract.js');runFile('js/runtime/building-audit.js');
   runFile('js/runtime/model.js');
   assert(run(`(() => {
     const grid=buildingGrid(D,BLOCK_SPECS);

@@ -373,7 +373,7 @@ function inspectorMaterialSpec(id, background) {
   const specs = background ? WALL_SPECS : BLOCK_SPECS;
   const palettes = background ? WALL : MAT;
   const spec = Object.hasOwn(specs, id) ? specs[id] : null;
-  const errors = materialSpecProblems(spec, background);
+  const errors = [...materialSpecProblems(spec, background), ...materialBindingProblems(id, spec, background)];
   if (!Object.hasOwn(palettes, id) || !validMaterialPalette(palettes[id], background))
     errors.push("missing or invalid palette");
   if (!errors.length) return spec;
@@ -405,7 +405,7 @@ function inspectorObjectRoom(scene, object) {
 // selections bypass the scene metadata adapter (their specs come from ENG).
 function inspectorObjectMetadata(scene, object) {
   return object && (!object.engineering || scene.objects.includes(object))
-    ? objectMetadata(object) : null;
+    ? objectContract(object) : null;
 }
 
 function inspect(o, wx, wy) {
@@ -450,6 +450,10 @@ function inspect(o, wx, wy) {
     if (carrier) rows.push(["Носитель", `${carrier.itemEn} · Item ID ${carrier.itemId}`]);
     if (metadata) {
       rows.push(["Роль элемента", OBJECT_ROLE_LABELS[metadata.role]]);
+      rows.push(["Проходимость", OBJECT_PASSAGE_LABELS[metadata.passage]],
+        ["Крепление", ATTACHMENT_LABELS[metadata.placement?.attachment] || "Не определено"]);
+      if (metadata.identity.items.length) rows.push(["Идентификатор установки",
+        metadata.identity.items.map(item => item.id).join(metadata.identity.status === "alternative" ? " / " : " + ")]);
       if (metadata.problems.length) rows.push(["Диагностика предмета", metadata.problems.join("; ")]);
       if (metadata.role === "liquid" && o.kind !== "lava") rows.push(["Жидкость", o.foregroundItemRu || o.name]);
       if (["reserve", "proposal", "npc", "zone", "landscape"].includes(metadata.role))

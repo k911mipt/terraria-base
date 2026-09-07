@@ -42,7 +42,8 @@
 | `camera.js`, `interactions.js` | Камера, поиск, кнопки, pan, wheel, pointer/touch/pinch, шторка |
 | `prepare.js`, `start.js` | Общая подготовка/запуск; отдельных startup-файлов аванпостов нет |
 | `validation.js` | Контракты материалов/объектов, непредметные роли, старые исключения и проверка ям |
-| `building-audit.js` | Общие проверки эффективной конструкции |
+| `placement-contract.js` | Привязки материалов, идентичность установки, общие крепления и проходимость |
+| `building-audit.js` | Проверки эффективной конструкции по общему контракту |
 | `lighting-audit.js` | Общая проектная эвристика света и её представление |
 | `scene-audit.js` | Единый вычисляемый результат для UI и CLI |
 
@@ -70,7 +71,7 @@ workflow — `validate-browser.yml`; check — `validate`. Старые Jungle-w
 от `designHistory` и вычисляемого PASS; его нельзя обновлять ради зелёного CI.
 
 Подробности: [материалы](material-contract.md), [объекты](object-contract.md),
-[рендереры](object-renderers.md), [конструкция](building-audit.md),
+[рендереры](object-renderers.md), [идентичность и размещение](placement-contract.md), [конструкция](building-audit.md),
 [исправления размещения](construction-fixes.md), [вычисляемый аудит](computed-audit.md),
 [проектный свет](project-lighting.md), [общий UI](common-ui.md),
 [HTTP, артефакты и ограничения эмуляции](browser-tests.md).

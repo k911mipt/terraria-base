@@ -126,6 +126,7 @@ function validateUsedMaterialSpecs(scene, blockSpecs, wallSpecs, materials, wall
       checked.add(region.mat);
       const spec = Object.hasOwn(specs, region.mat) ? specs[region.mat] : null;
       for (const problem of materialSpecProblems(spec, background)) errors.push(`${where}: ${problem}`);
+      for (const problem of materialBindingProblems(region.mat, spec, background)) errors.push(`${where}: ${problem}`);
       if (!Object.hasOwn(palettes, region.mat) || !validMaterialPalette(palettes[region.mat], background))
         errors.push(`${where}: missing or invalid palette`);
     }
@@ -312,6 +313,7 @@ function validateObjectData(scene) {
         object.x + object.w - 1 > bounds.xMax || object.y + object.h - 1 > bounds.yMax)
       error("invalid object rectangle");
     if (objectRole(object) === "unknown") error(`unknown object kind ${object.kind}`);
+    for (const problem of objectPlacementProblems(object)) error(problem);
     if (Object.hasOwn(object, "room") && object.room !== "" &&
         !scene.rooms.some(room => room.id === object.room)) error(`unknown room ${object.room}`);
     for (const prefix of ["foreground", "chest"]) {

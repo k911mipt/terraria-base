@@ -5,6 +5,7 @@ const {loadScene, SCENES} = require("./lib/load-scene.cjs");
 let mutations = 0, displays = 0;
 for (const entry of SCENES) {
   const {run, runFile} = loadScene(entry);
+  runFile("js/runtime/placement-contract.js");
   runFile("js/runtime/validation.js");
   runFile("js/runtime/model.js");
   const before = run("JSON.stringify(D)");

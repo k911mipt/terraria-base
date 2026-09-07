@@ -9,7 +9,7 @@ const placements={
  'jungle.html': {JG_WITCH_TORCH:{x:48,y:31,h:3}},
 };
 for(const entry of SCENES){
- const {run,runFile}=loadScene(entry);runFile('js/runtime/building-audit.js');
+ const {run,runFile}=loadScene(entry);runFile('js/runtime/placement-contract.js');runFile('js/runtime/building-audit.js');
  const D=run('D'), errors=run('auditBuilding(D,BLOCK_SPECS).errors');
  assert.equal(errors.length,0,JSON.stringify(errors));
  for(const [id,fields] of Object.entries(placements[entry]||{})){

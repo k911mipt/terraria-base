@@ -5,7 +5,7 @@ const reports={};
 for(const entry of SCENES) {
   const {run,runFile}=loadScene(entry);
   runFile('js/runtime/validation.js');
-  runFile('js/runtime/building-audit.js');
+  runFile('js/runtime/placement-contract.js');runFile('js/runtime/building-audit.js');
   reports[entry]=run(`(() => {
     const report=auditBuilding(D,BLOCK_SPECS);
     for(const message of validateUsedMaterialSpecs(D,BLOCK_SPECS,WALL_SPECS,MAT,WALL))
