@@ -384,7 +384,7 @@ assert(
 );
 
 for (const relative of ["js/data/materials.js", "js/data/jungle/materials.js",
-  "js/runtime/building-audit.js", "js/runtime/lighting-audit.js"]) {
+  "js/runtime/placement-contract.js", "js/runtime/building-audit.js", "js/runtime/lighting-audit.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {filename: relative});
 }
 const construction = vm.runInContext("auditBuilding(D, BLOCK_SPECS)", context);

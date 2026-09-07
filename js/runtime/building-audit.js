@@ -28,34 +28,6 @@ const BUILDING_SCENES = {
   },
 };
 
-const BUILDING_FLOOR_KINDS = new Set(['chest','station','furniture','bed','personal_storage',
-  'pylon','campfire','statue','museum_mannequin']);
-const BUILDING_WALL_KINDS = new Set(['museum_trophy','museum_weapon_rack','museum_item_frame','jungle_sign']);
-const BUILDING_CEILING_STYLES = new Set(['lantern_warm','star_light','glass_lantern','ice_lantern',
-  'copper_chandelier','crystal_chandelier','jungle_lantern','painter_lantern','tiki_lantern']);
-
-// Attachment classes describe the existing design intention. Item identity and
-// exact game footprint remain separate; unknown properties are not guessed.
-function buildingObjectTraits(object) {
-  if (object.kind === 'door') return {attachment:'door',collision:true,blocksDoor:false};
-  if (object.kind === 'hatch') return {attachment:'hatch',collision:true,blocksDoor:false};
-  if (object.kind === 'planter') return {attachment:'self',collision:true,blocksDoor:false};
-  if (object.kind === 'honey_bubble') return {attachment:'embedded',collision:false,blocksDoor:false};
-  if (BUILDING_FLOOR_KINDS.has(object.kind)) return {attachment:'floor',collision:true,blocksDoor:true};
-  if (BUILDING_WALL_KINDS.has(object.kind)) return {attachment:'wall',collision:true,blocksDoor:false};
-  if (object.kind === 'display') {
-    return {attachment: ['P1_MAN','P2_MAN'].includes(object.id) ? 'floor' : 'wall',collision:true,blocksDoor:false};
-  }
-  if (['heart_lantern','star_bottle'].includes(object.kind))
-    return {attachment:'ceiling',collision:true,blocksDoor:false};
-  if (object.kind === 'light') {
-    const attachment = ['tiki_torch','crystal_candelabra'].includes(object.style) ? 'floor'
-      : BUILDING_CEILING_STYLES.has(object.style) ? 'ceiling' : 'torch';
-    return {attachment,collision:true,blocksDoor:false};
-  }
-  return {attachment:'none',collision:false,blocksDoor:false};
-}
-
 function buildingContains(region, x, y) {
   return x >= region.x1 && x <= region.x2 && y >= region.y1 && y <= region.y2;
 }
@@ -91,17 +63,19 @@ function buildingGrid(scene, blockSpecs) {
   for (const region of scene.solids) {
     if (!region || !Object.hasOwn(blockSpecs,region.mat))
       throw new Error(`Unknown material ${region?.mat} X${region?.x1} Y${region?.y1}`);
+    const problems = materialBindingProblems(region.mat, blockSpecs[region.mat]);
+    if (problems.length) throw new Error(`${problems.join("; ")} X${region.x1} Y${region.y1}`);
   }
   const solids = index(scene.solids), backgrounds = index(scene.backgrounds);
   const foreground = (x,y) => solids.get(buildingTileKey(x,y));
   const wall = (x,y) => backgrounds.get(buildingTileKey(x,y));
-  const platform = (x,y) => blockSpecs[foreground(x,y)?.mat]?.layer === 'Платформа';
+  const platform = (x,y) => materialBinding(foreground(x,y)?.mat)?.collision === 'platform';
   const solid = (x,y) => {
     const tile = foreground(x,y);
     if (!tile) return false;
     const spec = blockSpecs[tile.mat];
     if (!spec) throw new Error(`Unknown material ${tile.mat} X${x} Y${y}`);
-    return !['Платформа','Проходимый блок-мебель'].includes(spec.layer);
+    return materialBinding(tile.mat)?.collision === 'solid';
   };
   const support = (x,y) => solid(x,y) || platform(x,y) || scene.objects.some(object =>
     object.kind === 'planter' && buildingObjectContains(object,x,y));
@@ -155,6 +129,9 @@ function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId
   const occupiedObjects = new Map();
   let openableDoors=0, attachedObjects=0, physicalObjects=0;
   for (const object of scene.objects) {
+    const before = errors.length;
+    for (const problem of objectPlacementProblems(object))
+      add('object-contract',object.x,object.y,object.id,problem);
     const traits = buildingObjectTraits(object);
     if (!['none','floor','ceiling','wall','torch','self','embedded','door','hatch'].includes(traits.attachment) ||
         typeof traits.collision !== 'boolean' || typeof traits.blocksDoor !== 'boolean') {
@@ -162,7 +139,6 @@ function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId
     }
     if (traits.attachment === 'none') continue;
     physicalObjects++;
-    const before = errors.length;
     if (traits.collision) {
       for (let y=object.y;y<object.y+object.h;y++) for (let x=object.x;x<object.x+object.w;x++) {
         // Passable foreground still occupies a cell: platforms and Bubble cannot
