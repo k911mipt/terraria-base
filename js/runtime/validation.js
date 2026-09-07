@@ -71,6 +71,11 @@ function materialSpecProblems(spec, background) {
     "Блок", "Твёрдый блок", "Блок с травой", "Поверхность", "Платформа",
     "Проходимый блок-мебель", "Блок-механизм", "Механизм-блок",
   ].includes(spec.layer)) errors.push("missing or invalid layer");
+  if (typeof spec.itemEn === "string" && spec.itemEn.trim() &&
+      !MATERIAL_NAMES[background ? "wall" : "block"].has(spec.itemEn))
+    errors.push(`unknown ${background ? "wall" : "block"} itemEn: ${spec.itemEn}`);
+  if (typeof spec.paintEn === "string" && spec.paintEn.trim() && !KNOWN_PAINTS.has(spec.paintEn))
+    errors.push(`unknown paintEn: ${spec.paintEn}`);
   return errors;
 }
 
@@ -249,6 +254,7 @@ function objectSpecProblems(object, prefix = objectSpecPrefix(object)) {
     if (!object || !Object.hasOwn(object, field) || typeof object[field] !== "string" || !object[field].trim())
       errors.push(`Отсутствует или некорректно поле ${field}`);
   }
+  errors.push(...selectedObjectItemProblems(object, prefix));
   return errors;
 }
 
@@ -333,4 +339,105 @@ function validateObjectData(scene) {
     }
   }
   return { errors, warnings };
+}
+
+// Explicit supported source labels. Never populate this registry from current D:
+// otherwise the same typo would authorize itself. These are the project's chosen
+// labels, not a catalogue of every item or an assertion about acquisition stage.
+const KNOWN_PAINTS = new Set([
+  "None", "Black Paint", "Brown Paint", "Cyan Paint", "Deep Blue Paint", "Deep Cyan Paint",
+  "Deep Green Paint", "Deep Lime Paint", "Deep Orange Paint", "Deep Pink Paint", "Deep Purple Paint",
+  "Deep Red Paint", "Gray Paint", "Green Paint", "Orange Paint", "Pink Paint", "Purple Paint",
+  "Teal Paint", "White Paint", "Yellow Paint",
+]);
+const MATERIAL_NAMES = {
+  block: new Set([
+    "Bamboo", "Boreal Wood", "Boreal Wood Platform", "Bubble", "Cloud Block",
+    "Conveyor Belt (Clockwise)", "Conveyor Belt (Counter Clockwise)", "Copper Brick", "Dart Trap",
+    "Glass", "Glass Platform", "Glowing Mushroom (placed block)", "Gray Brick", "Ice Block",
+    "Leaf Block", "Living Mahogany", "Mud Block", "Mud Block with Jungle Grass", "Mushroom Platform",
+    "Palm Wood", "Palm Wood Platform", "Rich Mahogany", "Rich Mahogany Platform", "Sand Block",
+    "Sandstone Block", "Smooth Marble Block", "Snow Block", "Stone Slab",
+  ]),
+  wall: new Set([
+    "Bamboo Wall", "Boreal Wood Wall", "Cloud Wall", "Copper Brick Wall", "Diamond Gemspark Wall",
+    "Glass Wall", "Gray Brick Wall", "Living Wood Wall", "Mushroom Wall", "Palm Wood Wall",
+    "Rich Mahogany Wall", "Sandstone Brick Wall", "Smooth Marble Wall", "Stone Slab Wall",
+  ]),
+};
+const CHEST_NAMES = new Set([
+  "Boreal Wood Chest", "Chest", "Dynasty Chest", "Frozen Chest", "Glass Chest", "Gold Chest",
+  "Honey Chest", "Living Wood Chest", "Obsidian Chest", "Sandstone Chest", "Shadow Chest",
+  "Skyware Chest", "Steampunk Chest", "Stone Chest", "Water Chest",
+]);
+const DISPLAY_CONTENTS = {
+  museum_weapon_rack: new Set([
+    "Bee Gun", "Blade of Grass", "Breaker Blade", "Excalibur", "Last Prism", "Megashark", "Muramasa",
+    "Night's Edge", "Picksaw", "Portal Gun", "Pwnhammer", "Pygmy Staff", "Solar Eruption", "Starfury",
+    "Sunfury", "Terra Blade",
+  ]),
+  museum_item_frame: new Set([
+    "Antlion Mandible", "Celestial Sigil", "Cloud in a Bottle", "Crystal Shard", "Demon Conch",
+    "Ectoplasm", "Guide Voodoo Doll", "Jungle Spores", "Luminite", "Magic Mirror", "Obsidian Rose",
+    "Shark Fin", "Shield of Cthulhu", "Soul of Fright", "Soul of Light", "Soul of Might",
+    "Soul of Night", "Soul of Sight", "Temple Key", "Picksaw", "Portal Gun",
+  ]),
+  museum_mannequin: new Set([
+    "Mannequin with Adamantite/Titanium Armor", "Mannequin with Chlorophyte Armor",
+    "Mannequin with Fossil Armor", "Mannequin with Hallowed Armor", "Mannequin with Jungle Armor",
+    "Mannequin with Molten Armor", "Mannequin with Obsidian Armor", "Mannequin with Player 1 final set",
+    "Mannequin with Player 2 final set", "Mannequin with Turtle Armor", "Mannequin with class armor set",
+    "Mannequin with early armor set", "Mannequin with final pre-Hardmode set", "Mannequin with first Hardmode set",
+  ]),
+  display: new Set([
+    "Item Frame with 1 Second Timer", "Item Frame with Switch", "Item Frame with Wire Cutter", "Item Frame with Wrench",
+  ]),
+};
+const OBJECT_ITEM_NAMES = {
+  chest: CHEST_NAMES,
+  door: new Set(["Wooden Door"]),
+  station: new Set(["Eternia Crystal Stand", "Palm Wood Work Bench", "Tinkerer's Workshop"]),
+  bed: new Set(["Boreal Wood Bed", "Palm Wood Bed"]),
+  pylon: new Set(["Desert Pylon", "Cavern Pylon", "Jungle Pylon"]),
+  light: new Set(["Copper Chandelier", "Crystal Candelabra", "Crystal Chandelier", "Green Torch", "Ice Lantern"]),
+  honey_bubble: new Set(["Bubble holding Honey"]),
+  water: new Set(["Water"]), palm_tree: new Set(["Palm Tree"]), cactus: new Set(["Cactus"]),
+  museum_trophy: new Set([
+    "Deerclops Trophy", "Duke Fishron Trophy", "Eater of Worlds / Brain of Cthulhu Trophy",
+    "Empress of Light Trophy", "Eye of Cthulhu Trophy", "Golem Trophy", "King Slime Trophy",
+    "Lunatic Cultist Trophy", "Moon Lord Trophy", "Plantera Trophy", "Queen Bee Trophy",
+    "Skeletron Prime Trophy", "Skeletron Trophy", "The Destroyer Trophy", "The Twins Trophy", "Wall of Flesh Trophy",
+  ]),
+  ...DISPLAY_CONTENTS,
+};
+// Real installed display carriers, rather than the inventory item shown inside.
+// IDs and dimensions are documented in docs/selected-items.md. No other item's
+// gameplay dimensions are inferred from a decorative drawing.
+const DISPLAY_CARRIERS = {
+  museum_weapon_rack: {id: "Weapon_Rack", itemId: 2699, itemEn: "Weapon Rack", w: 3, h: 3},
+  museum_item_frame: {id: "Item_Frame", itemId: 3270, itemEn: "Item Frame", w: 2, h: 2},
+  museum_mannequin: {id: "Mannequin", itemId: 498, itemEn: "Mannequin", w: 2, h: 3},
+  display: {id: "Item_Frame", itemId: 3270, itemEn: "Item Frame", w: 2, h: 2},
+};
+
+function selectedObjectItemProblems(object, prefix) {
+  const problems = [], name = object[prefix + "ItemEn"], paint = object[prefix + "PaintEn"];
+  const supported = prefix === "chest" ? CHEST_NAMES :
+    Object.hasOwn(OBJECT_ITEM_NAMES, object.kind) ? OBJECT_ITEM_NAMES[object.kind] : null;
+  if (typeof name === "string" && name.trim() && !(supported instanceof Set && supported.has(name)))
+    problems.push(`Unknown or incompatible ${prefix}ItemEn: ${name}`);
+  if (typeof paint === "string" && paint.trim() && !KNOWN_PAINTS.has(paint))
+    problems.push(`Unknown ${prefix}PaintEn: ${paint}`);
+  const carrier = prefix === "foreground" ? installedDisplayItem(object) : null;
+  if (carrier && (object.w !== carrier.w || object.h !== carrier.h))
+    problems.push(`Invalid ${carrier.itemEn} footprint: expected ${carrier.w}x${carrier.h}`);
+  return problems;
+}
+
+function installedDisplayItem(object) {
+  // Generic display objects without chosen contents may be racks, mannequins or
+  // unchosen paintings. Do not reclassify them merely because they share kind.
+  if (!object || !Object.hasOwn(DISPLAY_CONTENTS, object.kind) ||
+      !DISPLAY_CONTENTS[object.kind].has(object.foregroundItemEn)) return null;
+  return {...DISPLAY_CARRIERS[object.kind], contents: object.foregroundItemEn};
 }
