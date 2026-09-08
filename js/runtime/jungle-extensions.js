@@ -2,8 +2,7 @@
 // The shared runtime knows the data model; this file supplies the actual
 // mahogany, foliage, bamboo and painted-wall textures used by this scene.
 
-const sharedJungleTileMaterial = tileMaterial;
-tileMaterial = function drawSurfaceJungleTile(ctx, mat, wx, wy) {
+function drawSurfaceJungleTile(ctx, mat, wx, wy) {
   const x = cp(wx);
   const y = cy(wy);
   const t = CACHE_TILE;
@@ -95,8 +94,8 @@ tileMaterial = function drawSurfaceJungleTile(ctx, mat, wx, wy) {
     return;
   }
 
-  sharedJungleTileMaterial(ctx, mat, wx, wy);
-};
+  throw new Error(`Unregistered scene tile: ${mat}`);
+}
 
 const JUNGLE_WOOD_WALLS = new Set([
   "rich_mahogany_wall",
@@ -106,11 +105,9 @@ const JUNGLE_WOOD_WALLS = new Set([
   "painter_magenta_wall",
 ]);
 
-const sharedJungleTileWall = tileWall;
-tileWall = function drawSurfaceJungleWall(ctx, mat, wx, wy) {
+function drawSurfaceJungleWall(ctx, mat, wx, wy) {
   if (!WALL[mat]) {
-    sharedJungleTileWall(ctx, mat, wx, wy);
-    return;
+    throw new Error(`Unregistered scene wall: ${mat}`);
   }
 
   const p = WALL[mat];
@@ -201,8 +198,8 @@ tileWall = function drawSurfaceJungleWall(ctx, mat, wx, wy) {
     return;
   }
 
-  sharedJungleTileWall(ctx, mat, wx, wy);
-};
+  throw new Error(`Unregistered scene wall: ${mat}`);
+}
 
 function jungleRect(ctx, x, y, w, h, fill) {
   ctx.fillStyle = fill;
@@ -478,3 +475,6 @@ registerObjectRenderer("hatch", ["jungle_route"], drawHatch);
 registerObjectRenderer("npc", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawNpc);
 registerObjectRenderer("furniture", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawFurniture);
 registerObjectRenderer("chest", ["jungle_dryad", "jungle_hub", "jungle_painter", "jungle_witch"], drawChest);
+
+registerTileRenderer("block", ["rich_mahogany_platform", "rich_mahogany", "living_mahogany", "leaf_block", "jungle_grass", "bamboo_block"], drawSurfaceJungleTile);
+registerTileRenderer("wall", ["rich_mahogany_wall", "jungle_leaf_wall", "painter_yellow_wall", "painter_teal_wall", "painter_magenta_wall", "living_wood_wall", "bamboo_wall", "jungle_stone_wall"], drawSurfaceJungleWall);

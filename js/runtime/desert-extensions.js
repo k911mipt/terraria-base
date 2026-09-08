@@ -1,6 +1,5 @@
 // Scene-specific drawing extensions without changing the shared main-base runtime.
-const sharedTileMaterial = tileMaterial;
-tileMaterial = function drawDesertTileMaterial(ctx, mat, wx, wy) {
+function drawDesertTileMaterial(ctx, mat, wx, wy) {
   const x = cp(wx),
     y = cy(wy),
     t = CACHE_TILE;
@@ -37,14 +36,12 @@ tileMaterial = function drawDesertTileMaterial(ctx, mat, wx, wy) {
     return;
   }
 
-  sharedTileMaterial(ctx, mat, wx, wy);
-};
+  throw new Error(`Unregistered scene tile: ${mat}`);
+}
 
-const sharedTileWall = tileWall;
-tileWall = function drawDesertTileWall(ctx, mat, wx, wy) {
+function drawDesertTileWall(ctx, mat, wx, wy) {
   if (mat !== "palm_wall") {
-    sharedTileWall(ctx, mat, wx, wy);
-    return;
+    throw new Error(`Unregistered scene wall: ${mat}`);
   }
 
   const p = WALL.palm_wall,
@@ -65,7 +62,7 @@ tileWall = function drawDesertTileWall(ctx, mat, wx, wy) {
   ctx.stroke();
   ctx.fillStyle = "rgba(236, 193, 116, 0.18)";
   ctx.fillRect(x + 1, y + 1, 2, t - 2);
-};
+}
 
 function drawWater(ctx, o) {
   const b = objectBox(o),
@@ -170,3 +167,6 @@ registerObjectRenderer("npc", ["desert_npc", "desert_npc_alt"], drawNpc);
 registerObjectRenderer("furniture", ["desert_furniture"], drawFurniture);
 registerObjectRenderer("bed", ["desert_bed"], drawBed);
 registerObjectRenderer("station", ["desert_furniture"], drawStation);
+
+registerTileRenderer("block", ["palm_platform", "sand", "palm_wood"], drawDesertTileMaterial);
+registerTileRenderer("wall", ["palm_wall"], drawDesertTileWall);
