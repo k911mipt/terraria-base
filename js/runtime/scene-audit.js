@@ -143,7 +143,7 @@ let sceneAudit = null;
 function populateSceneAudit() {
   sceneAudit = computeSceneAudit(D, {
     blockSpecs: BLOCK_SPECS, wallSpecs: WALL_SPECS, materials: MAT, wallColors: WALL,
-    rendererErrors: validateObjectRenderers(D),
+    rendererErrors: [...validateObjectRenderers(D), ...validateTileRenderers(D)],
   });
   renderSceneAudit(sceneAudit, document.getElementById('status'));
 }

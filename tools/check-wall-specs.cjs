@@ -9,6 +9,8 @@ for (const entry of SCENES) {
   runFile("js/runtime/placement-contract.js");
   runFile("js/runtime/validation.js");
   runFile("js/runtime/model.js");
+  runFile("js/runtime/inspector.js");
+  runFile("js/runtime/render-cache.js");
   const errors = () => Array.from(run("validateUsedWallSpecs(D, WALL_SPECS)"));
   assert.deepEqual(errors(), [], entry);
   assert.equal(run("wallSafetyLabel({ safe: true })"), "Да, поставленная игроком");

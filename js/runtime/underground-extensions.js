@@ -1,6 +1,5 @@
 // Scene-specific rendering for Ice/Snow/Copper blocks, water and the Cavern Pylon.
-const sharedUndergroundTileMaterial = tileMaterial;
-tileMaterial = function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
+function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
   if (mat === "snow_block_plain") {
     const x = cp(wx),
       y = cy(wy),
@@ -31,8 +30,7 @@ tileMaterial = function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
   }
 
   if (mat !== "ice_block_plain") {
-    sharedUndergroundTileMaterial(ctx, mat, wx, wy);
-    return;
+    throw new Error(`Unregistered scene tile: ${mat}`);
   }
 
   const x = cp(wx),
@@ -51,7 +49,7 @@ tileMaterial = function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
     ctx.fillRect(x + 11, y + 3, 1, 4);
     ctx.fillRect(x + 9, y + 6, 3, 1);
   }
-};
+}
 
 function drawUndergroundWater(ctx, o) {
   const b = objectBox(o),
@@ -317,3 +315,5 @@ registerObjectRenderer("chest", ["special"], drawChest);
 registerObjectRenderer("station", ["tinkerer_station"], drawStation);
 registerObjectRenderer("personal_storage", ["special"], drawPersonal);
 registerObjectRenderer("bed", ["princess_room"], drawBed);
+
+registerTileRenderer("block", ["snow_block_plain", "copper_brick_plain", "ice_block_plain"], drawUndergroundTileMaterial);

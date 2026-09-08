@@ -40,6 +40,12 @@ RENDERER_MUTATIONS = {
     "missing-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).delete(D.objects[0].style);',
     "invalid-renderer": 'OBJECT_RENDERERS.get(D.objects[0].kind).set(D.objects[0].style, "not a function");',
 }
+TILE_RENDERER_MUTATIONS = {
+    "missing-block-renderer": 'TILE_RENDERERS.block.delete(D.solids[0].mat);',
+    "missing-wall-renderer": 'TILE_RENDERERS.wall.delete(D.backgrounds[0].mat);',
+    "invalid-block-renderer": 'TILE_RENDERERS.block.set(D.solids[0].mat, "not a function");',
+    "invalid-wall-renderer": 'TILE_RENDERERS.wall.set(D.backgrounds[0].mat, "not a function");',
+}
 OBJECT_DATA_MUTATIONS = {
     "placement-override": "D.objects.find(o=>o.kind==='light').attachment='none';",
     "unknown-item-name": "{const o=D.objects.find(o=>objectSpecPrefix(o)&&objectRole(o)==='item');o[objectSpecPrefix(o)+'ItemEn']='UNREGISTERED_SELECTED_ITEM';}",
@@ -53,7 +59,7 @@ OBJECT_DATA_MUTATIONS = {
     "object-aux-only": "D.objects.find(o=>objectRole(o)==='item'&&!objectSpecPrefix(o)).foregroundNote = 'SMOKE_PARTIAL';",
     "object-other-scene": "D.sceneId = 'NOT_THE_ORIGINAL_SCENE';",
 }
-DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS, **OBJECT_DATA_MUTATIONS}
+DATA_MUTATIONS = {**MATERIAL_MUTATIONS, **RENDERER_MUTATIONS, **TILE_RENDERER_MUTATIONS, **OBJECT_DATA_MUTATIONS}
 # Valid data and startup, but invalid construction. These must remain inspectable
 # and display FAIL even when somebody forges an old stored PASS.
 AUDIT_MUTATIONS = {
@@ -481,17 +487,19 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
             except SmokeFailure as error:
                 expected = ("Material contract:" if mutation in MATERIAL_MUTATIONS else
                             "Object renderer contract:" if mutation in RENDERER_MUTATIONS else
+                            "Tile renderer contract:" if mutation in TILE_RENDERER_MUTATIONS else
                             "Object data contract:" if mutation in OBJECT_DATA_MUTATIONS else
                             "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404")
                 assert expected in str(error), f"wrong failure for {mutation}: {error}"
                 result["expected_failure"] = str(error)
                 if mutation in DATA_MUTATIONS:
                     title = ("Ошибка данных материалов" if mutation in MATERIAL_MUTATIONS else
-                             "Ошибка отрисовки объектов" if mutation in RENDERER_MUTATIONS else "Ошибка данных объектов")
+                             "Ошибка отрисовки объектов" if mutation in RENDERER_MUTATIONS else
+                             "Ошибка отрисовки материалов" if mutation in TILE_RENDERER_MUTATIONS else "Ошибка данных объектов")
                     assert page.locator("#iname").inner_text() == title
                     diagnostic = page.locator("#ikv").inner_text()
                     assert re.search(r"X-?\d+ Y-?\d+", diagnostic), "diagnostic lacks coordinates"
-                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer", "rectangle", "unknown room", "foregroundItemEn", "UNREGISTERED_SELECTED_ITEM", "UNREGISTERED_PAINT", "identity", "collision", "placement"))
+                    assert any(word in diagnostic for word in ("specification", "palette", "unregistered renderer", "unregistered tile renderer", "rectangle", "unknown room", "foregroundItemEn", "UNREGISTERED_SELECTED_ITEM", "UNREGISTERED_PAINT", "identity", "collision", "placement"))
                     assert page.locator("#roomRows tr").count() == 0, "invalid data reached populate()"
             else:
                 raise AssertionError(f"{mutation}: broken scene passed the normal readiness gate")

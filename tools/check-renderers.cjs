@@ -6,7 +6,7 @@ const { loadScene, SCENES } = require("./lib/load-scene.cjs");
 let mutations = 0, objects = 0;
 for (const entry of SCENES) {
   const { run, runFile } = loadScene(entry);
-  for (const file of ["core", "placement-contract", "validation", "model", "render-base", "render-objects",
+  for (const file of ["core", "placement-contract", "validation", "model", "render-tiles", "render-cache", "inspector", "render-base", "render-objects",
     ...(entry === "index.html" ? [] : [entry.replace(".html", "") + "-extensions"])])
     runFile(`js/runtime/${file}.js`);
   const check = () => Array.from(run("validateObjectRenderers(D)"));
