@@ -3,164 +3,46 @@ on:
   push:
     branches: [maintenance/pr59-artifact-isolation-20260911]
 permissions:
-  contents: write
+  contents: read
+  actions: read
 jobs:
   stage:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: 21c3e802f293a1694a0b5d1539499e738bc4b0e3
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: '3.12'
-      - name: Apply only reviewed artifact isolation changes
-        shell: bash
-        run: |
-          mkdir -p /tmp/pr59-stage
-          test "$(git rev-parse HEAD)" = 21c3e802f293a1694a0b5d1539499e738bc4b0e3
-          python - <<'PY'
-          from pathlib import Path
-          def replace(path, old, new):
-              p=Path(path); text=p.read_text()
-              assert text.count(old)==1, (path, old)
-              p.write_text(text.replace(old,new))
-          replace('tools/profile-planner.py', '\ndef main():\n', '''
-          def prepare_output(output):
-              """Atomically claim a new directory; never alter a previous run."""
-              output.mkdir(parents=True, exist_ok=False)
-
-
-          def main():
-          ''')
-          replace('tools/profile-planner.py', '    args.output.mkdir(parents=True,exist_ok=True)', '''    try:
-                  prepare_output(args.output)
-              except OSError as error:
-                  parser.error(f'Choose a new --output directory; existing results are not overwritten: {error}')''')
-          replace('.github/workflows/profile-planner.yml', 'python tools/profile-planner.py --repeats 5', 'python tools/profile-planner.py --repeats 5 --output performance-artifacts/profiles')
-          replace('tools/check-performance.py', 'import unittest\n', 'import unittest\nimport tempfile\nimport io\nfrom contextlib import redirect_stderr\nfrom unittest.mock import patch\n')
-          replace('tools/check-performance.py', "\n\nif __name__ == '__main__':", '''
-
-          class ProfileOutputTests(unittest.TestCase):
-              def test_new_nested_output(self):
-                  with tempfile.TemporaryDirectory() as root:
-                      output=Path(root)/'nested'/'run'
-                      profile.prepare_output(output)
-                      self.assertTrue(output.is_dir())
-                      self.assertEqual(list(output.iterdir()), [])
-
-              def test_empty_directory_is_already_claimed(self):
-                  with tempfile.TemporaryDirectory() as root:
-                      output=Path(root)/'run'
-                      profile.prepare_output(output)
-                      with self.assertRaises(FileExistsError):
-                          profile.prepare_output(output)
-                      self.assertEqual(list(output.iterdir()), [])
-
-              def test_rerun_preserves_all_old_results(self):
-                  with tempfile.TemporaryDirectory() as root:
-                      output=Path(root)
-                      old={'summary.json':b'old PASS', 'index-desktop-5.json':b'old repeat',
-                           'index-mobile-1.png':b'old image', 'index-mobile-1.heapprofile':b'old heap'}
-                      for name, value in old.items():
-                          (output/name).write_bytes(value)
-                      with self.assertRaises(FileExistsError):
-                          profile.prepare_output(output)
-                      self.assertEqual({p.name:p.read_bytes() for p in output.iterdir()},old)
-
-              def test_output_file_is_not_overwritten(self):
-                  with tempfile.TemporaryDirectory() as root:
-                      output=Path(root)/'run'; output.write_bytes(b'keep')
-                      with self.assertRaises(FileExistsError):
-                          profile.prepare_output(output)
-                      self.assertEqual(output.read_bytes(),b'keep')
-
-              def test_symlink_is_not_followed(self):
-                  with tempfile.TemporaryDirectory() as root:
-                      target=Path(root)/'target'; target.mkdir()
-                      output=Path(root)/'run'; output.symlink_to(target,target_is_directory=True)
-                      with self.assertRaises(FileExistsError):
-                          profile.prepare_output(output)
-                      self.assertTrue(output.is_symlink())
-                      self.assertEqual(list(target.iterdir()),[])
-
-              def test_cli_fails_before_git_browser_or_summary(self):
-                  with tempfile.TemporaryDirectory() as root, \\
-                       patch('sys.argv',['profile-planner.py','--repeats','1','--output',root]), \\
-                       patch.object(profile.subprocess,'run') as git, \\
-                       patch.object(profile,'sync_playwright') as browser, \\
-                       redirect_stderr(io.StringIO()) as stderr:
-                      with self.assertRaises(SystemExit) as failure:
-                          profile.main()
-                      self.assertEqual(failure.exception.code,2)
-                      self.assertIn('Choose a new --output directory',stderr.getvalue())
-                      git.assert_not_called(); browser.assert_not_called()
-                      self.assertEqual(list(Path(root).iterdir()),[])
-
-
-          if __name__ == '__main__':''')
-          p=Path('docs/performance.md')
-          p.write_text(p.read_text()+'''
-
-          ## Изоляция повторных запусков
-
-          Профилировщик атомарно создаёт новый каталог `--output`. Если путь уже
-          существует (даже пустой каталог, файл или symlink), команда завершается
-          с кодом 2 **до** запуска браузера и записи отчёта. Старые JSON, PNG и
-          heapprofile не удаляются и не перезаписываются. Для повторения используйте
-          новый путь, например `python tools/profile-planner.py --repeats 1 --output
-          performance-artifacts/run-2` (команда одной строкой). Это исключает смешение
-          пяти старых повторов с одним новым или старого PASS с неудачным запуском.
-
-          В CI измерения лежат в `performance-artifacts/profiles/`; файлы provenance
-          от gh остаются уровнем выше. Исторические артефакты, на которые ссылается
-          отчёт, сохраняют прежнюю структуру. Шесть дополнительных регрессий проверяют
-          новые/уже занятые каталоги, сохранность результатов, файлы, symlink и ранний
-          отказ CLI. Геометрия, методика измерений и baseline-числа не меняются.
-          ''')
-          PY
-          python -m pip install -r requirements-dev.txt
-          python -m py_compile tools/profile-planner.py tools/check-performance.py
-          python tools/check-performance.py 2>&1 | tee /tmp/pr59-stage/tests.log
-          git diff --check
-          git diff > /tmp/pr59-stage/changes.patch
-      - name: Publish commit object only (no ref update, no merge)
+      - name: Retrieve exact patch whose 13 tests passed
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        shell: bash
         run: |
+          gh run download 34541755162 --repo "$GH_REPO" --name pr59-artifact-isolation-stage --dir /tmp/pr59-recovery
+          gh --version > /tmp/pr59-recovery/gh-version.txt
+      - name: Verify patch and export tracked source without credentials
+        run: |
+          test "$(git rev-parse HEAD)" = 21c3e802f293a1694a0b5d1539499e738bc4b0e3
+          git apply --check /tmp/pr59-recovery/changes.patch
+          git apply /tmp/pr59-recovery/changes.patch
+          git diff --check
           python - <<'PY'
-          import json, subprocess, os
+          import subprocess,json
           from pathlib import Path
-          parent='21c3e802f293a1694a0b5d1539499e738bc4b0e3'
-          repo=os.environ['GH_REPO']
-          def api(endpoint, body=None):
-              cmd=['gh','api',f'repos/{repo}/{endpoint}']
-              if body is not None:cmd+=['--method','POST','--input','-']
-              return json.loads(subprocess.run(cmd,input=json.dumps(body) if body is not None else None,
-                  text=True,capture_output=True,check=True).stdout)
-          pr=api('pulls/59')
-          assert pr['state']=='open' and pr['head']['sha']==parent
           changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
           assert set(changed)=={'tools/profile-planner.py','tools/check-performance.py','docs/performance.md','.github/workflows/profile-planner.yml'}
-          entries=[{'path':p,'mode':'100644','type':'blob','sha':api('git/blobs',{'content':Path(p).read_text(),'encoding':'utf-8'})['sha']} for p in changed]
-          base=api('git/commits/'+parent)['tree']['sha']
-          tree=api('git/trees',{'base_tree':base,'tree':entries})['sha']
           subprocess.run(['git','add','--',*changed],check=True)
-          assert subprocess.check_output(['git','write-tree'],text=True).strip()==tree
-          commit=api('git/commits',{'message':'fix: isolate performance artifacts and reject reused output paths\n\nAddress PR59 stale-artifact review. Atomically claim a fresh directory before metadata/browser startup; preserve old measurements. Six regressions, CI provenance separated. No application or baseline changes.', 'tree':tree,'parents':[parent]})['sha']
-          receipt={'parent':parent,'tree':tree,'commit':commit,'changed':changed,'refsUpdated':False}
-          Path('/tmp/pr59-stage/receipt.json').write_text(json.dumps(receipt,indent=2))
-          subprocess.run(['git','archive','--format=tar','-o','/tmp/pr59-stage/source.tar',tree],check=True)
-          print(json.dumps(receipt,indent=2))
+          tree=subprocess.check_output(['git','write-tree'],text=True).strip()
+          entries=[{'path':p,'mode':'100644','type':'blob','sha':subprocess.check_output(['git','hash-object',p],text=True).strip()} for p in changed]
+          Path('/tmp/pr59-recovery/receipt.json').write_text(json.dumps({'tree':tree,'entries':entries},indent=2))
+          subprocess.run(['git','archive','--format=tar','-o','/tmp/pr59-recovery/source.tar',tree],check=True)
+          print(json.dumps({'tree':tree,'entries':entries},indent=2))
           PY
-      - name: Preserve exact staged source and evidence
+      - name: Preserve source and evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: pr59-artifact-isolation-stage
-          path: /tmp/pr59-stage/
+          name: pr59-isolation-recovered
+          path: /tmp/pr59-recovery/
           if-no-files-found: error
