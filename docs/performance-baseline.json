@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 2,
+  "purpose": "Measured profile, not test thresholds or geometry golden",
+  "runId": 34502240769,
+  "artifactId": 10162380204,
+  "artifactSha256": "461b039261f289cf4f975c06e4534146209ca28d580fa39dd9183974854d4908",
+  "headSha": "6f97d4a9ba421cf74074b72ad34100af468e64aa",
+  "checkoutMergeSha": "84bea3352550e03962bf5bb218ee59a811e0d960",
+  "applicationSha256": "ed746f261f1370d94cf49c32210e1525aad63514ffd4e9a995f8cee26c9a3fe3",
+  "environment": {
+    "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "python": "3.12.14",
+    "playwright": "1.57.0",
+    "viewports": {
+      "desktop": {
+        "width": 1800,
+        "height": 1200
+      },
+      "mobile": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    "dpr": 1,
+    "headless": true,
+    "physicalPhone": false,
+    "throttling": false,
+    "chromium": "143.0.7499.4"
+  },
+  "expectedProfiles": 20,
+  "completedProfiles": 20,
+  "profiles": {
+    "index.html/desktop": {
+      "startupReadyMs": {
+        "n": 5,
+        "median": 329.3,
+        "p95": 367.1,
+        "max": 367.1
+      },
+      "lookupUs": {
+        "objectAt": {
+          "n": 50,
+          "median": 6.81,
+          "p95": 7.04,
+          "max": 7.59
+        },
+        "roomAt": {
+          "n": 50,
+          "median": 0.1,
+          "p95": 0.31,
+          "max": 0.35
+        }
+      },
+      "rafCallbackElapsedMs": {
+        "hover": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "panZoom": {
+          "n": 85,
+          "median": 3.4,
+          "p95": 3.7,
+          "max": 4.4
+        },
+        "engineeringModes": {
+          "n": 45,
+          "median": 3.8,
+          "p95": 4.4,
+          "max": 4.6
+        }
+      },
+      "focusRoom": "craft",
+      "visibleTargetCount": 223,
+      "cacheRgba8MiB": 77.625,
+      "screenRgba8AtReadyMiB": 14.904053,
+      "v8UsedMedianMiB": {
+        "heapAfterReady": 7.431377,
+        "heapAfterInputsBeforeGc": 4.740021,
+        "heapAfterGc": 4.207535
+      },
+      "summedProcessRssAtReadyMedianMiB": 607.714844,
+      "sampleEstimatedAllocationsMedianMiB": 69.9505,
+      "phaseScriptMedianMs": {
+        "hover": 14.355,
+        "panZoom": 60.459,
+        "engineeringModes": 28.731
+      },
+      "phaseRendererTaskMedianMs": {
+        "hover": 295.81,
+        "panZoom": 195.587,
+        "engineeringModes": 131.952
+      }
+    },
+    "index.html/mobile": {
+      "startupReadyMs": {
+        "n": 5,
+        "median": 317.7,
+        "p95": 331.2,
+        "max": 331.2
+      },
+      "lookupUs": {
+        "objectAt": {
+          "n": 50,
+          "median": 6.745,
+          "p95": 7.4,
+          "max": 7.56
+        },
+        "roomAt": {
+          "n": 50,
+          "median": 0.1,
+          "p95": 0.32,
+          "max": 0.36
+        }
+      },
+      "rafCallbackElapsedMs": {
+        "hover": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "panZoom": {
+          "n": 85,
+          "median": 1,
+          "p95": 4.6,
+          "max": 4.7
+        },
+        "engineeringModes": {
+          "n": 45,
+          "median": 1.1,
+          "p95": 1.7,
+          "max": 1.9
+        }
+      },
+      "focusRoom": "craft",
+      "visibleTargetCount": 228,
+      "cacheRgba8MiB": 77.625,
+      "screenRgba8AtReadyMiB": 2.46991,
+      "v8UsedMedianMiB": {
+        "heapAfterReady": 7.479893,
+        "heapAfterInputsBeforeGc": 4.713516,
+        "heapAfterGc": 4.210323
+      },
+      "summedProcessRssAtReadyMedianMiB": 485.773438,
+      "sampleEstimatedAllocationsMedianMiB": 70.118519,
+      "phaseScriptMedianMs": {
+        "panZoom": 27.673,
+        "engineeringModes": 7.139
+      },
+      "phaseRendererTaskMedianMs": {
+        "panZoom": 95.974,
+        "engineeringModes": 50.678
+      }
+    },
+    "desert.html/desktop": {
+      "startupReadyMs": {
+        "n": 5,
+        "median": 183.1,
+        "p95": 186.6,
+        "max": 186.6
+      },
+      "lookupUs": {
+        "objectAt": {
+          "n": 50,
+          "median": 0.835,
+          "p95": 1.26,
+          "max": 1.29
+        },
+        "roomAt": {
+          "n": 50,
+          "median": 0.12,
+          "p95": 0.27,
+          "max": 0.3
+        }
+      },
+      "rafCallbackElapsedMs": {
+        "hover": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "panZoom": {
+          "n": 85,
+          "median": 0.5,
+          "p95": 0.6,
+          "max": 0.8
+        },
+        "engineeringModes": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        }
+      },
+      "focusRoom": "desert_hub",
+      "visibleTargetCount": 31,
+      "cacheRgba8MiB": 16.640625,
+      "screenRgba8AtReadyMiB": 14.904053,
+      "v8UsedMedianMiB": {
+        "heapAfterReady": 4.205353,
+        "heapAfterInputsBeforeGc": 4.413086,
+        "heapAfterGc": 2.722652
+      },
+      "summedProcessRssAtReadyMedianMiB": 498.734375,
+      "sampleEstimatedAllocationsMedianMiB": 12.008709,
+      "phaseScriptMedianMs": {
+        "hover": 13.414,
+        "panZoom": 11.394
+      },
+      "phaseRendererTaskMedianMs": {
+        "hover": 227.069,
+        "panZoom": 147.996
+      }
+    },
+    "desert.html/mobile": {
+      "startupReadyMs": {
+        "n": 5,
+        "median": 167.5,
+        "p95": 169.5,
+        "max": 169.5
+      },
+      "lookupUs": {
+        "objectAt": {
+          "n": 50,
+          "median": 0.85,
+          "p95": 1.73,
+          "max": 2.01
+        },
+        "roomAt": {
+          "n": 50,
+          "median": 0.145,
+          "p95": 0.29,
+          "max": 0.61
+        }
+      },
+      "rafCallbackElapsedMs": {
+        "hover": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        },
+        "panZoom": {
+          "n": 85,
+          "median": 0.5,
+          "p95": 1.8,
+          "max": 2.1
+        },
+        "engineeringModes": {
+          "n": 0,
+          "median": null,
+          "p95": null,
+          "max": null
+        }
+      },
+      "focusRoom": "desert_hub",
+      "visibleTargetCount": 32,
+      "cacheRgba8MiB": 16.640625,
+      "screenRgba8AtReadyMiB": 2.46991,
+      "v8UsedMedianMiB": {
+        "heapAfterReady": 4.176712,
+        "heapAfterInputsBeforeGc": 4.391373,
+        "heapAfterGc": 2.772324
+      },
+      "summedProcessRssAtReadyMedianMiB": 401.140625,
+      "sampleEstimatedAllocationsMedianMiB": 12.003159,
+      "phaseScriptMedianMs": {
+        "panZoom": 14.326
+      },
+      "phaseRendererTaskMedianMs": {
+        "panZoom": 94.96
+      }
+    }
+  }
+}

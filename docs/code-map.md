@@ -74,7 +74,7 @@ A→B и публичный HTTPS проверены; одновременная
 
 Полная команда — `python tools/validate.py`, список — с `--list`. Она обнаруживает
 JS/CJS для синтаксиса и все Node checker-ы, проверяет release stamps, затем запускает строгие аудиты и четыре
-HTTP-набора. `check-validation.py` проверяет сам runner. Единственный read-only
+HTTP-набора. `check-validation.py` проверяет сам runner. Обязательный read-only
 workflow — `validate-browser.yml`; check — `validate`. Старые Jungle-workflow удалены,
 существующая публикация Pages сохранена. [CI, окружение и границы защиты main](validation.md).
 
@@ -92,3 +92,7 @@ workflow — `validate-browser.yml`; check — `validate`. Старые Jungle-w
 
 [Предлагаемый ruleset main](main-protection.md) проверяет `check-merge-policy.cjs`,
 но офлайн-проверка не применяет административные настройки GitHub.
+
+[Профиль производительности Main/Desert](performance.md): измеритель
+`tools/profile-planner.py`, сырые HTTP-артефакты и отдельные расчёты RGBA/V8/RSS.
+Измерения не являются порогами обязательного CI.
