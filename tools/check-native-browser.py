@@ -13,10 +13,47 @@ smoke = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(smoke)
 
 
+# Capture the browser's own globals before any application module executes.
+# Window.caches is CacheStorage on a secure origin, not the planner's Canvas map.
+# Comparing descriptors AND identity detects both newly leaked globals and a
+# replacement of that native property; simply excluding "caches" would not.
+GLOBAL_SCOPE_PROBE = """(() => {
+  const keys = ['D','ENG','cam','caches','OBJECT_RENDERERS','TILE_RENDERERS'];
+  const baseline = keys.map(key => ({key,
+    descriptor: Object.getOwnPropertyDescriptor(window, key), value: window[key]}));
+  const fields = ['value','get','set','writable','enumerable','configurable'];
+  window.__nativeGlobalLeaks = () => baseline.filter(({key, descriptor, value}) => {
+    const current = Object.getOwnPropertyDescriptor(window, key);
+    return !!current !== !!descriptor || (descriptor &&
+      (fields.some(field => current[field] !== descriptor[field]) || window[key] !== value));
+  }).map(({key}) => key);
+})();"""
+
+
+def check_global_scope(page):
+    assert page.evaluate('window.__nativeGlobalLeaks()') == [], 'application leaked or replaced a global'
+    # Negative controls: the same detector must reject newly leaked data AND a
+    # replacement of the browser property, without touching the running planner.
+    for key in ('D', 'caches'):
+        detected = page.evaluate("""key => {
+          const descriptor = Object.getOwnPropertyDescriptor(window, key);
+          try {
+            Object.defineProperty(window, key, {value: {}, configurable: true});
+            return window.__nativeGlobalLeaks();
+          } finally {
+            if (descriptor) Object.defineProperty(window, key, descriptor);
+            else delete window[key];
+          }
+        }""", key)
+        assert detected == [key], f'global-scope detector missed replacement of {key}: {detected}'
+    assert page.evaluate('window.__nativeGlobalLeaks()') == [], 'negative control did not restore globals'
+
+
 def check(browser, origin, entry, device, artifacts):
     context = browser.new_context(viewport=smoke.VIEWPORTS[device], device_scale_factor=1,
                                   is_mobile=device == 'mobile', has_touch=device == 'mobile')
     page = context.new_page()
+    page.add_init_script(GLOBAL_SCOPE_PROBE)
     page.add_init_script("document.addEventListener('planner-started', event => {window.__nativeAPI=event.detail;});")
     log, failures = [], []
     # Resource/error observation only. Unlike smoke mutation tests, no routes and
@@ -32,7 +69,7 @@ def check(browser, origin, entry, device, artifacts):
         assert response and response.status == 200
         smoke.healthy(page, failures)
         page.wait_for_function('!!window.__nativeAPI')
-        assert page.evaluate("['D','ENG','cam','caches','OBJECT_RENDERERS','TILE_RENDERERS'].every(key=>!Object.hasOwn(window,key))")
+        check_global_scope(page)
         version = page.locator('meta[name="planner-release"]').get_attribute('content')
         resources = [row for row in log if row['type'] in ('script', 'stylesheet')]
         assert resources and all(row['status'] == 200 and ('?v=' + version) in row['url'] for row in resources)
