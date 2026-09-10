@@ -1,10 +1,16 @@
+import { cp, cy, objectBox, seeded } from './core.js';
+import { drawBed, drawPersonal } from './render-base.js';
+import { drawChest, drawFurniture, drawNpc, drawStation, registerObjectRenderer } from './render-objects.js';
+import { pxRect, rect, registerTileRenderer } from './render-tiles.js';
+import { CACHE_TILE } from './state.js';
+
 // Scene-specific rendering for Ice/Snow/Copper blocks, water and the Cavern Pylon.
-function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
+export function drawUndergroundTileMaterial(planner, ctx, mat, wx, wy) {
   if (mat === "snow_block_plain") {
-    const x = cp(wx),
-      y = cy(wy),
+    const x = cp(planner, wx),
+      y = cy(planner, wy),
       t = CACHE_TILE,
-      p = MAT.snow_block_plain;
+      p = planner.MAT.snow_block_plain;
     rect(ctx, x, y, t, t, p.base, p.dark, 1);
     ctx.fillStyle = p.light;
     ctx.fillRect(x + 1, y + 1, t - 2, 3);
@@ -15,10 +21,10 @@ function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
   }
 
   if (mat === "copper_brick_plain") {
-    const x = cp(wx),
-      y = cy(wy),
+    const x = cp(planner, wx),
+      y = cy(planner, wy),
       t = CACHE_TILE,
-      p = MAT.copper_brick_plain;
+      p = planner.MAT.copper_brick_plain;
     rect(ctx, x, y, t, t, p.base, p.dark, 1);
     ctx.fillStyle = p.dark;
     ctx.fillRect(x, y + 7, t, 2);
@@ -33,10 +39,10 @@ function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
     throw new Error(`Unregistered scene tile: ${mat}`);
   }
 
-  const x = cp(wx),
-    y = cy(wy),
+  const x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE,
-    p = MAT.ice_block_plain;
+    p = planner.MAT.ice_block_plain;
   rect(ctx, x, y, t, t, p.base, p.dark, 1);
   ctx.fillStyle = p.light;
   ctx.fillRect(x + 2, y + 2, 7, 1);
@@ -51,8 +57,8 @@ function drawUndergroundTileMaterial(ctx, mat, wx, wy) {
   }
 }
 
-function drawUndergroundWater(ctx, o) {
-  const b = objectBox(o),
+export function drawUndergroundWater(planner, ctx, o) {
+  const b = objectBox(planner, o),
     gradient = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
   gradient.addColorStop(0, "#8be0ec");
   gradient.addColorStop(0.16, "#3aa8c4");
@@ -92,8 +98,8 @@ function drawUndergroundWater(ctx, o) {
   ctx.restore();
 }
 
-function drawGoblinGreenTorch(ctx, o) {
-  const b = objectBox(o),
+export function drawGoblinGreenTorch(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   ctx.save();
   ctx.globalAlpha = 0.32;
@@ -121,8 +127,8 @@ function drawGoblinGreenTorch(ctx, o) {
   ctx.fill();
 }
 
-function drawGoblinCopperChandelier(ctx, o) {
-  const b = objectBox(o),
+export function drawGoblinCopperChandelier(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     top = b.y + 1,
     barY = b.y + 13;
@@ -147,8 +153,8 @@ function drawGoblinCopperChandelier(ctx, o) {
   }
 }
 
-function drawGoblinToolFrame(ctx, o) {
-  const b = objectBox(o),
+export function drawGoblinToolFrame(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
   pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 4, "#5b3a26");
@@ -182,8 +188,8 @@ function drawGoblinToolFrame(ctx, o) {
   ctx.restore();
 }
 
-function drawCavernPylon(ctx, o) {
-  const b = objectBox(o),
+export function drawCavernPylon(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
   ctx.save();
@@ -218,8 +224,8 @@ function drawCavernPylon(ctx, o) {
 }
 
 // Scene-local room lighting and wall-display sprites.
-function drawUndergroundV3IceLantern(ctx, o) {
-  const b = objectBox(o), cx = b.x + b.w / 2;
+export function drawUndergroundV3IceLantern(planner, ctx, o) {
+  const b = objectBox(planner, o), cx = b.x + b.w / 2;
   ctx.save();
   ctx.globalAlpha = 0.28;
   ctx.fillStyle = "#91e9ff";
@@ -233,8 +239,8 @@ function drawUndergroundV3IceLantern(ctx, o) {
   pxRect(ctx, cx - 2, b.y + 8, 4, Math.max(3, b.h - 13), "#e9fdff");
 }
 
-function drawUndergroundV3CrystalChandelier(ctx, o) {
-  const b = objectBox(o), cx = b.x + b.w / 2, barY = b.y + 13;
+export function drawUndergroundV3CrystalChandelier(planner, ctx, o) {
+  const b = objectBox(planner, o), cx = b.x + b.w / 2, barY = b.y + 13;
   ctx.save();
   ctx.globalAlpha = 0.2;
   ctx.fillStyle = "#b7efff";
@@ -259,8 +265,8 @@ function drawUndergroundV3CrystalChandelier(ctx, o) {
   }
 }
 
-function drawUndergroundV3CrystalCandelabra(ctx, o) {
-  const b = objectBox(o), cx = b.x + b.w / 2, baseY = b.y + b.h - 4;
+export function drawUndergroundV3CrystalCandelabra(planner, ctx, o) {
+  const b = objectBox(planner, o), cx = b.x + b.w / 2, baseY = b.y + b.h - 4;
   ctx.save();
   ctx.globalAlpha = 0.22;
   ctx.fillStyle = "#c5f3ff";
@@ -276,8 +282,8 @@ function drawUndergroundV3CrystalCandelabra(ctx, o) {
   }
 }
 
-function drawUndergroundV3MechanicFrame(ctx, o) {
-  const b = objectBox(o), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+export function drawUndergroundV3MechanicFrame(planner, ctx, o) {
+  const b = objectBox(planner, o), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
   pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 4, "#26373f");
   pxRect(ctx, b.x + 4, b.y + 4, b.w - 8, b.h - 8, "#8d593d");
   pxRect(ctx, b.x + 6, b.y + 6, b.w - 12, b.h - 12, "#20343b");
@@ -300,20 +306,24 @@ function drawUndergroundV3MechanicFrame(ctx, o) {
   }
 }
 
-registerObjectRenderer("water", ["fishing_ice"], drawUndergroundWater);
-registerObjectRenderer("pylon", ["cavern_pylon"], drawCavernPylon);
-registerObjectRenderer("light", ["green_torch"], drawGoblinGreenTorch);
-registerObjectRenderer("light", ["copper_chandelier"], drawGoblinCopperChandelier);
-registerObjectRenderer("light", ["ice_lantern"], drawUndergroundV3IceLantern);
-registerObjectRenderer("light", ["crystal_chandelier"], drawUndergroundV3CrystalChandelier);
-registerObjectRenderer("light", ["crystal_candelabra"], drawUndergroundV3CrystalCandelabra);
-registerObjectRenderer("display", ["goblin_display"], drawGoblinToolFrame);
-registerObjectRenderer("display", ["mechanic_display"], drawUndergroundV3MechanicFrame);
-registerObjectRenderer("npc", ["mechanic_npc", "goblin_npc", "princess_npc"], drawNpc);
-registerObjectRenderer("furniture", ["mechanic", "tinkerer_station", "princess_room", "fishing_blue"], drawFurniture);
-registerObjectRenderer("chest", ["special"], drawChest);
-registerObjectRenderer("station", ["tinkerer_station"], drawStation);
-registerObjectRenderer("personal_storage", ["special"], drawPersonal);
-registerObjectRenderer("bed", ["princess_room"], drawBed);
+export function registerUndergroundRenderers(planner) {
 
-registerTileRenderer("block", ["snow_block_plain", "copper_brick_plain", "ice_block_plain"], drawUndergroundTileMaterial);
+
+  registerObjectRenderer(planner, "water", ["fishing_ice"], drawUndergroundWater.bind(null, planner));
+  registerObjectRenderer(planner, "pylon", ["cavern_pylon"], drawCavernPylon.bind(null, planner));
+  registerObjectRenderer(planner, "light", ["green_torch"], drawGoblinGreenTorch.bind(null, planner));
+  registerObjectRenderer(planner, "light", ["copper_chandelier"], drawGoblinCopperChandelier.bind(null, planner));
+  registerObjectRenderer(planner, "light", ["ice_lantern"], drawUndergroundV3IceLantern.bind(null, planner));
+  registerObjectRenderer(planner, "light", ["crystal_chandelier"], drawUndergroundV3CrystalChandelier.bind(null, planner));
+  registerObjectRenderer(planner, "light", ["crystal_candelabra"], drawUndergroundV3CrystalCandelabra.bind(null, planner));
+  registerObjectRenderer(planner, "display", ["goblin_display"], drawGoblinToolFrame.bind(null, planner));
+  registerObjectRenderer(planner, "display", ["mechanic_display"], drawUndergroundV3MechanicFrame.bind(null, planner));
+  registerObjectRenderer(planner, "npc", ["mechanic_npc", "goblin_npc", "princess_npc"], drawNpc.bind(null, planner));
+  registerObjectRenderer(planner, "furniture", ["mechanic", "tinkerer_station", "princess_room", "fishing_blue"], drawFurniture.bind(null, planner));
+  registerObjectRenderer(planner, "chest", ["special"], drawChest.bind(null, planner));
+  registerObjectRenderer(planner, "station", ["tinkerer_station"], drawStation.bind(null, planner));
+  registerObjectRenderer(planner, "personal_storage", ["special"], drawPersonal.bind(null, planner));
+  registerObjectRenderer(planner, "bed", ["princess_room"], drawBed.bind(null, planner));
+
+  registerTileRenderer(planner, "block", ["snow_block_plain", "copper_brick_plain", "ice_block_plain"], drawUndergroundTileMaterial.bind(null, planner));
+}

@@ -1,6 +1,6 @@
 // Upper complex, crafting floors, towers and boss-arena solid geometry.
 // Generated from the canonical monolith without changing item order.
-const SOLIDS_UPPER = [
+export const SOLIDS_UPPER = [
   {
     x1: 45,
     y1: -3,

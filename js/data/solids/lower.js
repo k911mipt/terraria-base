@@ -1,6 +1,6 @@
 // Museum, technical passages, conveyors and four Dart Trap columns.
 // Generated from the canonical monolith without changing item order.
-const SOLIDS_LOWER = [
+export const SOLIDS_LOWER = [
   {
     x1: -19,
     y1: 55,

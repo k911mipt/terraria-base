@@ -1,13 +1,13 @@
 // World bounds, named rooms and high-level navigation metadata.
 
-const BASE_BOUNDS = {
+export const BASE_BOUNDS = {
   xMin: -200,
   xMax: 167,
   yMin: -3,
   yMax: 68,
 };
 
-const ROOMS = [
+export const ROOMS = [
   {
     id: "left_tower",
     name: "Левая боковая башня / проход",
@@ -190,7 +190,7 @@ const ROOMS = [
   },
 ];
 
-const RESERVES = [
+export const RESERVES = [
   {
     x1: 32,
     y1: 13,
@@ -207,10 +207,10 @@ const RESERVES = [
   },
 ];
 
-const BASE_TITLE =
+export const BASE_TITLE =
   "Terraria — музей, ямы на базе v2 · точные столбцы ловушек и опущенные люки";
 
-const MUSEUM_CHAPTERS = [
+export const MUSEUM_CHAPTERS = [
   {
     id: "CH1",
     name: "Глава 1 · Ранний мир",

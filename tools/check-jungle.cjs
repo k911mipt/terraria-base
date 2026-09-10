@@ -6,32 +6,12 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
-const files = [
-  "js/data/jungle/layout.js",
-  "js/data/jungle/solids.js",
-  "js/data/jungle/backgrounds.js",
-  "js/data/jungle/objects.js",
-  "js/data/jungle/index.js",
-  "js/data/jungle/engineering.js",
-];
+const { loadScene } = require("./lib/load-scene.cjs");
+const { context, run, runFile } = loadScene("jungle.html");
+const { D, ENG } = run("({D, ENG})");
 
-const context = vm.createContext({ console });
-for (const relative of files) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {
-    filename: relative,
-  });
-}
 
-const { D, ENG } = vm.runInContext(
-  "({ D: JSON.parse(JSON.stringify(D)), ENG: JSON.parse(JSON.stringify(ENG)) })",
-  context,
-);
-
-vm.runInContext(
-  fs.readFileSync(path.join(root, "js/runtime/core.js"), "utf8"),
-  context,
-  { filename: "js/runtime/core.js" },
-);
+runFile("js/runtime/core.js");
 
 const displayedDoorModules = vm.runInContext(
   `Object.fromEntries(
@@ -383,10 +363,10 @@ assert(
   "Do not replace the open root level with a solid artificial foundation",
 );
 
-for (const relative of ["js/data/materials.js", "js/data/jungle/materials.js",
-  "js/runtime/placement-contract.js", "js/runtime/building-audit.js", "js/runtime/lighting-audit.js"]) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {filename: relative});
+for (const relative of ["js/runtime/placement-contract.js", "js/runtime/building-audit.js", "js/runtime/lighting-audit.js"]) {
+  runFile(relative);
 }
+
 const construction = vm.runInContext("auditBuilding(D, BLOCK_SPECS)", context);
 const lighting = vm.runInContext("auditLighting(D, BLOCK_SPECS)", context);
 for (const error of construction.errors) assert(false, `${error.rule}: ${error.message}`);

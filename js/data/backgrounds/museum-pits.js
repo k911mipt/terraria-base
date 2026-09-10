@@ -1,6 +1,6 @@
 // Museum chapters, light niches and pit technical passages.
 // Generated from the canonical monolith without changing item order.
-const BACKGROUNDS_MUSEUM_PITS = [
+export const BACKGROUNDS_MUSEUM_PITS = [
   {
     x1: 9,
     y1: 55,

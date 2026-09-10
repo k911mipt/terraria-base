@@ -9,8 +9,7 @@ run(`
   elements.mode.value = 'visual';
   globalThis.document = {getElementById: id=>elements[id]};
   // Visual mode has no engineering foreground overlay and does not draw here.
-  engineeringDeviceAtTile = () => null;
-  schedule = () => {};
+  window = {requestAnimationFrame: () => 1};
 `);
 for (const id of ["HEART_STAT_L", "HEART_STAT_R"]) {
   run(`globalThis.statue = D.objects.find(o=>o.id===${JSON.stringify(id)});`);

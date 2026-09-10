@@ -1,5 +1,12 @@
+import { auditBuilding, buildingGrid, buildingTileKey } from './building-audit.js';
+import { escHtml } from './formatters.js';
+import { auditLighting, lightingZonesFor, renderLightingAudit } from './lighting-audit.js';
+import { validateObjectRenderers } from './render-objects.js';
+import { validateTileRenderers } from './render-tiles.js';
+import { validateObjectData, validateUsedMaterialSpecs } from './validation.js';
+
 // One computed result for CLI and UI. No stored PASS or design-history field is read.
-const SCENE_REQUIREMENTS = {
+export const SCENE_REQUIREMENTS = {
   main: {
     residents: ['ZOO', 'GOLF', 'GUIDE', 'MER', 'ARMS', 'NURSE', 'TRUFFLE'],
     roomSizes: [{id: 'craft', width: 46, height: 36}],
@@ -37,7 +44,7 @@ const SCENE_REQUIREMENTS = {
   },
 };
 
-function computeSceneAudit(scene, inputs) {
+export function computeSceneAudit(scene, inputs) {
   const errors = [], warnings = [], requirements = [];
   const add = (rule, message, object = null) => errors.push({
     scene: scene.sceneId, rule, id: object?.id ?? null,
@@ -138,17 +145,15 @@ function computeSceneAudit(scene, inputs) {
     ],
   };
 }
-
-let sceneAudit = null;
-function populateSceneAudit() {
-  sceneAudit = computeSceneAudit(D, {
-    blockSpecs: BLOCK_SPECS, wallSpecs: WALL_SPECS, materials: MAT, wallColors: WALL,
-    rendererErrors: [...validateObjectRenderers(D), ...validateTileRenderers(D)],
+export function populateSceneAudit(planner) {
+  planner.sceneAudit = computeSceneAudit(planner.D, {
+    blockSpecs: planner.BLOCK_SPECS, wallSpecs: planner.WALL_SPECS, materials: planner.MAT, wallColors: planner.WALL,
+    rendererErrors: [...validateObjectRenderers(planner, planner.D), ...validateTileRenderers(planner, planner.D)],
   });
-  renderSceneAudit(sceneAudit, document.getElementById('status'));
+  renderSceneAudit(planner.sceneAudit, planner.document.getElementById('status'));
 }
 
-function renderSceneAudit(report, element) {
+export function renderSceneAudit(report, element) {
   const {metrics: m} = report;
   element.dataset.auditStatus = report.status;
   const badge = (text, kind = '') => `<span class="badge${kind ? ` ${kind}` : ''}">${escHtml(text)}</span>`;

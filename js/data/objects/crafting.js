@@ -1,6 +1,6 @@
 // Crafting stations and work-floor fixtures.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_CRAFTING = [
+export const OBJECTS_CRAFTING = [
   {
     id: "C_STMP",
     name: "Стимпанк-котёл",

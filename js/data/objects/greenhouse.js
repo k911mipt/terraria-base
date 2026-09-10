@@ -1,6 +1,6 @@
 // Planter-box rows and greenhouse lighting.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_GREENHOUSE = [
+export const OBJECTS_GREENHOUSE = [
   {
     id: "HERB_1_DAY",
     name: "Daybloom — верхний ярус",

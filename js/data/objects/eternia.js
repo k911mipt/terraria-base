@@ -1,8 +1,9 @@
+import { OBJECTS_ARENA } from './arena.js';
 // Dual-purpose Old One's Army layout inside the existing left boss arena.
 // No new physical floors or ceilings are required: the current Gray Brick floor
 // and four Boreal Wood Platform rows already satisfy both use cases.
 
-const bossArenaBast = OBJECTS_ARENA.find((object) => object.id === "BOSS_BAST_C");
+export const bossArenaBast = OBJECTS_ARENA.find((object) => object.id === "BOSS_BAST_C");
 if (bossArenaBast) {
   Object.assign(bossArenaBast, {
     x: -123,
@@ -12,7 +13,7 @@ if (bossArenaBast) {
   });
 }
 
-const OBJECTS_ETERNIA = [
+export const OBJECTS_ETERNIA = [
   {
     id: "ETERNIA_PORTAL_L",
     name: "Ожидаемая зона левого портала",

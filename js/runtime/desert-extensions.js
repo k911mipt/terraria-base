@@ -1,16 +1,22 @@
+import { cp, cy, objectBox, seeded } from './core.js';
+import { drawBed, drawPlatformTile } from './render-base.js';
+import { drawFurniture, drawNpc, drawStation, registerObjectRenderer } from './render-objects.js';
+import { pxRect, rect, registerTileRenderer } from './render-tiles.js';
+import { CACHE_TILE } from './state.js';
+
 // Scene-specific drawing extensions without changing the shared main-base runtime.
-function drawDesertTileMaterial(ctx, mat, wx, wy) {
-  const x = cp(wx),
-    y = cy(wy),
+export function drawDesertTileMaterial(planner, ctx, mat, wx, wy) {
+  const x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE;
 
   if (mat === "palm_platform") {
-    drawPlatformTile(ctx, wx, wy, mat);
+    drawPlatformTile(planner, ctx, wx, wy, mat);
     return;
   }
 
   if (mat === "sand") {
-    const p = MAT.sand;
+    const p = planner.MAT.sand;
     rect(ctx, x, y, t, t, p.base, p.dark, 1);
     for (let i = 0; i < 5; i++) {
       const qx = x + 2 + Math.floor(seeded(wx, wy, i) * 12),
@@ -22,7 +28,7 @@ function drawDesertTileMaterial(ctx, mat, wx, wy) {
   }
 
   if (mat === "palm_wood") {
-    const p = MAT.palm_wood;
+    const p = planner.MAT.palm_wood;
     rect(ctx, x, y, t, t, p.base, p.dark, 1);
     ctx.fillStyle = p.dark;
     ctx.fillRect(x + 4, y, 2, t);
@@ -39,14 +45,14 @@ function drawDesertTileMaterial(ctx, mat, wx, wy) {
   throw new Error(`Unregistered scene tile: ${mat}`);
 }
 
-function drawDesertTileWall(ctx, mat, wx, wy) {
+export function drawDesertTileWall(planner, ctx, mat, wx, wy) {
   if (mat !== "palm_wall") {
     throw new Error(`Unregistered scene wall: ${mat}`);
   }
 
-  const p = WALL.palm_wall,
-    x = cp(wx),
-    y = cy(wy),
+  const p = planner.WALL.palm_wall,
+    x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE;
   ctx.globalAlpha = 0.88;
   ctx.fillStyle = p[0];
@@ -64,8 +70,8 @@ function drawDesertTileWall(ctx, mat, wx, wy) {
   ctx.fillRect(x + 1, y + 1, 2, t - 2);
 }
 
-function drawWater(ctx, o) {
-  const b = objectBox(o),
+export function drawWater(planner, ctx, o) {
+  const b = objectBox(planner, o),
     gradient = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
   gradient.addColorStop(0, "#47c1ca");
   gradient.addColorStop(0.18, "#258da4");
@@ -97,8 +103,8 @@ function drawWater(ctx, o) {
   ctx.restore();
 }
 
-function drawCactus(ctx, o) {
-  const b = objectBox(o),
+export function drawCactus(planner, ctx, o) {
+  const b = objectBox(planner, o),
     x = b.x + b.w / 2;
   ctx.fillStyle = "#1f5e30";
   ctx.fillRect(x - 4, b.y + 3, 8, b.h - 3);
@@ -110,8 +116,8 @@ function drawCactus(ctx, o) {
   ctx.fillRect(x - 2, b.y + 4, 2, b.h - 7);
 }
 
-function drawPalmTree(ctx, o) {
-  const b = objectBox(o),
+export function drawPalmTree(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   ctx.fillStyle = "#57351f";
   ctx.fillRect(cx - 3, b.y + b.h * 0.28, 7, b.h * 0.72);
@@ -134,8 +140,8 @@ function drawPalmTree(ctx, o) {
   ctx.fillRect(cx + 1, cy + 1, 12, 4);
 }
 
-function drawDesertPylon(ctx, o) {
-  const b = objectBox(o),
+export function drawDesertPylon(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
   ctx.fillStyle = "#7a5428";
@@ -159,14 +165,18 @@ function drawDesertPylon(ctx, o) {
   pxRect(ctx, b.x + 3, b.y + b.h - 5, b.w - 6, 4, "#9f7135");
 }
 
-registerObjectRenderer("water", ["oasis_water"], drawWater);
-registerObjectRenderer("cactus", ["nature"], drawCactus);
-registerObjectRenderer("palm_tree", ["nature"], drawPalmTree);
-registerObjectRenderer("pylon", ["desert_pylon"], drawDesertPylon);
-registerObjectRenderer("npc", ["desert_npc", "desert_npc_alt"], drawNpc);
-registerObjectRenderer("furniture", ["desert_furniture"], drawFurniture);
-registerObjectRenderer("bed", ["desert_bed"], drawBed);
-registerObjectRenderer("station", ["desert_furniture"], drawStation);
+export function registerDesertRenderers(planner) {
 
-registerTileRenderer("block", ["palm_platform", "sand", "palm_wood"], drawDesertTileMaterial);
-registerTileRenderer("wall", ["palm_wall"], drawDesertTileWall);
+
+  registerObjectRenderer(planner, "water", ["oasis_water"], drawWater.bind(null, planner));
+  registerObjectRenderer(planner, "cactus", ["nature"], drawCactus.bind(null, planner));
+  registerObjectRenderer(planner, "palm_tree", ["nature"], drawPalmTree.bind(null, planner));
+  registerObjectRenderer(planner, "pylon", ["desert_pylon"], drawDesertPylon.bind(null, planner));
+  registerObjectRenderer(planner, "npc", ["desert_npc", "desert_npc_alt"], drawNpc.bind(null, planner));
+  registerObjectRenderer(planner, "furniture", ["desert_furniture"], drawFurniture.bind(null, planner));
+  registerObjectRenderer(planner, "bed", ["desert_bed"], drawBed.bind(null, planner));
+  registerObjectRenderer(planner, "station", ["desert_furniture"], drawStation.bind(null, planner));
+
+  registerTileRenderer(planner, "block", ["palm_platform", "sand", "palm_wood"], drawDesertTileMaterial.bind(null, planner));
+  registerTileRenderer(planner, "wall", ["palm_wall"], drawDesertTileWall.bind(null, planner));
+}

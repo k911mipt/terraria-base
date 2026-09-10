@@ -6,32 +6,12 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
-const files = [
-  "js/data/underground/layout.js",
-  "js/data/underground/solids.js",
-  "js/data/underground/backgrounds.js",
-  "js/data/underground/objects.js",
-  "js/data/underground/index.js",
-  "js/data/underground/engineering.js",
-];
+const { loadScene } = require("./lib/load-scene.cjs");
+const { context, run, runFile } = loadScene("underground.html");
+const { D, ENG } = run("({D, ENG})");
 
-const context = vm.createContext({ console });
-for (const relative of files) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {
-    filename: relative,
-  });
-}
 
-const { D, ENG } = vm.runInContext(
-  "({ D: JSON.parse(JSON.stringify(D)), ENG: JSON.parse(JSON.stringify(ENG)) })",
-  context,
-);
-
-vm.runInContext(
-  fs.readFileSync(path.join(root, "js/runtime/core.js"), "utf8"),
-  context,
-  { filename: "js/runtime/core.js" },
-);
+runFile("js/runtime/core.js");
 
 const displayedDoorModules = vm.runInContext(
   `Object.fromEntries(

@@ -82,7 +82,7 @@ const root = path.resolve(__dirname, '..'), temporary = fs.mkdtempSync(path.join
 try {
   for (const dir of ['js', 'tools']) fs.cpSync(path.join(root, dir), path.join(temporary, dir), {recursive:true});
   for (const entry of SCENES) fs.copyFileSync(path.join(root, entry), path.join(temporary, entry));
-  fs.writeFileSync(path.join(temporary, 'js/data/backgrounds/index.js'), 'const BACKGROUNDS = [];\n');
+  fs.writeFileSync(path.join(temporary, 'js/data/backgrounds/index.js'), 'export const BACKGROUNDS = [];\n');
   const failed = spawnSync(process.execPath, [path.join(temporary, 'tools/audit-scene.cjs'), '--json'], {encoding:'utf8', maxBuffer:16*1024*1024});
   assert.ifError(failed.error);
   assert.equal(failed.status, 1, failed.stderr);

@@ -1,5 +1,8 @@
+import { ENGINEERING_CIRCUITS } from './circuits.js';
+import { ENGINEERING_CONTROLS } from './controls.js';
+import { ENGINEERING_TRAPS } from './traps.js';
 // Engineering-model assembly.
-const ENG = {
+export const ENG = {
   stage: "Ямы v3 clean · база v2 + точные столбцы ловушек и опущенные люки",
   focus: {
     x1: -22,

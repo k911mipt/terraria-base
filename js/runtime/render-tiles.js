@@ -1,5 +1,9 @@
+import { cp, cy, seeded } from './core.js';
+import { drawGlassPlatformTile, drawPlatformTile } from './render-base.js';
+import { CACHE_TILE } from './state.js';
+
 // Canvas tile textures and explicit material-to-function dispatch.
-function rect(ctx, x, y, w, h, fill, stroke = null, lw = 1) {
+export function rect(ctx, x, y, w, h, fill, stroke = null, lw = 1) {
   ctx.fillStyle = fill;
   ctx.fillRect(x, y, w, h);
   if (stroke) {
@@ -9,10 +13,10 @@ function rect(ctx, x, y, w, h, fill, stroke = null, lw = 1) {
   }
 }
 
-function drawCommonTileMaterial(ctx, mat, wx, wy) {
-  const p = MAT[mat],
-    x = cp(wx),
-    y = cy(wy),
+export function drawCommonTileMaterial(planner, ctx, mat, wx, wy) {
+  const p = planner.MAT[mat],
+    x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE;
   rect(ctx, x, y, t, t, p.base, p.dark, 1);
   ctx.imageSmoothingEnabled = false;
@@ -83,7 +87,7 @@ function drawCommonTileMaterial(ctx, mat, wx, wy) {
       );
     }
   } else if (mat === "mushroom_grass") {
-    ctx.fillStyle = MAT.mud.base;
+    ctx.fillStyle = planner.MAT.mud.base;
     ctx.fillRect(x, y + 5, t, 11);
     ctx.fillStyle = p.light;
     ctx.fillRect(x, y, t, 5);
@@ -160,10 +164,10 @@ function drawCommonTileMaterial(ctx, mat, wx, wy) {
   }
 }
 
-function drawCommonTileWall(ctx, mat, wx, wy) {
-  const p = WALL[mat],
-    x = cp(wx),
-    y = cy(wy),
+export function drawCommonTileWall(planner, ctx, mat, wx, wy) {
+  const p = planner.WALL[mat],
+    x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE;
   ctx.globalAlpha = 0.88;
   ctx.fillStyle = p[0];
@@ -237,10 +241,10 @@ function drawCommonTileWall(ctx, mat, wx, wy) {
   }
 }
 
-function applyTileShape(ctx, shape, wx, wy) {
+export function applyTileShape(planner, ctx, shape, wx, wy) {
   if (!shape) return;
-  const x = cp(wx),
-    y = cy(wy),
+  const x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE;
   ctx.save();
   ctx.globalCompositeOperation = "destination-out";
@@ -273,16 +277,12 @@ function applyTileShape(ctx, shape, wx, wy) {
   ctx.restore();
 }
 
-function pxRect(ctx, x, y, w, h, c) {
+export function pxRect(ctx, x, y, w, h, c) {
   ctx.fillStyle = c;
   ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
 }
-
-// Map lookup is shared by validation and drawing. Registration is explicit;
-// source data cannot add its own fallback or overwrite an existing renderer.
-const TILE_RENDERERS = {block: new Map(), wall: new Map()};
-function registerTileRenderer(layer, materials, draw) {
-  const registry = Object.hasOwn(TILE_RENDERERS, layer) ? TILE_RENDERERS[layer] : null;
+export function registerTileRenderer(planner, layer, materials, draw) {
+  const registry = Object.hasOwn(planner.TILE_RENDERERS, layer) ? planner.TILE_RENDERERS[layer] : null;
   if (!registry || !Array.isArray(materials) || !materials.length ||
       materials.some(id => typeof id !== "string" || !id.trim()) || typeof draw !== "function")
     throw new Error("Invalid tile renderer registration");
@@ -290,46 +290,50 @@ function registerTileRenderer(layer, materials, draw) {
     throw new Error(`Duplicate tile renderer: ${layer} / ${materials.join(", ")}`);
   for (const id of materials) registry.set(id, draw);
 }
-function tileRenderer(layer, material) {
-  const registry = Object.hasOwn(TILE_RENDERERS, layer) ? TILE_RENDERERS[layer] : null;
+export function tileRenderer(planner, layer, material) {
+  const registry = Object.hasOwn(planner.TILE_RENDERERS, layer) ? planner.TILE_RENDERERS[layer] : null;
   const draw = registry?.get(material);
   return typeof draw === "function" ? draw : null;
 }
-function validateTileRenderers(scene) {
+export function validateTileRenderers(planner, scene) {
   const errors = [];
   for (const [layer, regions] of [["block",scene.solids],["wall",scene.backgrounds]]) {
     const checked = new Set();
     for (const region of regions) {
       if (checked.has(region.mat)) continue;
       checked.add(region.mat);
-      if (!tileRenderer(layer, region.mat))
+      if (!tileRenderer(planner, layer, region.mat))
         errors.push(`${scene.title}: ${layer} ${region.mat} at X${region.x1} Y${region.y1}: unregistered tile renderer`);
     }
   }
   return errors;
 }
-function drawRegisteredTile(layer, ctx, mat, wx, wy) {
-  const draw = tileRenderer(layer, mat);
+export function drawRegisteredTile(planner, layer, ctx, mat, wx, wy) {
+  const draw = tileRenderer(planner, layer, mat);
   if (!draw) throw new Error(`Unregistered tile renderer: ${layer} / ${mat} X${wx} Y${wy}`);
   return draw(ctx, mat, wx, wy);
 }
-function tileMaterial(ctx, mat, wx, wy) { return drawRegisteredTile("block", ctx, mat, wx, wy); }
-function tileWall(ctx, mat, wx, wy) { return drawRegisteredTile("wall", ctx, mat, wx, wy); }
+export function tileMaterial(planner, ctx, mat, wx, wy) { return drawRegisteredTile(planner, "block", ctx, mat, wx, wy); }
+export function tileWall(planner, ctx, mat, wx, wy) { return drawRegisteredTile(planner, "wall", ctx, mat, wx, wy); }
 
-registerTileRenderer("block", [
-  "gray_brick", "black_slab", "boreal_wood", "glass", "marble", "mushroom_block", "mud",
-  "mushroom_grass", "sandstone_block_plain", "cloud_block_plain", "bubble",
-  "conveyor_left", "conveyor_right", "dart_trap_e", "dart_trap_w",
-], drawCommonTileMaterial);
-registerTileRenderer("block", ["boreal_platform", "boreal_platform_plain", "mushroom_platform"],
-  (ctx, mat, wx, wy) => drawPlatformTile(ctx, wx, wy, mat));
-registerTileRenderer("block", ["glass_platform"], (ctx, mat, wx, wy) => drawGlassPlatformTile(ctx, wx, wy));
-registerTileRenderer("wall", [
-  "accessory_wall", "arena_wall", "boreal_wall", "clinic_wall", "cloud_wall_plain", "copper_wall_plain",
-  "diamond_gemspark_wall", "engineer_orange_wall", "fishing_wall", "food_wall", "glass_wall",
-  "goblin_green_wall", "gray_wall", "industrial_wall", "living_wall", "magic_cyan_wall",
-  "marble_plain_wall", "museum_biomes", "museum_center", "museum_early", "museum_final",
-  "museum_jungle", "museum_mechs", "museum_wof", "mushroom_wall", "player1_accent_wall",
-  "player1_wall", "player2_accent_wall", "player2_wall", "princess_pink_wall", "purple_wall",
-  "sandstone_wall_plain", "tech_cyan_wall", "tower_wall",
-], drawCommonTileWall);
+export function registerCommonTileRenderers(planner) {
+
+
+  registerTileRenderer(planner, "block", [
+    "gray_brick", "black_slab", "boreal_wood", "glass", "marble", "mushroom_block", "mud",
+    "mushroom_grass", "sandstone_block_plain", "cloud_block_plain", "bubble",
+    "conveyor_left", "conveyor_right", "dart_trap_e", "dart_trap_w",
+  ], drawCommonTileMaterial.bind(null, planner));
+  registerTileRenderer(planner, "block", ["boreal_platform", "boreal_platform_plain", "mushroom_platform"],
+    (ctx, mat, wx, wy) => drawPlatformTile(planner, ctx, wx, wy, mat));
+  registerTileRenderer(planner, "block", ["glass_platform"], (ctx, mat, wx, wy) => drawGlassPlatformTile(planner, ctx, wx, wy));
+  registerTileRenderer(planner, "wall", [
+    "accessory_wall", "arena_wall", "boreal_wall", "clinic_wall", "cloud_wall_plain", "copper_wall_plain",
+    "diamond_gemspark_wall", "engineer_orange_wall", "fishing_wall", "food_wall", "glass_wall",
+    "goblin_green_wall", "gray_wall", "industrial_wall", "living_wall", "magic_cyan_wall",
+    "marble_plain_wall", "museum_biomes", "museum_center", "museum_early", "museum_final",
+    "museum_jungle", "museum_mechs", "museum_wof", "mushroom_wall", "player1_accent_wall",
+    "player1_wall", "player2_accent_wall", "player2_wall", "princess_pink_wall", "purple_wall",
+    "sandstone_wall_plain", "tech_cyan_wall", "tower_wall",
+  ], drawCommonTileWall.bind(null, planner));
+}

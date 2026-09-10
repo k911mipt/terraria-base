@@ -1,12 +1,12 @@
 // Surface Jungle treehouse bounds, rooms, lighting zones and design invariants.
-const JUNGLE_BOUNDS = {
+export const JUNGLE_BOUNDS = {
   xMin: 0,
   xMax: 72,
   yMin: 0,
   yMax: 62,
 };
 
-const JUNGLE_ROOMS = [
+export const JUNGLE_ROOMS = [
   {
     id: "jungle_context",
     name: "Поверхностный джунглевый узел",
@@ -79,9 +79,9 @@ const JUNGLE_ROOMS = [
   },
 ];
 
-const JUNGLE_RESERVES = [];
+export const JUNGLE_RESERVES = [];
 
-const JUNGLE_LIGHTING_ZONES = [
+export const JUNGLE_LIGHTING_ZONES = [
   {
     id: "dryad_room",
     name: "Комната Дриады",
@@ -139,7 +139,7 @@ const JUNGLE_LIGHTING_ZONES = [
   },
 ];
 
-const JUNGLE_VALIDATION = {
+export const JUNGLE_VALIDATION = {
   status: "PASS",
   sceneWidth: 73,
   sceneHeight: 63,
@@ -190,7 +190,7 @@ const JUNGLE_VALIDATION = {
   hubLanterns: ["x25 y24", "x35 y24"],
 };
 
-const JUNGLE_NOTES = [
+export const JUNGLE_NOTES = [
   "Сцена рассчитана на существующий поверхностный биом Джунглей и не пытается искусственно создавать его счётчиком блоков.",
   "Дриада, Маляр и Шаман расположены в пределах 25 тайлов друг от друга и все получают бонус любимого биома.",
   "Архитектура повторяет мотив домика в кронах: боковые кроны физически лежат на крыше, а две органические колонны святилища выполнены проходимой Living Wood Wall.",
@@ -200,5 +200,5 @@ const JUNGLE_NOTES = [
   "Фоновые стены непрерывны за дверями, люком и всеми платформами внутри закрытых зон.",
 ];
 
-const JUNGLE_TITLE =
+export const JUNGLE_TITLE =
   "Terraria — поверхностный джунглевый дом, Jungle Pylon и шахта к Храму";

@@ -1,5 +1,5 @@
 // Doors, residents, pylon, furniture, decor, measured lights and teleporter reserves.
-const JUNGLE_OBJECTS = [
+export const JUNGLE_OBJECTS = [
   {
     id: "JG_OUTER_L",
     name: "Левая входная дверь",

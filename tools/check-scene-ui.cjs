@@ -10,10 +10,10 @@ for (const entry of SCENES) {
   runFile("js/runtime/formatters.js");
   const ui = run("plannerUI"), html = fs.readFileSync(path.join(ROOT, entry), "utf8");
   const scriptPaths = [...html.matchAll(/<script\b[^>]*src="([^\"]+)"/g)].map(m => m[1].split("?")[0]);
-  for (const file of ["scene-ui", "formatters", "tables", "prepare", "interactions", "start"])
-    assert.equal(scriptPaths.filter(p => p === `./js/runtime/${file}.js`).length, 1, `${entry}: ${file}`);
-  for (const file of ["scene-ui", "formatters", "tables", "prepare", "interactions", "start"])
-    assert(html.includes(`./js/runtime/${file}.js?v=common-ui-20260907`), `${entry}: missing shared UI rollout version ${file}`);
+  assert.equal(scriptPaths.length, 1, `${entry}: one module entry`);
+  assert(html.includes('type="module"'));
+  const entrySource = fs.readFileSync(path.join(ROOT, html.match(/data-planner-entry="([^"]+)"/)[1]), 'utf8');
+  assert(entrySource.includes("../runtime/start.js"));
   assert(!scriptPaths.some(p => /(?:start|prepare|tables|interactions)-(?:desert|underground|jungle)/.test(p)));
   assert(html.includes(`value="${ui.initialMode}"`));
   for (const [id, target] of Object.entries(ui.focus)) {
@@ -32,6 +32,6 @@ for (const entry of SCENES) {
 }
 // Every button binding is configured once, not corrected by a later script.
 const interaction = fs.readFileSync(path.join(ROOT, "js/runtime/interactions.js"), "utf8");
-assert(interaction.includes("Object.entries(plannerUI.focus)"));
+assert(interaction.includes("Object.entries(planner.plannerUI.focus)"));
 assert(!/getElementById\("(?:bossLeft|museumBtn|wiringBtn|upper|craft)"\)\.onclick/.test(interaction));
 assert(!fs.readFileSync(path.join(ROOT, "js/runtime/start.js"), "utf8").includes("insertAdjacentHTML"));

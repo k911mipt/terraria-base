@@ -11,20 +11,9 @@ const assert = (condition, message) => {
   if (!condition) errors.push(message);
 };
 
-const context = vm.createContext({ console });
-for (const relative of [
-  "js/data/materials.js",
-  "js/data/jungle/materials.js",
-]) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {
-    filename: relative,
-  });
-}
-
-const { MAT, WALL, STYLE, WALL_SPECS } = vm.runInContext(
-  "({ MAT: JSON.parse(JSON.stringify(MAT)), WALL: JSON.parse(JSON.stringify(WALL)), STYLE: JSON.parse(JSON.stringify(STYLE)), WALL_SPECS: JSON.parse(JSON.stringify(WALL_SPECS)) })",
-  context,
-);
+const {loadScene} = require("./lib/load-scene.cjs");
+const {run} = loadScene("jungle.html");
+const {MAT, WALL, STYLE, WALL_SPECS} = run("({MAT,WALL,STYLE,WALL_SPECS})");
 
 const isHex = (value) =>
   typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
@@ -128,7 +117,7 @@ assert(
   "jungle.html must mark the Jungle tab as current",
 );
 assert(
-  html.includes('./js/runtime/jungle-extensions.js'),
+  fs.readFileSync(path.join(root, "js/entries/jungle.js"), "utf8").includes('../runtime/jungle-extensions.js'),
   "jungle.html must load the Jungle texture renderer",
 );
 

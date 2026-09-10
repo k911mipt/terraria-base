@@ -1,24 +1,27 @@
+import { draw } from './render-base.js';
+import { CACHE_TILE, CHEST_FAMILY_BASE } from './state.js';
+
 // Small shared helpers for cached coordinates, colors, camera history and wire paths.
-function cp(x) {
-  return (x - D.bounds.xMin) * CACHE_TILE;
+export function cp(planner, x) {
+  return (x - planner.D.bounds.xMin) * CACHE_TILE;
 }
 
-function cy(y) {
-  return (y - D.bounds.yMin) * CACHE_TILE;
+export function cy(planner, y) {
+  return (y - planner.D.bounds.yMin) * CACHE_TILE;
 }
 
-function seeded(x, y, s = 0) {
+export function seeded(x, y, s = 0) {
   let n = ((x * 73856093) ^ (y * 19349663) ^ (s * 83492791)) >>> 0;
   n = ((n ^ (n >> 13)) * 1274126177) >>> 0;
   return ((n ^ (n >> 16)) >>> 0) / 4294967295;
 }
 
-function pstyle(style) {
-  const c = STYLE[style] || "#74808a";
+export function pstyle(planner, style) {
+  const c = planner.STYLE[style] || "#74808a";
   return { base: c, dark: shade(c, -32), light: shade(c, 35) };
 }
 
-function shade(hex, amt) {
+export function shade(hex, amt) {
   let n = parseInt(hex.slice(1), 16),
     r = Math.max(0, Math.min(255, (n >> 16) + amt)),
     g = Math.max(0, Math.min(255, ((n >> 8) & 255) + amt)),
@@ -26,29 +29,29 @@ function shade(hex, amt) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
-function objectBox(o) {
-  return { x: cp(o.x), y: cy(o.y), w: o.w * CACHE_TILE, h: o.h * CACHE_TILE };
+export function objectBox(planner, o) {
+  return { x: cp(planner, o.x), y: cy(planner, o.y), w: o.w * CACHE_TILE, h: o.h * CACHE_TILE };
 }
 
-function chestPalette(o) {
+export function chestPalette(planner, o) {
   const c =
     o.paintColor ||
     CHEST_FAMILY_BASE[o.chestFamily] ||
-    STYLE[o.style] ||
+    planner.STYLE[o.style] ||
     "#74808a";
   return { base: c, dark: shade(c, -34), light: shade(c, 38) };
 }
 
-function saveCam(c = { ...cam }) {
-  history.push(c);
-  if (history.length > 40) history.shift();
+export function saveCam(planner, c = { ...planner.cam }) {
+  planner.history.push(c);
+  if (planner.history.length > 40) planner.history.shift();
 }
 
-function engKey(x, y) {
+export function engKey(x, y) {
   return `${x},${y}`;
 }
 
-function expandOrthPath(points) {
+export function expandOrthPath(points) {
   const cells = [];
   for (let i = 0; i < points.length; i++) {
     const [x, y] = points[i];
@@ -72,16 +75,17 @@ function expandOrthPath(points) {
   return cells;
 }
 
-function schedule() {
-  if (!raf)
-    raf = requestAnimationFrame(() => {
-      raf = 0;
-      draw();
-      if (startupComplete) viewport.dataset.ready = "true";
+export function schedule(planner) {
+  if (!planner.destroyed && !planner.raf)
+    planner.raf = planner.window.requestAnimationFrame(() => {
+      planner.raf = 0;
+      if (planner.destroyed) return;
+      draw(planner);
+      if (planner.startupComplete) planner.viewport.dataset.ready = "true";
     });
 }
 
-function roomAt(scene, wx, wy) {
+export function roomAt(scene, wx, wy) {
   return (
     scene.rooms
       .filter((r) => wx >= r.x1 && wx <= r.x2 && wy >= r.y1 && wy <= r.y2)
@@ -92,7 +96,7 @@ function roomAt(scene, wx, wy) {
 }
 
 // Ownership and tile location are different at shared doors and room borders.
-function roomForObject(scene, object) {
+export function roomForObject(scene, object) {
   if (!object) return null;
   // Legacy base doors use room: "" to mean no declared ownership.
   if (Object.hasOwn(object, "room") && object.room !== "") {

@@ -1,5 +1,5 @@
 // The styled workshop and artificial fishing reservoir require no wiring.
-const ENG = {
+export const ENG = {
   stage: "Подземная мастерская Гоблина v2 · без обязательной проводки",
   focus: {
     x1: 0,

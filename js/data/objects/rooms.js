@@ -1,6 +1,6 @@
 // Greenhouse chests, NPC housing, transport, personal and pre-battle rooms.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_ROOMS = [
+export const OBJECTS_ROOMS = [
   {
     id: "SEED",
     name: "Сундук семян теплицы",

@@ -1,7 +1,15 @@
+import { roomAt, roomForObject, schedule } from './core.js';
+import { biName, escHtml, paintName } from './formatters.js';
+import { objectsAtTile, rectAt } from './model.js';
+import { directionLabel, engineeringDeviceAtTile, engineeringForegroundSpec } from './overlay.js';
+import { ATTACHMENT_LABELS, OBJECT_PASSAGE_LABELS, materialBindingProblems, objectContract } from './placement-contract.js';
+import { AIR_SPEC, NO_WALL_SPEC, SOLID_SHAPE_LABELS, WIRE_LABELS } from './state.js';
+import { OBJECT_ROLE_LABELS, installedDisplayItem, materialSpecProblems, validMaterialPalette } from './validation.js';
+
 // Selected-tile inspector and tooltip presentation.
-function inspectorMaterialSpec(id, background) {
-  const specs = background ? WALL_SPECS : BLOCK_SPECS;
-  const palettes = background ? WALL : MAT;
+export function inspectorMaterialSpec(planner, id, background) {
+  const specs = background ? planner.WALL_SPECS : planner.BLOCK_SPECS;
+  const palettes = background ? planner.WALL : planner.MAT;
   const spec = Object.hasOwn(specs, id) ? specs[id] : null;
   const errors = [...materialSpecProblems(spec, background), ...materialBindingProblems(id, spec, background)];
   if (!Object.hasOwn(palettes, id) || !validMaterialPalette(palettes[id], background))
@@ -18,7 +26,7 @@ function inspectorMaterialSpec(id, background) {
 }
 
 // The absence of a wall is separate from missing or malformed metadata.
-function wallSafetyLabel(spec, hasWall = true) {
+export function wallSafetyLabel(spec, hasWall = true) {
   if (!hasWall) return null;
   if (spec?.safe === true) return "Да, поставленная игроком";
   if (spec?.safe === false) return "Нет";
@@ -26,40 +34,40 @@ function wallSafetyLabel(spec, hasWall = true) {
 }
 
 // Keep the data helper strict, but keep a damaged room reference inspectable.
-function inspectorObjectRoom(scene, object) {
+export function inspectorObjectRoom(scene, object) {
   try { return roomForObject(scene, object); }
   catch (error) { return { name: "Ошибка данных", error: error.message }; }
 }
 
 // Scene objects can also carry engineering annotations. Only synthetic overlay
 // selections bypass the scene metadata adapter (their specs come from ENG).
-function inspectorObjectMetadata(scene, object) {
+export function inspectorObjectMetadata(scene, object) {
   return object && (!object.engineering || scene.objects.includes(object))
     ? objectContract(object) : null;
 }
 
-function inspect(o, wx, wy) {
-  selected = o || null;
-  searchHit = null;
+export function inspect(planner, o, wx, wy) {
+  planner.selected = o || null;
+  planner.searchHit = null;
   const tx = Math.floor(wx),
     ty = Math.floor(wy);
-  selectedTile = o ? null : { x: tx, y: ty };
-  const room = roomAt(D, tx, ty),
-    objectRoom = inspectorObjectRoom(D, o),
-    engDevice = engineeringDeviceAtTile(tx, ty),
-    solid = rectAt(D.solids, tx, ty),
-    bg = rectAt(D.backgrounds, tx, ty),
-    metadata = inspectorObjectMetadata(D, o),
+  planner.selectedTile = o ? null : { x: tx, y: ty };
+  const room = roomAt(planner.D, tx, ty),
+    objectRoom = inspectorObjectRoom(planner.D, o),
+    engDevice = engineeringDeviceAtTile(planner, tx, ty),
+    solid = rectAt(planner.D.solids, tx, ty),
+    bg = rectAt(planner.D.backgrounds, tx, ty),
+    metadata = inspectorObjectMetadata(planner.D, o),
     objectSpec = metadata?.foreground,
     bs = engDevice
-      ? engineeringForegroundSpec(engDevice)
-      : objectSpec || (solid ? inspectorMaterialSpec(solid.mat, false) : AIR_SPEC),
-    ws = bg ? inspectorMaterialSpec(bg.mat, true) : NO_WALL_SPEC,
-    cellObjects = objectsAtTile(tx, ty);
-  document.getElementById("iname").textContent = o
+      ? engineeringForegroundSpec(planner, engDevice)
+      : objectSpec || (solid ? inspectorMaterialSpec(planner, solid.mat, false) : AIR_SPEC),
+    ws = bg ? inspectorMaterialSpec(planner, bg.mat, true) : NO_WALL_SPEC,
+    cellObjects = objectsAtTile(planner, tx, ty);
+  planner.document.getElementById("iname").textContent = o
     ? o.name
     : `Тайл x${tx}, y${ty}`;
-  document.getElementById("idesc").textContent = o
+  planner.document.getElementById("idesc").textContent = o
     ? o.desc || "Функциональный объект текущего плана."
     : room
       ? room.desc
@@ -91,7 +99,7 @@ function inspect(o, wx, wy) {
     }
     if (objectRoom?.error) rows.push(["Ошибка привязки", objectRoom.error]);
     if (o.engineering) {
-      rows.push(["Инженерный этап", o.stage || ENG.stage]);
+      rows.push(["Инженерный этап", o.stage || planner.ENG.stage]);
       if (o.wireColor)
         rows.push(
           ["Цвет провода", WIRE_LABELS[o.wireColor] || o.wireColor],
@@ -185,25 +193,25 @@ function inspect(o, wx, wy) {
     "Объекты в тайле",
     cellObjects.length ? cellObjects.map((x) => x.id).join(", ") : "нет",
   ]);
-  document.getElementById("ikv").innerHTML = rows
+  planner.document.getElementById("ikv").innerHTML = rows
     .map(([a, b]) => `<div>${escHtml(a)}</div><div>${escHtml(b)}</div>`)
     .join("");
-  schedule();
+  schedule(planner);
 }
 
 // Tile inspector and tooltip presentation.
-function showTip(e, o) {
-  if (drag?.moved) return;
-  tip.style.display = "block";
+export function showTip(planner, e, o) {
+  if (planner.drag?.moved) return;
+  planner.tip.style.display = "block";
   const parts = [`<b>${escHtml(o.name)}</b>`];
-  const room = inspectorObjectRoom(D, o);
+  const room = inspectorObjectRoom(planner.D, o);
   if (room?.error) parts.push(`<div class="tip-section"><strong>Ошибка привязки:</strong> ${escHtml(room.error)}</div>`);
   if (room)
     parts.push(
       `<div class="tip-section"><strong>Модуль объекта:</strong> ${escHtml(room.name)}</div>`,
     );
   if (o.engineering && o.kind !== "wire" && o.kind !== "futureTrap") {
-    const fs = engineeringForegroundSpec(o);
+    const fs = engineeringForegroundSpec(planner, o);
     if (fs)
       parts.push(
         `<div class="tip-section"><strong>Передний материал:</strong> ${escHtml(biName(fs))}</div>`,
@@ -246,7 +254,7 @@ function showTip(e, o) {
     );
   if (o.engineering) {
     parts.push(
-      `<div class="tip-section"><strong>Этап:</strong> ${escHtml(o.stage || ENG.stage)}</div>`,
+      `<div class="tip-section"><strong>Этап:</strong> ${escHtml(o.stage || planner.ENG.stage)}</div>`,
     );
     if (o.wireColor)
       parts.push(
@@ -261,11 +269,11 @@ function showTip(e, o) {
         `<div class="tip-section tip-muted"><strong>Старт:</strong> ${escHtml(o.initialState)}</div>`,
       );
   }
-  tip.innerHTML = parts.join("");
-  tip.style.left = Math.min(innerWidth - 390, e.clientX + 14) + "px";
-  tip.style.top = Math.min(innerHeight - 150, e.clientY + 14) + "px";
+  planner.tip.innerHTML = parts.join("");
+  planner.tip.style.left = Math.min(planner.window.innerWidth - 390, e.clientX + 14) + "px";
+  planner.tip.style.top = Math.min(planner.window.innerHeight - 150, e.clientY + 14) + "px";
 }
 
-function hideTip() {
-  tip.style.display = "none";
+export function hideTip(planner) {
+  planner.tip.style.display = "none";
 }

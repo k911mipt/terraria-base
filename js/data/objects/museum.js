@@ -1,6 +1,6 @@
 // All seven museum chapters and their individual exhibits.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_MUSEUM = [
+export const OBJECTS_MUSEUM = [
   {
     id: "M1_TROPHY_SLIME",
     name: "Трофей Короля слизней",

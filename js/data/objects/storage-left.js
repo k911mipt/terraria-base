@@ -1,6 +1,6 @@
 // Left storage tower: non-stackable equipment and collections.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_STORAGE_LEFT = [
+export const OBJECTS_STORAGE_LEFT = [
   {
     id: "L1_1",
     name: "NEW — нестакуемое",

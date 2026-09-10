@@ -1,6 +1,6 @@
 // Doors, hatches and route infrastructure.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_ROUTES = [
+export const OBJECTS_ROUTES = [
   {
     id: "D_LT_TRANSPORT",
     name: "Левая башня ↔ транспорт",

@@ -1,6 +1,6 @@
 // Left boss-arena columns, roof windows and lighting ornaments.
 // Generated from the canonical monolith without changing item order.
-const BACKGROUNDS_BOSS_ARENA = [
+export const BACKGROUNDS_BOSS_ARENA = [
   {
     x1: -190,
     y1: 11,

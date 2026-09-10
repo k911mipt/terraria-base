@@ -1,6 +1,6 @@
 // Four columns of eight solid Dart Traps on Y56–Y63.
 // Generated from the canonical monolith without changing item order.
-const ENGINEERING_TRAPS = [
+export const ENGINEERING_TRAPS = [
   {
     id: "L_OUT_56",
     name: "Левая яма · наружная Dart Trap y56",

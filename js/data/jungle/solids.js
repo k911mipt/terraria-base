@@ -1,5 +1,5 @@
 // Surface Jungle terrain, treehouse shell, canopy, roots and temple-access shaft.
-const JUNGLE_SOLIDS = [
+export const JUNGLE_SOLIDS = [
   {
     x1: 0,
     y1: 40,

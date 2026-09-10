@@ -1,6 +1,6 @@
 // Combat-street and boss-arena buffs, statues and honey fixtures.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_ARENA = [
+export const OBJECTS_ARENA = [
   {
     id: "HONEY_L",
     name: "Левая медовая купель",

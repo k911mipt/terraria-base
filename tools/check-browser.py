@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 SCENES = ("index.html", "desert.html", "underground.html", "jungle.html")
 CONTROL_DOORS = ("D_P1_CRAFT", "D_INNER_L", "UG_MECH_GOBLIN", "JG_DRYAD_HUB")
-# Prefix the real startup script; the shared runtime guard must reject these
+# Mutate the real native instance before startup; the shared guard must reject these
 # before any first render, independently of pageerror/HTTP listeners.
 MATERIAL_MUTATIONS = {
     "other-block-name": 'BLOCK_SPECS[D.solids[0].mat].itemEn = BLOCK_SPECS[D.solids[0].mat].itemEn === "Glass" ? "Gray Brick" : "Glass";',
@@ -69,6 +69,17 @@ AUDIT_MUTATIONS = {
     "audit-water": "D.objects=D.objects.map(o=>o.kind==='water'?{...o,w:19}:o);",
     "audit-water-removed": "D.objects=D.objects.filter(o=>o.kind!=='water');",
 }
+
+READY_OBSERVER = """(() => {
+  window.__smokeReadyObserved = false;
+  new MutationObserver(records => {
+    if (document.querySelector('#viewport[data-ready="true"]') || records.some(record =>
+      record.type === 'attributes' && record.target.id === 'viewport' && record.oldValue === 'true'))
+      window.__smokeReadyObserved = true;
+  }).observe(document, {subtree:true,childList:true,attributes:true,
+    attributeFilter:['data-ready'],attributeOldValue:true});
+})();"""
+
 
 VIEWPORTS = {"desktop": {"width": 1800, "height": 1200},
              "mobile": {"width": 390, "height": 844}}
@@ -132,6 +143,34 @@ def watch(page, origin, log, failures):
     page.on("requestfailed", request_failed)
     page.on("response", response_received)
     page.route("**/*", route_request)
+
+
+def route_startup(page, mutation=""):
+    """Inject ONLY test response code, never runtime globals or source rewriting on disk."""
+    source = (ROOT / "js/runtime/start.js").read_text()
+    anchor = "  const planner = createPlanner(scene, registerRenderers, document);"
+    assert source.count(anchor) == 1, "native startup injection point drifted"
+    source = "import {attachTestPlanner} from '../../tools/lib/browser-probe.mjs';\n" + source
+    source = source.replace(anchor, anchor + "\n  attachTestPlanner(planner);\n  " + mutation)
+    page.route("**/js/runtime/start.js*", lambda route: route.fulfill(content_type="text/javascript", body=source))
+    # Instrument the actual function imported by runtime; replacing a window
+    # alias would not prove that native render paths avoid recalculating audits.
+    audit = (ROOT / "js/runtime/scene-audit.js").read_text()
+    anchor = "export function computeSceneAudit(scene, inputs) {"
+    assert audit.count(anchor) == 1
+    audit = audit.replace(anchor, anchor + "\n  globalThis.__auditRunCount = (globalThis.__auditRunCount || 0) + 1;")
+    page.route("**/js/runtime/scene-audit.js*", lambda route: route.fulfill(content_type="text/javascript", body=audit))
+
+
+def save_screenshot(page, path, result):
+    """Keep the original failure (e.g. navigation policy) when screenshots fail too."""
+    try:
+        page.screenshot(path=str(path), full_page=False)
+    except Exception as error:
+        result["screenshot_error"] = str(error)
+        if result.get("status") == "PASS":
+            result["status"] = "FAIL"
+            raise
 
 
 def healthy(page, failures):
@@ -447,27 +486,16 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
     if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
         # Observe independently of the expected pageerror/404: catching an error
         # must not hide an incorrectly published (even transient) ready marker.
-        page.add_init_script("""(() => {
-          window.__smokeReadyObserved = false;
-          new MutationObserver(() => {
-            if (document.querySelector('#viewport[data-ready="true"]'))
-              window.__smokeReadyObserved = true;
-          }).observe(document, { subtree: true, childList: true,
-            attributes: true, attributeFilter: ['data-ready'] });
-        })();""")
+        page.add_init_script(READY_OBSERVER)
     result = {"scene": entry, "device": device, "mutation": mutation, "status": "FAIL"}
     try:
-        if mutation:
-            scripts = re.findall(r'<script\b[^>]*src="([^"]+)"', (ROOT / entry).read_text())
-            startup = urlsplit(scripts[-1]).path.removeprefix("./")
-            if mutation == "start-throw" or mutation in DATA_MUTATIONS or mutation in AUDIT_MUTATIONS:
-                source = (ROOT / startup).read_text()
-                prefix = {**DATA_MUTATIONS, **AUDIT_MUTATIONS}.get(mutation, 'throw new Error("SMOKE_START_FAILURE");')
-                page.route(f"**/{startup}*", lambda route: route.fulfill(
-                    content_type="text/javascript", body=prefix + "\n" + source))
-            else:
-                target = startup if mutation == "missing-js" else "styles.css"
-                page.route(f"**/{target}*", lambda route: route.fulfill(status=404, body="Smoke-test missing resource"))
+        prefix = {**DATA_MUTATIONS, **AUDIT_MUTATIONS}.get(mutation, "")
+        if mutation == "start-throw":
+            prefix = 'throw new Error("SMOKE_START_FAILURE");'
+        route_startup(page, prefix)
+        if mutation in ("missing-js", "missing-css"):
+            target = "js/boot.js" if mutation == "missing-js" else "styles.css"
+            page.route(f"**/{target}*", lambda route: route.fulfill(status=404, body="Smoke-test missing resource"))
         response = page.goto(f"{origin}/{entry}", wait_until="load")
         assert response and response.status == 200
         if mutation in AUDIT_MUTATIONS:
@@ -478,6 +506,11 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         elif mutation:
             # The static heading remains visible even in a broken startup.
             assert page.locator(".maphead b").inner_text()
+            if mutation == "start-throw" or mutation in DATA_MUTATIONS:
+                # Native bootstrap awaits a manifest fetch, so document load is
+                # not proof that the failed startup has run. Wait for its visible
+                # result before asserting the independent ready observer.
+                page.wait_for_function("document.getElementById('iname').textContent.startsWith('Ошибка')")
             if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
                 settle(page)
                 assert not page.evaluate("window.__smokeReadyObserved"), "ready appeared before startup completed"
@@ -492,6 +525,10 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
                             "SMOKE_START_FAILURE" if mutation == "start-throw" else "resource: HTTP 404")
                 assert expected in str(error), f"wrong failure for {mutation}: {error}"
                 result["expected_failure"] = str(error)
+                if mutation in ("start-throw", "missing-js") or mutation in DATA_MUTATIONS:
+                    settle(page)
+                    assert not page.evaluate("window.__smokeReadyObserved"), "failed startup published ready"
+                    assert page.locator('#viewport[data-ready="true"]').count() == 0
                 if mutation in DATA_MUTATIONS:
                     title = ("Ошибка данных материалов" if mutation in MATERIAL_MUTATIONS else
                              "Ошибка отрисовки объектов" if mutation in RENDERER_MUTATIONS else
@@ -506,15 +543,11 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         else:
             healthy(page, failures)
             check_computed_audit(page, entry)
-            page.evaluate("""() => {
-                window.__auditRunCount=0; window.__auditFunction=computeSceneAudit;
-                computeSceneAudit=(...args)=>{window.__auditRunCount++;return window.__auditFunction(...args);};
-            }""")
+            page.evaluate("window.__auditRunCount = 0")
             check_scene_controls(page, entry)
             interact(page, entry, device == "mobile")
             healthy(page, failures)
             assert page.evaluate("window.__auditRunCount") == 0, "audit was recalculated while interacting/rendering"
-            page.evaluate("computeSceneAudit=window.__auditFunction;delete window.__auditFunction;")
             if entry == "index.html":
                 page.evaluate("inspect(null, 110, 10); selectedTile = null; focusRect(102, 6, 128, 27, 2, false)")
                 settle(page)
@@ -544,7 +577,7 @@ def scenario(browser, origin, entry, device, artifacts, mutation=None):
         raise
     finally:
         try:
-            page.screenshot(path=str(artifacts / f"{name}.png"), full_page=False)
+            save_screenshot(page, artifacts / f"{name}.png", result)
         finally:
             (artifacts / f"{name}.json").write_text(json.dumps({**result, "log": log, "failures": failures}, ensure_ascii=False, indent=2))
             context.tracing.stop(path=str(artifacts / f"{name}-trace.zip"))

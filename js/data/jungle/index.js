@@ -1,5 +1,9 @@
+import { JUNGLE_BACKGROUNDS } from './backgrounds.js';
+import { JUNGLE_BOUNDS, JUNGLE_LIGHTING_ZONES, JUNGLE_NOTES, JUNGLE_RESERVES, JUNGLE_ROOMS, JUNGLE_TITLE, JUNGLE_VALIDATION } from './layout.js';
+import { JUNGLE_OBJECTS } from './objects.js';
+import { JUNGLE_SOLIDS } from './solids.js';
 // Assemble the standalone Surface Jungle scene for the shared Canvas runtime.
-const D = {
+export const D = {
   sceneId: "jungle",
   bounds: JUNGLE_BOUNDS,
   rooms: JUNGLE_ROOMS,

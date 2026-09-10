@@ -1,8 +1,10 @@
+import { materialBindingProblems, objectPlacementProblems } from './placement-contract.js';
+
 // Runtime audits and engineering invariant checks.
-function validatePitConfiguration() {
-  const traps = ENG.devices.filter((o) => o.kind === "trap" && o.pitSide),
-    bridges = ENG.devices.filter((o) => o.kind === "bridge"),
-    levers = ENG.devices.filter((o) => o.kind === "lever" && o.pitSide);
+export function validatePitConfiguration(planner) {
+  const traps = planner.ENG.devices.filter((o) => o.kind === "trap" && o.pitSide),
+    bridges = planner.ENG.devices.filter((o) => o.kind === "bridge"),
+    levers = planner.ENG.devices.filter((o) => o.kind === "lever" && o.pitSide);
   const trapOk = traps.filter((o) => o.actuatorInstalled === false).length;
   const bridgeOk = bridges.filter(
     (o) => o.actuatorInstalled === true && o.w === 16,
@@ -27,36 +29,36 @@ function validatePitConfiguration() {
       o.h === 2 &&
       ((o.x === 1 && o.y === 56) || (o.x === 133 && o.y === 56)),
   ).length;
-  const timersOk = ENG.devices.filter(
+  const timersOk = planner.ENG.devices.filter(
     (o) =>
       o.kind === "timer" &&
       o.pitSide &&
       ((o.x === 1 && o.y === 55) || (o.x === 134 && o.y === 55)),
   ).length;
-  ENG.validation.pitStates = `traps ${trapOk}/32 · columns ${columnsOk}/4 · bridges ${bridgeOk}/2 · levers ${leverOk}/2 · timers ${timersOk}/2`;
+  planner.ENG.validation.pitStates = `traps ${trapOk}/32 · columns ${columnsOk}/4 · bridges ${bridgeOk}/2 · levers ${leverOk}/2 · timers ${timersOk}/2`;
   if (traps.length !== 32 || trapOk !== 32)
-    ENG.validation.errors.push(
+    planner.ENG.validation.errors.push(
       "В ямах должно быть ровно 32 твёрдых Dart Trap без Actuator",
     );
   if (columnsOk !== 4)
-    ENG.validation.errors.push(
+    planner.ENG.validation.errors.push(
       "Четыре столбца должны содержать по 8 Dart Trap на y56–63",
     );
   if (bridgeOk !== 2)
-    ENG.validation.errors.push(
+    planner.ENG.validation.errors.push(
       "Оба актуируемых моста должны иметь по 16 блоков",
     );
   if (leverOk !== 2)
-    ENG.validation.errors.push(
+    planner.ENG.validation.errors.push(
       "Lever должны стоять x1–2/y56–57 и x133–134/y56–57",
     );
   if (timersOk !== 2)
-    ENG.validation.errors.push("Таймеры должны стоять x1/y55 и x134/y55");
-  ENG.validation.status = ENG.validation.errors.length ? "FAIL" : "PASS";
+    planner.ENG.validation.errors.push("Таймеры должны стоять x1/y55 и x134/y55");
+  planner.ENG.validation.status = planner.ENG.validation.errors.length ? "FAIL" : "PASS";
 }
 
 // Small shared contract for material specs; gameplay/object rules are separate.
-function materialSpecProblems(spec, background) {
+export function materialSpecProblems(spec, background) {
   if (!spec || typeof spec !== "object" || Array.isArray(spec))
     return ["missing material specification"];
   const errors = [];
@@ -81,14 +83,14 @@ function materialSpecProblems(spec, background) {
 
 // The palettes currently use six-digit hex and rgba; do not silently accept a
 // different format that Canvas/shading helpers would interpret differently.
-function validMaterialColor(value) {
+export function validMaterialColor(value) {
   if (typeof value !== "string") return false;
   if (/^#[0-9a-f]{6}$/i.test(value)) return true;
   const match = value.match(/^rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*(0|1|0?\.\d+)\s*\)$/);
   return !!match && match.slice(1, 4).every(v => Number(v) <= 255) && Number(match[4]) <= 1;
 }
 
-function validMaterialPalette(palette, background) {
+export function validMaterialPalette(palette, background) {
   return background
     ? Array.isArray(palette) && palette.length === 2 && [0, 1].every(i => Object.hasOwn(palette, i) && validMaterialColor(palette[i]))
     : !!palette && !Array.isArray(palette) && ["base", "dark", "light"].every(
@@ -96,7 +98,7 @@ function validMaterialPalette(palette, background) {
 }
 
 // Retain the wall-only API used by existing regression checks.
-function validateUsedWallSpecs(scene, specs) {
+export function validateUsedWallSpecs(scene, specs) {
   const errors = [], checked = new Set();
   for (const region of scene.backgrounds) {
     if (checked.has(region.mat)) continue;
@@ -110,7 +112,7 @@ function validateUsedWallSpecs(scene, specs) {
 
 // Pure, shared by CLI and runtime. Rectangle order is not changed, so intentional
 // last-write-wins overlays and open areas without backgrounds remain valid.
-function validateUsedMaterialSpecs(scene, blockSpecs, wallSpecs, materials, walls) {
+export function validateUsedMaterialSpecs(scene, blockSpecs, wallSpecs, materials, walls) {
   const errors = [];
   for (const [background, regions, specs, palettes] of [
     [false, scene.solids, blockSpecs, materials],
@@ -135,17 +137,17 @@ function validateUsedMaterialSpecs(scene, blockSpecs, wallSpecs, materials, wall
 }
 
 // Small adapter for existing object metadata. No item names or paints are guessed.
-const OBJECT_ROLE_LABELS = {
+export const OBJECT_ROLE_LABELS = {
   item: "Предмет", zone: "Планировочная зона", npc: "Маркер жителя",
   liquid: "Жидкость", reserve: "Будущий резерв", landscape: "Элемент ландшафта",
   proposal: "Эскиз декора — предмет не выбран", unknown: "Неизвестный тип",
 };
-const NON_ITEM_ROLES = {
+export const NON_ITEM_ROLES = {
   zone: "zone", npc: "npc", water: "liquid", lava: "liquid", honey: "liquid",
   teleporter: "reserve", palm_tree: "landscape", cactus: "landscape", jungle_vine: "landscape",
   jungle_plant: "proposal", jungle_canvas: "proposal", jungle_totem: "proposal",
 };
-const PHYSICAL_OBJECT_KINDS = new Set([
+export const PHYSICAL_OBJECT_KINDS = new Set([
   "chest", "station", "door", "hatch", "furniture", "bed", "personal_storage", "pylon",
   "planter", "light", "museum_trophy", "museum_mannequin", "museum_weapon_rack",
   "museum_item_frame", "display", "honey_bubble", "star_bottle", "statue", "campfire",
@@ -154,7 +156,7 @@ const PHYSICAL_OBJECT_KINDS = new Set([
 
 // Frozen migration exceptions from 75db86cc: sceneId + ID + kind/style.
 // Never inferred from current D. Remove the row/ID when its specification is completed.
-const LEGACY_ITEM_METADATA = new Map([
+export const LEGACY_ITEM_METADATA = new Map([
   ["main", "door/route", "D_LT_TRANSPORT D_TRANSPORT_P1 D_P1_CRAFT D_CRAFT_P2 D_P2_PRE D_PRE_RT F_DOOR_1 F_DOOR_2 C_DOOR_1 C_DOOR_2 M_DOOR D_LT_MUSEUM D_RT_MUSEUM"],
   ["main", "hatch/route", "H_GREEN H_TOP_L H_TOP_C H_TOP_R H_MUS_L H_MUS_C H_MUS_R H_P1 H_P2 H_MUSH"],
   ["main", "station/special", "C_STMP C_LIZ C_BONE C_GLASS C_HONEY C_ICE C_LIVING C_SKY C_SOLID C_FLESH"],
@@ -231,23 +233,23 @@ const LEGACY_ITEM_METADATA = new Map([
   ["jungle", "jungle_sign/jungle_hub", "JG_TEMPLE_SIGN"],
 ].flatMap(([scene, pair, ids]) => ids.split(" ").map(id => [`${scene}:${id}`, pair])));
 
-function objectRole(object) {
+export function objectRole(object) {
   if (Object.hasOwn(NON_ITEM_ROLES, object?.kind)) return NON_ITEM_ROLES[object.kind];
   return PHYSICAL_OBJECT_KINDS.has(object?.kind) ? "item" : "unknown";
 }
 
-function hasObjectSpec(object, prefix) {
+export function hasObjectSpec(object, prefix) {
   const fields = ["ItemRu", "ItemEn", "PaintRu", "PaintEn", ...(prefix === "foreground" ? ["Layer", "Note"] : [])];
   return !!object && fields.some(suffix =>
     Object.hasOwn(object, prefix + suffix));
 }
 
-function objectSpecPrefix(object) {
+export function objectSpecPrefix(object) {
   // Preserve foreground priority, then reuse existing chest specifications.
   return ["foreground", "chest"].find(prefix => hasObjectSpec(object, prefix)) || null;
 }
 
-function objectSpecProblems(object, prefix = objectSpecPrefix(object)) {
+export function objectSpecProblems(object, prefix = objectSpecPrefix(object)) {
   if (!prefix) return ["Не указана предметная спецификация; название и краска не выбираются автоматически."];
   const errors = [];
   for (const suffix of ["ItemRu", "ItemEn", "PaintRu", "PaintEn"]) {
@@ -259,7 +261,7 @@ function objectSpecProblems(object, prefix = objectSpecPrefix(object)) {
   return errors;
 }
 
-function objectMetadata(object) {
+export function objectMetadata(object) {
   const role = objectRole(object), prefix = objectSpecPrefix(object);
   const problems = role === "item" || prefix ? objectSpecProblems(object) : [];
   if (role === "unknown") problems.push("Неизвестный тип объекта; проверьте данные.");
@@ -286,7 +288,7 @@ function objectMetadata(object) {
   };
 }
 
-function validateObjectData(scene) {
+export function validateObjectData(scene) {
   const errors = [], warnings = [], ids = new Set();
   const bounds = scene.bounds;
   if (!bounds || !["xMin", "xMax", "yMin", "yMax"].every(key => Number.isSafeInteger(bounds[key])) ||
@@ -346,13 +348,13 @@ function validateObjectData(scene) {
 // Explicit supported source labels. Never populate this registry from current D:
 // otherwise the same typo would authorize itself. These are the project's chosen
 // labels, not a catalogue of every item or an assertion about acquisition stage.
-const KNOWN_PAINTS = new Set([
+export const KNOWN_PAINTS = new Set([
   "None", "Black Paint", "Brown Paint", "Cyan Paint", "Deep Blue Paint", "Deep Cyan Paint",
   "Deep Green Paint", "Deep Lime Paint", "Deep Orange Paint", "Deep Pink Paint", "Deep Purple Paint",
   "Deep Red Paint", "Gray Paint", "Green Paint", "Orange Paint", "Pink Paint", "Purple Paint",
   "Teal Paint", "White Paint", "Yellow Paint",
 ]);
-const MATERIAL_NAMES = {
+export const MATERIAL_NAMES = {
   block: new Set([
     "Bamboo", "Boreal Wood", "Boreal Wood Platform", "Bubble", "Cloud Block",
     "Conveyor Belt (Clockwise)", "Conveyor Belt (Counter Clockwise)", "Copper Brick", "Dart Trap",
@@ -367,12 +369,12 @@ const MATERIAL_NAMES = {
     "Rich Mahogany Wall", "Sandstone Brick Wall", "Smooth Marble Wall", "Stone Slab Wall",
   ]),
 };
-const CHEST_NAMES = new Set([
+export const CHEST_NAMES = new Set([
   "Boreal Wood Chest", "Chest", "Dynasty Chest", "Frozen Chest", "Glass Chest", "Gold Chest",
   "Honey Chest", "Living Wood Chest", "Obsidian Chest", "Sandstone Chest", "Shadow Chest",
   "Skyware Chest", "Steampunk Chest", "Stone Chest", "Water Chest",
 ]);
-const DISPLAY_CONTENTS = {
+export const DISPLAY_CONTENTS = {
   museum_weapon_rack: new Set([
     "Bee Gun", "Blade of Grass", "Breaker Blade", "Excalibur", "Last Prism", "Megashark", "Muramasa",
     "Night's Edge", "Picksaw", "Portal Gun", "Pwnhammer", "Pygmy Staff", "Solar Eruption", "Starfury",
@@ -395,7 +397,7 @@ const DISPLAY_CONTENTS = {
     "Item Frame with 1 Second Timer", "Item Frame with Switch", "Item Frame with Wire Cutter", "Item Frame with Wrench",
   ]),
 };
-const OBJECT_ITEM_NAMES = {
+export const OBJECT_ITEM_NAMES = {
   chest: CHEST_NAMES,
   door: new Set(["Wooden Door"]),
   station: new Set(["Eternia Crystal Stand", "Palm Wood Work Bench", "Tinkerer's Workshop"]),
@@ -415,14 +417,14 @@ const OBJECT_ITEM_NAMES = {
 // Real installed display carriers, rather than the inventory item shown inside.
 // IDs and dimensions are documented in docs/selected-items.md. No other item's
 // gameplay dimensions are inferred from a decorative drawing.
-const DISPLAY_CARRIERS = {
+export const DISPLAY_CARRIERS = {
   museum_weapon_rack: {id: "Weapon_Rack", itemId: 2699, itemEn: "Weapon Rack", w: 3, h: 3},
   museum_item_frame: {id: "Item_Frame", itemId: 3270, itemEn: "Item Frame", w: 2, h: 2},
   museum_mannequin: {id: "Mannequin", itemId: 498, itemEn: "Mannequin", w: 2, h: 3},
   display: {id: "Item_Frame", itemId: 3270, itemEn: "Item Frame", w: 2, h: 2},
 };
 
-function selectedObjectItemProblems(object, prefix) {
+export function selectedObjectItemProblems(object, prefix) {
   const problems = [], name = object[prefix + "ItemEn"], paint = object[prefix + "PaintEn"];
   const supported = prefix === "chest" ? CHEST_NAMES :
     Object.hasOwn(OBJECT_ITEM_NAMES, object.kind) ? OBJECT_ITEM_NAMES[object.kind] : null;
@@ -436,7 +438,7 @@ function selectedObjectItemProblems(object, prefix) {
   return problems;
 }
 
-function installedDisplayItem(object) {
+export function installedDisplayItem(object) {
   // Generic display objects without chosen contents may be racks, mannequins or
   // unchosen paintings. Do not reclassify them merely because they share kind.
   if (!object || !Object.hasOwn(DISPLAY_CONTENTS, object.kind) ||

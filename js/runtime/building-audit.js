@@ -1,6 +1,8 @@
+import { buildingObjectTraits, materialBinding, materialBindingProblems, objectPlacementProblems } from './placement-contract.js';
+
 // Pure construction checks. The source rectangle order is part of the model.
 // This validates the planner's documented rules, not Terraria's whole engine.
-const BUILDING_SCENES = {
+export const BUILDING_SCENES = {
   main: {
     closedRooms: ['left_tower','forest_npc','transport','p1','craft','greenhouse','p2',
       'clinic_npc','prebattle','mushroom','right_tower','arena','museum','pit_l','pit_r'],
@@ -28,15 +30,15 @@ const BUILDING_SCENES = {
   },
 };
 
-function buildingContains(region, x, y) {
+export function buildingContains(region, x, y) {
   return x >= region.x1 && x <= region.x2 && y >= region.y1 && y <= region.y2;
 }
-function buildingObjectContains(object, x, y) {
+export function buildingObjectContains(object, x, y) {
   return x >= object.x && x < object.x + object.w && y >= object.y && y < object.y + object.h;
 }
-function buildingTileKey(x, y) { return `${x},${y}`; }
+export function buildingTileKey(x, y) { return `${x},${y}`; }
 
-function buildingGrid(scene, blockSpecs) {
+export function buildingGrid(scene, blockSpecs) {
   const bounds = scene.bounds;
   if (!bounds || !['xMin','xMax','yMin','yMax'].every(key => Number.isSafeInteger(bounds[key])) ||
       bounds.xMin > bounds.xMax || bounds.yMin > bounds.yMax ||
@@ -82,7 +84,7 @@ function buildingGrid(scene, blockSpecs) {
   return {solids,backgrounds,foreground,wall,platform,solid,support};
 }
 
-function buildingDoorClearance(scene, grid, door) {
+export function buildingDoorClearance(scene, grid, door) {
   const clear = x => {
     for (let y=door.y;y<door.y+door.h;y++) {
       if (grid.foreground(x,y) || scene.objects.some(object => object !== door &&
@@ -93,7 +95,7 @@ function buildingDoorClearance(scene, grid, door) {
   return {left:clear(door.x-1),right:clear(door.x+door.w)};
 }
 
-function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId]) {
+export function auditBuilding(scene, blockSpecs, config = BUILDING_SCENES[scene.sceneId]) {
   const errors = [], warnings = [], checkedWalls = new Set();
   const add = (rule,x,y,id,message,relatedId) => errors.push({scene:scene.sceneId,rule,x,y,id,message,
     ...(relatedId === undefined ? {} : {relatedId})});
