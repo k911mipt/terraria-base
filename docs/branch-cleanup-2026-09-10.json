@@ -1,0 +1,48 @@
+{
+  "base": "7d9ec92f96f5e6eedf14ccf74c51bcba5c2e87a7",
+  "candidates": {
+    "feature/jungle-outpost": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-2026": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-actual": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-build": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-build2": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-clean": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-final2": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-final3": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-live": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-live2": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-v2": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-v3": "283a888c226ffc251832d1481466b8ed4300b138",
+    "feature/jungle-outpost-actual2": "945465c05d168aae413735a66bd527ad73634a01",
+    "feature/jungle-outpost-work": "3013ccbe1b9e5a591b05e29b78f128e79339e730"
+  },
+  "status": "PASS",
+  "main_before": "7d9ec92f96f5e6eedf14ccf74c51bcba5c2e87a7",
+  "push": "",
+  "deleted": [
+    "feature/jungle-outpost",
+    "feature/jungle-outpost-2026",
+    "feature/jungle-outpost-actual",
+    "feature/jungle-outpost-build",
+    "feature/jungle-outpost-build2",
+    "feature/jungle-outpost-clean",
+    "feature/jungle-outpost-final2",
+    "feature/jungle-outpost-final3",
+    "feature/jungle-outpost-live",
+    "feature/jungle-outpost-live2",
+    "feature/jungle-outpost-v2",
+    "feature/jungle-outpost-v3",
+    "feature/jungle-outpost-actual2",
+    "feature/jungle-outpost-work"
+  ],
+  "archives": {
+    "archive/jungle-outpost-actual2-20260910": "945465c05d168aae413735a66bd527ad73634a01",
+    "archive/jungle-outpost-work-20260910": "3013ccbe1b9e5a591b05e29b78f128e79339e730"
+  },
+  "main_after": "7d9ec92f96f5e6eedf14ccf74c51bcba5c2e87a7",
+  "evidence": {
+    "run_id": 34482115812,
+    "artifact_id": 10154016769,
+    "date": "2026-09-10"
+  }
+}

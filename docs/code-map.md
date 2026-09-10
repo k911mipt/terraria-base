@@ -1,6 +1,7 @@
 # Карта исходного кода
 
-Промежуточное состояние [плана #24](https://github.com/k911mipt/terraria-base/issues/24).
+Нативная архитектура после PR #56; [приёмка и оставшиеся задачи](refactor-acceptance.md)
+[плана #24](https://github.com/k911mipt/terraria-base/issues/24).
 Статический Canvas-сайт, без сборщика и runtime-зависимостей. Используются
 нативные `import/export`, явные entry points и состояние экземпляра планировщика.
 
@@ -66,8 +67,8 @@
 свои ключи; модель, текстуры, кэши и инспектор разделены. Stateful-функции принимают
 `planner` явно; импортированные функции не переназначаются. [Жизненный цикл](native-modules.md). [Рендереры тайлов](tile-renderers.md).
 Четыре вкладки статические. [Одна версия графа/CSS](deployment-versions.md)
-генерируется `tools/version-assets.py` и проверяется без записи; реальный rollout
-и гарантии конкурентной публикации #34 проверяются отдельно.
+генерируется `tools/version-assets.py` и проверяется без записи. Реальный rollout
+A→B и публичный HTTPS проверены; одновременная транзакционная выкладка не обещается.
 
 ## Проверки и документы
 
@@ -88,3 +89,6 @@ workflow — `validate-browser.yml`; check — `validate`. Старые Jungle-w
 [проектный свет](project-lighting.md), [общий UI](common-ui.md),
 [HTTP, артефакты и ограничения эмуляции](browser-tests.md).
 Перед изменением геометрии читайте [строительные правила](building-rules.md).
+
+[Предлагаемый ruleset main](main-protection.md) проверяет `check-merge-policy.cjs`,
+но офлайн-проверка не применяет административные настройки GitHub.
