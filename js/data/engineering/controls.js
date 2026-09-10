@@ -1,6 +1,6 @@
 // Switches, timers, levers and actuated bridges.
 // Generated from the canonical monolith without changing item order.
-const ENGINEERING_CONTROLS = [
+export const ENGINEERING_CONTROLS = [
   {
     id: "HEARTS_SWITCH",
     name: "HEARTS AUTO · Switch",

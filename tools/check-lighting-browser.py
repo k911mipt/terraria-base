@@ -29,10 +29,7 @@ def check(browser, origin, entry, mutation, artifacts):
     page = context.new_page()
     log, failures = [], []
     smoke.watch(page, origin, log, failures)
-    scripts = re.findall(r'<script\b[^>]*src="([^"]+)"', (ROOT / entry).read_text())
-    startup = urlsplit(scripts[-1]).path.removeprefix("./")
-    source = MUTATIONS[mutation] + "\n" + (ROOT / startup).read_text()
-    page.route(f"**/{startup}*", lambda route: route.fulfill(content_type="text/javascript", body=source))
+    smoke.route_startup(page, MUTATIONS[mutation])
     name = Path(entry).stem + "-" + mutation
     result = {"scene": entry, "mutation": mutation, "status": "FAIL"}
     try:
@@ -61,7 +58,7 @@ def check(browser, origin, entry, mutation, artifacts):
         raise
     finally:
         try:
-            page.screenshot(path=str(artifacts / f"{name}.png"))
+            smoke.save_screenshot(page, artifacts / f"{name}.png", result)
         finally:
             (artifacts / f"{name}.json").write_text(json.dumps({**result, "log": log, "failures": failures}, ensure_ascii=False, indent=2))
             context.close()

@@ -1,6 +1,6 @@
 // Human-readable design history and the frozen validation snapshot.
 
-const VALIDATION_SNAPSHOT = {
+export const VALIDATION_SNAPSHOT = {
   doubleWalls: 0,
   furnitureOverlaps: 0,
   craftWidth: 46,
@@ -214,7 +214,7 @@ const VALIDATION_SNAPSHOT = {
   pitServiceClearHeight: 3,
 };
 
-const DESIGN_NOTES = [
+export const DESIGN_NOTES = [
   "Архив полностью убран из текущего плана; вернём его отдельным модулем, когда реально понадобится.",
   "Башни оставлены как боковые прыжковые маршруты и надвратные арки; на уровне улицы ступенек нет.",
   "Телепортеры находятся в отдельном нижнем транспортном зале, а не внутри NPC-комнат.",

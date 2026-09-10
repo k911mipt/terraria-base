@@ -1,6 +1,6 @@
 // Six-chest dye, hair-dye, paint and coating catalogue.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_DYES = [
+export const OBJECTS_DYES = [
   {
     id: "D5_1",
     short: "D5.1",

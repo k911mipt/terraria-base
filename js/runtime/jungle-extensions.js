@@ -1,15 +1,21 @@
+import { cp, cy, objectBox, seeded } from './core.js';
+import { drawPlatformTile } from './render-base.js';
+import { drawChest, drawDoor, drawFurniture, drawHatch, drawNpc, registerObjectRenderer } from './render-objects.js';
+import { rect, registerTileRenderer } from './render-tiles.js';
+import { CACHE_TILE } from './state.js';
+
 // Surface Jungle scene rendering extensions.
 // The shared runtime knows the data model; this file supplies the actual
 // mahogany, foliage, bamboo and painted-wall textures used by this scene.
 
-function drawSurfaceJungleTile(ctx, mat, wx, wy) {
-  const x = cp(wx);
-  const y = cy(wy);
+export function drawSurfaceJungleTile(planner, ctx, mat, wx, wy) {
+  const x = cp(planner, wx);
+  const y = cy(planner, wy);
   const t = CACHE_TILE;
-  const p = MAT[mat];
+  const p = planner.MAT[mat];
 
   if (mat === "rich_mahogany_platform") {
-    drawPlatformTile(ctx, wx, wy, mat);
+    drawPlatformTile(planner, ctx, wx, wy, mat);
     ctx.fillStyle = p.light;
     ctx.fillRect(x + 2, y + 8, 5, 1);
     ctx.fillRect(x + 10, y + 8, 3, 1);
@@ -66,7 +72,7 @@ function drawSurfaceJungleTile(ctx, mat, wx, wy) {
 
   if (mat === "jungle_grass") {
     rect(ctx, x, y, t, t, p.base, p.dark, 1);
-    ctx.fillStyle = MAT.mud?.base || "#674934";
+    ctx.fillStyle = planner.MAT.mud?.base || "#674934";
     ctx.fillRect(x, y + 6, t, t - 6);
     ctx.fillStyle = p.light;
     ctx.fillRect(x, y, t, 5);
@@ -97,7 +103,7 @@ function drawSurfaceJungleTile(ctx, mat, wx, wy) {
   throw new Error(`Unregistered scene tile: ${mat}`);
 }
 
-const JUNGLE_WOOD_WALLS = new Set([
+export const JUNGLE_WOOD_WALLS = new Set([
   "rich_mahogany_wall",
   "jungle_leaf_wall",
   "painter_yellow_wall",
@@ -105,14 +111,14 @@ const JUNGLE_WOOD_WALLS = new Set([
   "painter_magenta_wall",
 ]);
 
-function drawSurfaceJungleWall(ctx, mat, wx, wy) {
-  if (!WALL[mat]) {
+export function drawSurfaceJungleWall(planner, ctx, mat, wx, wy) {
+  if (!planner.WALL[mat]) {
     throw new Error(`Unregistered scene wall: ${mat}`);
   }
 
-  const p = WALL[mat];
-  const x = cp(wx);
-  const y = cy(wy);
+  const p = planner.WALL[mat];
+  const x = cp(planner, wx);
+  const y = cy(planner, wy);
   const t = CACHE_TILE;
 
   if (JUNGLE_WOOD_WALLS.has(mat)) {
@@ -201,7 +207,7 @@ function drawSurfaceJungleWall(ctx, mat, wx, wy) {
   throw new Error(`Unregistered scene wall: ${mat}`);
 }
 
-function jungleRect(ctx, x, y, w, h, fill) {
+export function jungleRect(ctx, x, y, w, h, fill) {
   ctx.fillStyle = fill;
   ctx.fillRect(
     Math.round(x),
@@ -211,7 +217,7 @@ function jungleRect(ctx, x, y, w, h, fill) {
   );
 }
 
-function jungleGlow(ctx, cx, cy, radius, fill) {
+export function jungleGlow(ctx, cx, cy, radius, fill) {
   ctx.save();
   ctx.globalAlpha = 0.22;
   ctx.fillStyle = fill;
@@ -221,8 +227,8 @@ function jungleGlow(ctx, cx, cy, radius, fill) {
   ctx.restore();
 }
 
-function drawJungleLanternSprite(ctx, o, colors) {
-  const b = objectBox(o);
+export function drawJungleLanternSprite(planner, ctx, o, colors) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   const top = b.y + 1;
   jungleGlow(ctx, cx, b.y + b.h * 0.62, Math.max(14, b.w * 1.4), colors.glow);
@@ -232,8 +238,8 @@ function drawJungleLanternSprite(ctx, o, colors) {
   jungleRect(ctx, b.x + b.w * 0.38, b.y + b.h * 0.46, b.w * 0.24, b.h * 0.22, colors.core);
 }
 
-function drawJungleTorchSprite(ctx, o, colors) {
-  const b = objectBox(o);
+export function drawJungleTorchSprite(planner, ctx, o, colors) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   const cy = b.y + b.h / 2;
   jungleGlow(ctx, cx, cy, Math.max(12, b.w * 1.25), colors.glow);
@@ -261,8 +267,8 @@ function drawJungleTorchSprite(ctx, o, colors) {
   ctx.fill();
 }
 
-function drawTikiTorchSprite(ctx, o) {
-  const b = objectBox(o);
+export function drawTikiTorchSprite(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   jungleGlow(ctx, cx, b.y + b.h * 0.18, Math.max(15, b.w * 1.5), "#ffad58");
   jungleRect(ctx, cx - 2, b.y + b.h * 0.28, 4, b.h * 0.69, "#5b3820");
@@ -278,8 +284,8 @@ function drawTikiTorchSprite(ctx, o) {
   jungleRect(ctx, cx - 2, b.y + b.h * 0.12, 4, b.h * 0.12, "#ffe178");
 }
 
-function drawJunglePlant(ctx, o) {
-  const b = objectBox(o);
+export function drawJunglePlant(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const potW = b.w / 4;
   for (let i = 0; i < 3; i += 1) {
     const cx = b.x + b.w * (0.2 + i * 0.3);
@@ -292,8 +298,8 @@ function drawJunglePlant(ctx, o) {
   }
 }
 
-function drawJungleCanvas(ctx, o) {
-  const b = objectBox(o);
+export function drawJungleCanvas(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const palette = {
     canvas_yellow: ["#5a3725", "#e9c34e", "#fff1a3"],
     canvas_teal: ["#5a3725", "#36a69e", "#9ee8df"],
@@ -313,8 +319,8 @@ function drawJungleCanvas(ctx, o) {
   ctx.fill();
 }
 
-function drawJungleTotem(ctx, o) {
-  const b = objectBox(o);
+export function drawJungleTotem(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   const cy = b.y + b.h * 0.52;
   jungleRect(ctx, cx - b.w * 0.23, b.y + b.h * 0.2, b.w * 0.46, b.h * 0.67, "#7a4b2b");
@@ -331,8 +337,8 @@ function drawJungleTotem(ctx, o) {
   }
 }
 
-function drawWitchCauldron(ctx, o) {
-  const b = objectBox(o);
+export function drawWitchCauldron(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   jungleRect(ctx, b.x + b.w * 0.16, b.y + b.h * 0.42, b.w * 0.68, b.h * 0.38, "#343832");
   ctx.fillStyle = "#6ebd4b";
@@ -349,8 +355,8 @@ function drawWitchCauldron(ctx, o) {
   }
 }
 
-function drawJungleVine(ctx, o) {
-  const b = objectBox(o);
+export function drawJungleVine(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   ctx.strokeStyle = "#3d7f3b";
   ctx.lineWidth = Math.max(2, b.w * 0.18);
@@ -368,8 +374,8 @@ function drawJungleVine(ctx, o) {
   }
 }
 
-function drawJungleSign(ctx, o) {
-  const b = objectBox(o);
+export function drawJungleSign(planner, ctx, o) {
+  const b = objectBox(planner, o);
   jungleRect(ctx, b.x + 2, b.y + 3, b.w - 4, b.h - 6, "#6e4327");
   jungleRect(ctx, b.x + 4, b.y + 5, b.w - 8, b.h - 10, "#a06d38");
   ctx.fillStyle = "#f0e293";
@@ -379,8 +385,8 @@ function drawJungleSign(ctx, o) {
   ctx.fillText("→ ХРАМ", b.x + b.w / 2, b.y + b.h / 2);
 }
 
-function drawSurfaceJunglePylon(ctx, o) {
-  const b = objectBox(o);
+export function drawSurfaceJunglePylon(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const cx = b.x + b.w / 2;
   const cy = b.y + b.h / 2;
   jungleGlow(ctx, cx, cy, Math.max(18, b.w * 0.8), "#7df3b0");
@@ -404,9 +410,9 @@ function drawSurfaceJunglePylon(ctx, o) {
   jungleRect(ctx, b.x + b.w * 0.18, b.y + b.h - 5, b.w * 0.64, 4, "#5a3e28");
 }
 
-function drawSurfaceJungleLight(ctx, o) {
+export function drawSurfaceJungleLight(planner, ctx, o) {
   if (o.style === "jungle_lantern") {
-    drawJungleLanternSprite(ctx, o, {
+    drawJungleLanternSprite(planner, ctx, o, {
       glow: "#a8ef75",
       chain: "#4f3824",
       frame: "#6a4a2c",
@@ -416,7 +422,7 @@ function drawSurfaceJungleLight(ctx, o) {
     return;
   }
   if (o.style === "painter_lantern") {
-    drawJungleLanternSprite(ctx, o, {
+    drawJungleLanternSprite(planner, ctx, o, {
       glow: "#f1a7dc",
       chain: "#5a382c",
       frame: "#8a4f73",
@@ -426,7 +432,7 @@ function drawSurfaceJungleLight(ctx, o) {
     return;
   }
   if (o.style === "tiki_lantern") {
-    drawJungleLanternSprite(ctx, o, {
+    drawJungleLanternSprite(planner, ctx, o, {
       glow: "#ffb35e",
       chain: "#4f321e",
       frame: "#79512d",
@@ -436,7 +442,7 @@ function drawSurfaceJungleLight(ctx, o) {
     return;
   }
   if (o.style === "jungle_torch") {
-    drawJungleTorchSprite(ctx, o, {
+    drawJungleTorchSprite(planner, ctx, o, {
       glow: "#89df55",
       stick: "#5a3b20",
       flame: "#67bf42",
@@ -445,7 +451,7 @@ function drawSurfaceJungleLight(ctx, o) {
     return;
   }
   if (o.style === "painter_torch") {
-    drawJungleTorchSprite(ctx, o, {
+    drawJungleTorchSprite(planner, ctx, o, {
       glow: "#ec8cc8",
       stick: "#5a3b20",
       flame: "#bd4d94",
@@ -454,27 +460,31 @@ function drawSurfaceJungleLight(ctx, o) {
     return;
   }
   if (o.style === "tiki_torch") {
-    drawTikiTorchSprite(ctx, o);
+    drawTikiTorchSprite(planner, ctx, o);
     return;
   }
   throw new Error(`Unregistered Jungle light style: ${o.style}`);
 }
 
-registerObjectRenderer("pylon", ["jungle_pylon"], drawSurfaceJunglePylon);
-registerObjectRenderer("light", [
-  "jungle_lantern", "painter_lantern", "tiki_lantern", "jungle_torch", "painter_torch", "tiki_torch",
-], drawSurfaceJungleLight);
-registerObjectRenderer("jungle_plant", ["jungle_dryad"], drawJunglePlant);
-registerObjectRenderer("jungle_canvas", ["canvas_yellow", "canvas_teal", "canvas_magenta"], drawJungleCanvas);
-registerObjectRenderer("jungle_totem", ["jungle_witch"], drawJungleTotem);
-registerObjectRenderer("jungle_vine", ["jungle_dryad", "jungle_hub", "jungle_witch"], drawJungleVine);
-registerObjectRenderer("jungle_sign", ["jungle_hub"], drawJungleSign);
-registerObjectRenderer("station", ["witch_cauldron"], drawWitchCauldron);
-registerObjectRenderer("door", ["jungle_route"], drawDoor);
-registerObjectRenderer("hatch", ["jungle_route"], drawHatch);
-registerObjectRenderer("npc", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawNpc);
-registerObjectRenderer("furniture", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawFurniture);
-registerObjectRenderer("chest", ["jungle_dryad", "jungle_hub", "jungle_painter", "jungle_witch"], drawChest);
+export function registerJungleRenderers(planner) {
 
-registerTileRenderer("block", ["rich_mahogany_platform", "rich_mahogany", "living_mahogany", "leaf_block", "jungle_grass", "bamboo_block"], drawSurfaceJungleTile);
-registerTileRenderer("wall", ["rich_mahogany_wall", "jungle_leaf_wall", "painter_yellow_wall", "painter_teal_wall", "painter_magenta_wall", "living_wood_wall", "bamboo_wall", "jungle_stone_wall"], drawSurfaceJungleWall);
+
+  registerObjectRenderer(planner, "pylon", ["jungle_pylon"], drawSurfaceJunglePylon.bind(null, planner));
+  registerObjectRenderer(planner, "light", [
+    "jungle_lantern", "painter_lantern", "tiki_lantern", "jungle_torch", "painter_torch", "tiki_torch",
+  ], drawSurfaceJungleLight.bind(null, planner));
+  registerObjectRenderer(planner, "jungle_plant", ["jungle_dryad"], drawJunglePlant.bind(null, planner));
+  registerObjectRenderer(planner, "jungle_canvas", ["canvas_yellow", "canvas_teal", "canvas_magenta"], drawJungleCanvas.bind(null, planner));
+  registerObjectRenderer(planner, "jungle_totem", ["jungle_witch"], drawJungleTotem.bind(null, planner));
+  registerObjectRenderer(planner, "jungle_vine", ["jungle_dryad", "jungle_hub", "jungle_witch"], drawJungleVine.bind(null, planner));
+  registerObjectRenderer(planner, "jungle_sign", ["jungle_hub"], drawJungleSign.bind(null, planner));
+  registerObjectRenderer(planner, "station", ["witch_cauldron"], drawWitchCauldron.bind(null, planner));
+  registerObjectRenderer(planner, "door", ["jungle_route"], drawDoor.bind(null, planner));
+  registerObjectRenderer(planner, "hatch", ["jungle_route"], drawHatch.bind(null, planner));
+  registerObjectRenderer(planner, "npc", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawNpc.bind(null, planner));
+  registerObjectRenderer(planner, "furniture", ["jungle_dryad", "jungle_painter", "jungle_witch"], drawFurniture.bind(null, planner));
+  registerObjectRenderer(planner, "chest", ["jungle_dryad", "jungle_hub", "jungle_painter", "jungle_witch"], drawChest.bind(null, planner));
+
+  registerTileRenderer(planner, "block", ["rich_mahogany_platform", "rich_mahogany", "living_mahogany", "leaf_block", "jungle_grass", "bamboo_block"], drawSurfaceJungleTile.bind(null, planner));
+  registerTileRenderer(planner, "wall", ["rich_mahogany_wall", "jungle_leaf_wall", "painter_yellow_wall", "painter_teal_wall", "painter_magenta_wall", "living_wood_wall", "bamboo_wall", "jungle_stone_wall"], drawSurfaceJungleWall.bind(null, planner));
+}

@@ -1,7 +1,12 @@
+import { clearCtx } from './camera.js';
+import { chestPalette, objectBox, pstyle } from './core.js';
+import { drawBed, drawCached, drawCampfire, drawDisplay, drawHeart, drawHoney, drawHoneyBubble, drawLava, drawLight, drawPersonal, drawPylon, drawStarBottle, drawStatue, drawTeleporter, drawZone } from './render-base.js';
+import { pxRect } from './render-tiles.js';
+
 // Foreground objects, furniture and museum rendering.
-function drawChest(ctx, o) {
-  const b = objectBox(o),
-    p = chestPalette(o),
+export function drawChest(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = chestPalette(planner, o),
     x = b.x + 2,
     y = b.y + 5,
     w = b.w - 4,
@@ -169,9 +174,9 @@ function drawChest(ctx, o) {
   }
 }
 
-function drawStation(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style),
+export function drawStation(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style),
     x = b.x + 2,
     y = b.y + 2,
     w = b.w - 4,
@@ -203,9 +208,9 @@ function drawStation(ctx, o) {
   }
 }
 
-function drawNpc(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style),
+export function drawNpc(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style),
     cx = b.x + b.w / 2;
   ctx.fillStyle = p.dark;
   ctx.fillRect(cx - 5, b.y + 14, 10, b.h - 16);
@@ -218,9 +223,9 @@ function drawNpc(ctx, o) {
   ctx.fillRect(cx + 2, b.y + 8, 2, 2);
 }
 
-function drawDoor(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style),
+export function drawDoor(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style),
     x = b.x + 3,
     y = b.y + 1,
     w = b.w - 6,
@@ -238,18 +243,18 @@ function drawDoor(ctx, o) {
   pxRect(ctx, x + w - 4, y + h / 2, 2, 2, "#e1bd62");
 }
 
-function drawHatch(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawHatch(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   pxRect(ctx, b.x + 1, b.y + 6, b.w - 2, 6, p.dark);
   pxRect(ctx, b.x + 2, b.y + 7, b.w - 4, 3, p.base);
   for (let x = b.x + 4; x < b.x + b.w - 3; x += 5)
     pxRect(ctx, x, b.y + 8, 2, 2, p.light);
 }
 
-function drawFurniture(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style),
+export function drawFurniture(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style),
     n = o.name.toLowerCase();
   if (n.includes("стул") || n.includes("chair")) {
     pxRect(ctx, b.x + b.w / 2 - 2, b.y + 5, 4, b.h - 6, p.light);
@@ -263,8 +268,8 @@ function drawFurniture(ctx, o) {
   }
 }
 
-function drawPlanter(ctx, o) {
-  const b = objectBox(o);
+export function drawPlanter(planner, ctx, o) {
+  const b = objectBox(planner, o);
   const palettes = {
     planter_day: {
       tray: "#c4a63c",
@@ -330,7 +335,7 @@ function drawPlanter(ctx, o) {
   }
 }
 
-function drawMuseumGlyph(ctx, icon, cx, cy, a, s = 8) {
+export function drawMuseumGlyph(ctx, icon, cx, cy, a, s = 8) {
   ctx.save();
   ctx.fillStyle = a;
   ctx.strokeStyle = a;
@@ -625,8 +630,8 @@ function drawMuseumGlyph(ctx, icon, cx, cy, a, s = 8) {
   ctx.restore();
 }
 
-function drawMuseumTrophy(ctx, o) {
-  const b = objectBox(o),
+export function drawMuseumTrophy(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2,
     a = o.accent || "#c9a45f";
@@ -636,8 +641,8 @@ function drawMuseumTrophy(ctx, o) {
   drawMuseumGlyph(ctx, o.icon, cx, cy, a, 8);
 }
 
-function drawMuseumMannequin(ctx, o) {
-  const b = objectBox(o),
+export function drawMuseumMannequin(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     a = o.accent || "#8b6a50";
   pxRect(ctx, cx - 1, b.y + 2, 2, 5, "#806044");
@@ -653,8 +658,8 @@ function drawMuseumMannequin(ctx, o) {
   pxRect(ctx, b.x + 3, b.y + b.h - 4, b.w - 6, 3, "#6c5136");
 }
 
-function drawMuseumWeaponRack(ctx, o) {
-  const b = objectBox(o),
+export function drawMuseumWeaponRack(planner, ctx, o) {
+  const b = objectBox(planner, o),
     a = o.accent || "#9fc8e5",
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2,
@@ -732,8 +737,8 @@ function drawMuseumWeaponRack(ctx, o) {
   ctx.restore();
 }
 
-function drawMuseumItemFrame(ctx, o) {
-  const b = objectBox(o),
+export function drawMuseumItemFrame(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2,
     a = o.accent || "#d9d0a0";
@@ -771,85 +776,85 @@ function drawMuseumItemFrame(ctx, o) {
   } else drawMuseumGlyph(ctx, o.icon, cx, cy, a, 6);
 }
 
-// Explicit kind/style dispatch: validation and drawing resolve the SAME function.
-// A scene extends this small map instead of replacing shared drawing functions.
-const OBJECT_RENDERERS = new Map();
-
-function registerObjectRenderer(kind, styles, draw) {
+export function registerObjectRenderer(planner, kind, styles, draw) {
   if (typeof kind !== "string" || !kind || !Array.isArray(styles) || !styles.length ||
       styles.some(style => typeof style !== "string" || !style) || typeof draw !== "function")
     throw new Error("Invalid object renderer registration");
-  const registered = OBJECT_RENDERERS.get(kind) || new Map();
+  const registered = planner.OBJECT_RENDERERS.get(kind) || new Map();
   if (new Set(styles).size !== styles.length || styles.some(style => registered.has(style)))
     throw new Error(`Duplicate object renderer: ${kind} / ${styles.join(", ")}`);
   for (const style of styles) registered.set(style, draw);
-  OBJECT_RENDERERS.set(kind, registered);
+  planner.OBJECT_RENDERERS.set(kind, registered);
 }
 
-function rendererForObject(object) {
-  const draw = OBJECT_RENDERERS.get(object?.kind)?.get(object?.style);
+export function rendererForObject(planner, object) {
+  const draw = planner.OBJECT_RENDERERS.get(object?.kind)?.get(object?.style);
   return typeof draw === "function" ? draw : null;
 }
 
-function validateObjectRenderers(scene) {
+export function validateObjectRenderers(planner, scene) {
   const errors = [];
   for (const object of scene.objects) {
-    if (!rendererForObject(object))
+    if (!rendererForObject(planner, object))
       errors.push(`${scene.title}: object ${object?.id} at X${object?.x} Y${object?.y}: ` +
         `unregistered renderer ${object?.kind} / ${object?.style}`);
   }
   return errors;
 }
 
-function drawObjectSprite(ctx, object) {
-  const draw = rendererForObject(object);
+export function drawObjectSprite(planner, ctx, object) {
+  const draw = rendererForObject(planner, object);
   if (!draw) throw new Error(`Unregistered object renderer: ${object?.id} (${object?.kind} / ${object?.style})`);
   return draw(ctx, object);
 }
 
-registerObjectRenderer("zone", ["anchor1", "anchor2", "spawn", "summon"], drawZone);
-registerObjectRenderer("chest", [
-  "nature", "nature_teal", "curator", "player2", "ammo", "alchemy", "mushroom",
-  "tech_cyan", "accessory_cyan", "weapon_red", "tool_gray", "collector_white",
-  "engineer_orange", "resource_gray", "build_brown", "alchemy_purple", "food_orange",
-  "fishing_blue", "decor_white", "player1",
-], drawChest);
-registerObjectRenderer("station", ["special", "advanced", "buff", "alchemy", "food", "core", "summon"], drawStation);
-registerObjectRenderer("npc", ["npc", "clinic", "mushroom"], drawNpc);
-registerObjectRenderer("door", ["route"], drawDoor);
-registerObjectRenderer("hatch", ["route"], drawHatch);
-registerObjectRenderer("furniture", ["furniture"], drawFurniture);
-registerObjectRenderer("bed", ["player1", "player2"], drawBed);
-registerObjectRenderer("personal_storage", ["player1", "player2"], drawPersonal);
-registerObjectRenderer("pylon", ["pylon"], drawPylon);
-registerObjectRenderer("teleporter", ["teleporter_reserve"], drawTeleporter);
-registerObjectRenderer("planter", [
-  "planter_day", "planter_blink", "planter_moon", "planter_water", "planter_fire", "planter_death", "planter_shiver",
-], drawPlanter);
-registerObjectRenderer("light", [
-  "light", "lantern_warm", "star_light", "pink_torch", "ice_torch", "white_torch",
-  "red_torch", "purple_torch", "ultrabright_torch", "mushroom", "glass_lantern",
-], drawLight);
-registerObjectRenderer("museum_trophy", ["museum"], drawMuseumTrophy);
-registerObjectRenderer("museum_mannequin", ["museum"], drawMuseumMannequin);
-registerObjectRenderer("museum_weapon_rack", ["museum"], drawMuseumWeaponRack);
-registerObjectRenderer("museum_item_frame", ["museum"], drawMuseumItemFrame);
-registerObjectRenderer("display", ["player1", "player2"], drawDisplay);
-registerObjectRenderer("honey", ["honey"], drawHoney);
-registerObjectRenderer("lava", ["combat"], drawLava);
-registerObjectRenderer("honey_bubble", ["honey"], drawHoneyBubble);
-registerObjectRenderer("star_bottle", ["star_light"], drawStarBottle);
-registerObjectRenderer("statue", ["heart_statue", "bast"], drawStatue);
-registerObjectRenderer("campfire", ["buff"], drawCampfire);
-registerObjectRenderer("heart_lantern", ["heal"], drawHeart);
-
-function drawObjects() {
-  clearCtx(octx);
-  const mode = document.getElementById("mode").value;
+export function drawObjects(planner) {
+  clearCtx(planner, planner.octx);
+  const mode = planner.document.getElementById("mode").value;
   if (mode === "backgrounds") return;
-  drawCached(
-    octx,
-    caches.objects,
+  drawCached(planner,
+    planner.octx,
+    planner.caches.objects,
     mode === "structure" ? 0.18 : mode === "wiring" ? 0.72 : 1,
   );
+}
+
+export function registerCommonObjectRenderers(planner) {
+
+
+  registerObjectRenderer(planner, "zone", ["anchor1", "anchor2", "spawn", "summon"], drawZone.bind(null, planner));
+  registerObjectRenderer(planner, "chest", [
+    "nature", "nature_teal", "curator", "player2", "ammo", "alchemy", "mushroom",
+    "tech_cyan", "accessory_cyan", "weapon_red", "tool_gray", "collector_white",
+    "engineer_orange", "resource_gray", "build_brown", "alchemy_purple", "food_orange",
+    "fishing_blue", "decor_white", "player1",
+  ], drawChest.bind(null, planner));
+  registerObjectRenderer(planner, "station", ["special", "advanced", "buff", "alchemy", "food", "core", "summon"], drawStation.bind(null, planner));
+  registerObjectRenderer(planner, "npc", ["npc", "clinic", "mushroom"], drawNpc.bind(null, planner));
+  registerObjectRenderer(planner, "door", ["route"], drawDoor.bind(null, planner));
+  registerObjectRenderer(planner, "hatch", ["route"], drawHatch.bind(null, planner));
+  registerObjectRenderer(planner, "furniture", ["furniture"], drawFurniture.bind(null, planner));
+  registerObjectRenderer(planner, "bed", ["player1", "player2"], drawBed.bind(null, planner));
+  registerObjectRenderer(planner, "personal_storage", ["player1", "player2"], drawPersonal.bind(null, planner));
+  registerObjectRenderer(planner, "pylon", ["pylon"], drawPylon.bind(null, planner));
+  registerObjectRenderer(planner, "teleporter", ["teleporter_reserve"], drawTeleporter.bind(null, planner));
+  registerObjectRenderer(planner, "planter", [
+    "planter_day", "planter_blink", "planter_moon", "planter_water", "planter_fire", "planter_death", "planter_shiver",
+  ], drawPlanter.bind(null, planner));
+  registerObjectRenderer(planner, "light", [
+    "light", "lantern_warm", "star_light", "pink_torch", "ice_torch", "white_torch",
+    "red_torch", "purple_torch", "ultrabright_torch", "mushroom", "glass_lantern",
+  ], drawLight.bind(null, planner));
+  registerObjectRenderer(planner, "museum_trophy", ["museum"], drawMuseumTrophy.bind(null, planner));
+  registerObjectRenderer(planner, "museum_mannequin", ["museum"], drawMuseumMannequin.bind(null, planner));
+  registerObjectRenderer(planner, "museum_weapon_rack", ["museum"], drawMuseumWeaponRack.bind(null, planner));
+  registerObjectRenderer(planner, "museum_item_frame", ["museum"], drawMuseumItemFrame.bind(null, planner));
+  registerObjectRenderer(planner, "display", ["player1", "player2"], drawDisplay.bind(null, planner));
+  registerObjectRenderer(planner, "honey", ["honey"], drawHoney.bind(null, planner));
+  registerObjectRenderer(planner, "lava", ["combat"], drawLava.bind(null, planner));
+  registerObjectRenderer(planner, "honey_bubble", ["honey"], drawHoneyBubble.bind(null, planner));
+  registerObjectRenderer(planner, "star_bottle", ["star_light"], drawStarBottle.bind(null, planner));
+  registerObjectRenderer(planner, "statue", ["heart_statue", "bast"], drawStatue.bind(null, planner));
+  registerObjectRenderer(planner, "campfire", ["buff"], drawCampfire.bind(null, planner));
+  registerObjectRenderer(planner, "heart_lantern", ["heal"], drawHeart.bind(null, planner));
 }

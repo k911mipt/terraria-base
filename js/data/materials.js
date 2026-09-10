@@ -1,6 +1,6 @@
 // Terraria material palettes and exact foreground/background specifications.
 // Duplicate object keys are preserved exactly as in the working monolith.
-const MAT = {
+export const MAT = {
   gray_brick: { base: "#78838c", dark: "#515b65", light: "#9aa4ad" },
   black_slab: { base: "#252a30", dark: "#11161b", light: "#444b52" },
   boreal_wood: { base: "#875c3d", dark: "#4f3425", light: "#b17b50" },
@@ -27,7 +27,7 @@ const MAT = {
   dart_trap_w: { base: "#56616a", dark: "#1e262d", light: "#c7d0d7" },
 };
 
-const WALL = {
+export const WALL = {
   glass_wall: ["#2e6474", "#5d98a7"],
   boreal_wall: ["#563f30", "#765741"],
   gray_wall: ["#3f474f", "#59636c"],
@@ -61,7 +61,7 @@ const WALL = {
   diamond_gemspark_wall: ["#d7f7ff", "#ffffff"],
 };
 
-const STYLE = {
+export const STYLE = {
   neutral: "#6f7b86",
   route: "#45b5ad",
   combat: "#bc4148",
@@ -137,7 +137,7 @@ const STYLE = {
   glass_lantern: "#b9eff6",
 };
 
-const BLOCK_SPECS = {
+export const BLOCK_SPECS = {
   gray_brick: {
     layer: "Блок",
     itemRu: "Серый кирпич",
@@ -294,7 +294,7 @@ const BLOCK_SPECS = {
   },
 };
 
-const WALL_SPECS = {
+export const WALL_SPECS = {
   glass_wall: {
     itemRu: "Стеклянная стена",
     itemEn: "Glass Wall",
@@ -545,7 +545,7 @@ const WALL_SPECS = {
   },
 };
 
-const ENGINEERING_FOREGROUND_SPECS = {
+export const ENGINEERING_FOREGROUND_SPECS = {
   trap: {
     layer: "Механизм-блок",
     itemRu: "Дротиковая ловушка",
@@ -588,9 +588,14 @@ const ENGINEERING_FOREGROUND_SPECS = {
   },
 };
 
-const WIRE_COLORS = {
+export const WIRE_COLORS = {
   red: "#ef3e47",
   green: "#39c96b",
   blue: "#388cff",
   yellow: "#f1cf35",
 };
+
+// Each scene extends its own palette/specification objects.
+export function createMaterials() {
+  return structuredClone({ MAT, WALL, STYLE, BLOCK_SPECS, WALL_SPECS, ENGINEERING_FOREGROUND_SPECS, WIRE_COLORS });
+}

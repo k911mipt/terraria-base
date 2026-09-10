@@ -1,6 +1,6 @@
 // Combat street zones and spawn-yard annotations.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_STREET = [
+export const OBJECTS_STREET = [
   {
     id: "LA",
     name: "Левая лечебная точка",

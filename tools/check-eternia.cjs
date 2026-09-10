@@ -4,27 +4,12 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
-const context = vm.createContext({ console });
-for (const relative of [
-  "js/data/solids/upper.js",
-  "js/data/solids/street.js",
-  "js/data/objects/arena.js",
-  "js/data/objects/eternia.js",
-]) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {
-    filename: relative,
-  });
-}
-
-const data = vm.runInContext(
-  `({
-    upper: JSON.parse(JSON.stringify(SOLIDS_UPPER)),
-    street: JSON.parse(JSON.stringify(SOLIDS_STREET)),
-    arena: JSON.parse(JSON.stringify(OBJECTS_ARENA)),
-    eternia: JSON.parse(JSON.stringify(OBJECTS_ETERNIA)),
-  })`,
-  context,
-);
+const data = structuredClone({
+  upper: require("../js/data/solids/upper.js").SOLIDS_UPPER,
+  street: require("../js/data/solids/street.js").SOLIDS_STREET,
+  arena: require("../js/data/objects/arena.js").OBJECTS_ARENA,
+  eternia: require("../js/data/objects/eternia.js").OBJECTS_ETERNIA,
+});
 
 const errors = [];
 const assert = (condition, message) => {
@@ -147,13 +132,11 @@ assert(
 assert(data.eternia.length === 5, "Expected one stand and four planning zones");
 
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-const arenaScript = html.indexOf('./js/data/objects/arena.js');
-const eterniaScript = html.indexOf('./js/data/objects/eternia.js');
-const objectIndexScript = html.indexOf('./js/data/objects/index.js');
-assert(
-  arenaScript >= 0 && eterniaScript > arenaScript && objectIndexScript > eterniaScript,
-  "index.html must load arena.js, eternia.js and objects/index.js in that order",
-);
+const assembly = require("../js/data/objects/index.js").OBJECTS;
+const arenaEnd = assembly.indexOf(require("../js/data/objects/arena.js").OBJECTS_ARENA.at(-1));
+const eterniaStart = assembly.indexOf(require("../js/data/objects/eternia.js").OBJECTS_ETERNIA[0]);
+assert(arenaEnd >= 0 && eterniaStart > arenaEnd,
+  "Native object assembly must preserve arena before Eternia");
 assert(
   html.includes('<button id="bossLeft">Босс / Этерия</button'),
   "Left-arena navigation button was not renamed",
@@ -170,8 +153,8 @@ assert(
 
 const checkData = fs.readFileSync(path.join(root, "tools/check-data.cjs"), "utf8");
 assert(
-  checkData.includes('"js/data/objects/eternia.js"'),
-  "check-data.cjs must load the Eternia object module",
+  require("./lib/load-scene.cjs").loadScene("index.html").run("D.objects.some(o => o.eterniaSpec)"),
+  "Native scene loader must include Eternia objects",
 );
 
 if (errors.length) {

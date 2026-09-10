@@ -1,9 +1,16 @@
+import { clearCtx, viewRect } from './camera.js';
+import { cp, cy, objectBox, pstyle, shade } from './core.js';
+import { drawOverlay } from './overlay.js';
+import { drawObjects } from './render-objects.js';
+import { pxRect } from './render-tiles.js';
+import { CACHE_TILE } from './state.js';
+
 // Base-layer and structural Canvas rendering.
-function drawPlatformTile(ctx, wx, wy, mat = "boreal_platform") {
-  const x = cp(wx),
-    y = cy(wy),
+export function drawPlatformTile(planner, ctx, wx, wy, mat = "boreal_platform") {
+  const x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE,
-    p = MAT[mat] || MAT.boreal_platform;
+    p = planner.MAT[mat] || planner.MAT.boreal_platform;
   ctx.fillStyle = p.dark;
   ctx.fillRect(x, y + 9, t, 5);
   ctx.fillStyle = p.base;
@@ -15,11 +22,11 @@ function drawPlatformTile(ctx, wx, wy, mat = "boreal_platform") {
   ctx.fillRect(x + 11, y + 11, 2, 5);
 }
 
-function drawGlassPlatformTile(ctx, wx, wy) {
-  const x = cp(wx),
-    y = cy(wy),
+export function drawGlassPlatformTile(planner, ctx, wx, wy) {
+  const x = cp(planner, wx),
+    y = cy(planner, wy),
     t = CACHE_TILE,
-    p = MAT.glass_platform;
+    p = planner.MAT.glass_platform;
   ctx.save();
   ctx.globalAlpha = 0.42;
   ctx.fillStyle = p.base;
@@ -38,9 +45,9 @@ function drawGlassPlatformTile(ctx, wx, wy) {
   ctx.restore();
 }
 
-function drawBed(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawBed(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   pxRect(ctx, b.x + 2, b.y + 7, b.w - 4, b.h - 9, p.dark);
   pxRect(ctx, b.x + 4, b.y + 5, b.w - 6, 8, p.base);
   pxRect(ctx, b.x + 5, b.y + 6, 7, 6, "#e6e1d5");
@@ -49,9 +56,9 @@ function drawBed(ctx, o) {
   pxRect(ctx, b.x + b.w - 6, b.y + b.h - 3, 3, 3, p.dark);
 }
 
-function drawPersonal(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style),
+export function drawPersonal(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style),
     s = o.short;
   pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 3, p.dark);
   pxRect(ctx, b.x + 4, b.y + 4, b.w - 8, b.h - 7, p.base);
@@ -85,8 +92,8 @@ function drawPersonal(ctx, o) {
   }
 }
 
-function drawPylon(ctx, o) {
-  const b = objectBox(o),
+export function drawPylon(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2;
   ctx.fillStyle = "#285f68";
@@ -108,9 +115,9 @@ function drawPylon(ctx, o) {
   pxRect(ctx, b.x + 3, b.y + b.h - 5, b.w - 6, 4, "#6d5940");
 }
 
-function drawTeleporter(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawTeleporter(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   pxRect(ctx, b.x + 2, b.y + b.h - 7, b.w - 4, 5, p.dark);
   pxRect(ctx, b.x + 4, b.y + b.h - 8, b.w - 8, 4, p.base);
   ctx.strokeStyle = "#7fe8ef";
@@ -120,8 +127,8 @@ function drawTeleporter(ctx, o) {
   ctx.stroke();
 }
 
-function drawLight(ctx, o) {
-  const b = objectBox(o),
+export function drawLight(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2,
     cy = b.y + b.h / 2,
     style = o.style || "light";
@@ -220,9 +227,9 @@ function drawLight(ctx, o) {
   ctx.fill();
 }
 
-function drawDisplay(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawDisplay(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   if (o.room === "museum") {
     pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 4, shade(p.base, -18));
     pxRect(ctx, b.x + 4, b.y + 4, b.w - 8, b.h - 8, p.base);
@@ -234,9 +241,9 @@ function drawDisplay(ctx, o) {
   }
 }
 
-function drawPanel(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawPanel(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   pxRect(ctx, b.x + 2, b.y + 2, b.w - 4, b.h - 4, p.dark);
   pxRect(ctx, b.x + 4, b.y + 4, b.w - 8, b.h - 8, p.base);
   const cols = ["#ff5b56", "#55d77d", "#56a9ff", "#ffd45a"];
@@ -245,9 +252,9 @@ function drawPanel(ctx, o) {
   pxRect(ctx, b.x + 5, b.y + b.h - 8, b.w - 10, 3, "#222b32");
 }
 
-function drawZone(ctx, o) {
-  const b = objectBox(o),
-    p = pstyle(o.style);
+export function drawZone(planner, ctx, o) {
+  const b = objectBox(planner, o),
+    p = pstyle(planner, o.style);
   ctx.save();
   ctx.globalAlpha = o.style === "spawn" ? 0.14 : 0.17;
   ctx.fillStyle = p.base;
@@ -260,8 +267,8 @@ function drawZone(ctx, o) {
   ctx.restore();
 }
 
-function drawHoney(ctx, o) {
-  const b = objectBox(o);
+export function drawHoney(planner, ctx, o) {
+  const b = objectBox(planner, o);
   ctx.save();
   ctx.globalAlpha = 0.88;
   pxRect(ctx, b.x, b.y + 2, b.w, b.h - 2, "#d89f35");
@@ -276,8 +283,8 @@ function drawHoney(ctx, o) {
   ctx.restore();
 }
 
-function drawLava(ctx, o) {
-  const b = objectBox(o),
+export function drawLava(planner, ctx, o) {
+  const b = objectBox(planner, o),
     t = CACHE_TILE;
   ctx.save();
   ctx.globalAlpha = 0.92;
@@ -294,8 +301,8 @@ function drawLava(ctx, o) {
   ctx.restore();
 }
 
-function drawHoneyBubble(ctx, o) {
-  const b = objectBox(o),
+export function drawHoneyBubble(planner, ctx, o) {
+  const b = objectBox(planner, o),
     t = CACHE_TILE;
   ctx.save();
   for (let yy = 0; yy < o.h; yy++)
@@ -324,8 +331,8 @@ function drawHoneyBubble(ctx, o) {
   ctx.restore();
 }
 
-function drawStarBottle(ctx, o) {
-  const b = objectBox(o),
+export function drawStarBottle(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   ctx.strokeStyle = "#7c8eaa";
   ctx.lineWidth = 1.5;
@@ -351,8 +358,8 @@ function drawStarBottle(ctx, o) {
   ctx.fill();
 }
 
-function drawStatue(ctx, o) {
-  const b = objectBox(o),
+export function drawStatue(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   if (o.style === "bast") {
     pxRect(ctx, b.x + 2, b.y + b.h - 5, b.w - 4, 4, "#a87b42");
@@ -380,8 +387,8 @@ function drawStatue(ctx, o) {
   }
 }
 
-function drawCampfire(ctx, o) {
-  const b = objectBox(o),
+export function drawCampfire(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   ctx.strokeStyle = "#81522e";
   ctx.lineWidth = 4;
@@ -408,8 +415,8 @@ function drawCampfire(ctx, o) {
   ctx.fill();
 }
 
-function drawHeart(ctx, o) {
-  const b = objectBox(o),
+export function drawHeart(planner, ctx, o) {
+  const b = objectBox(planner, o),
     cx = b.x + b.w / 2;
   ctx.strokeStyle = "#6f6f78";
   ctx.beginPath();
@@ -424,21 +431,21 @@ function drawHeart(ctx, o) {
   ctx.fill();
 }
 
-function drawCached(ctx, cache, alpha = 1) {
-  const vr = viewRect(),
-    ix1 = Math.max(vr.x1, D.bounds.xMin),
-    iy1 = Math.max(vr.y1, D.bounds.yMin),
-    ix2 = Math.min(vr.x2, D.bounds.xMax + 1),
-    iy2 = Math.min(vr.y2, D.bounds.yMax + 1);
+export function drawCached(planner, ctx, cache, alpha = 1) {
+  const vr = viewRect(planner),
+    ix1 = Math.max(vr.x1, planner.D.bounds.xMin),
+    iy1 = Math.max(vr.y1, planner.D.bounds.yMin),
+    ix2 = Math.min(vr.x2, planner.D.bounds.xMax + 1),
+    iy2 = Math.min(vr.y2, planner.D.bounds.yMax + 1);
   if (ix2 <= ix1 || iy2 <= iy1) return;
-  const sx = (ix1 - D.bounds.xMin) * CACHE_TILE,
-    sy = (iy1 - D.bounds.yMin) * CACHE_TILE,
+  const sx = (ix1 - planner.D.bounds.xMin) * CACHE_TILE,
+    sy = (iy1 - planner.D.bounds.yMin) * CACHE_TILE,
     sw = (ix2 - ix1) * CACHE_TILE,
     sh = (iy2 - iy1) * CACHE_TILE,
-    dx = (ix1 - cam.x) * cam.scale,
-    dy = (iy1 - cam.y) * cam.scale,
-    dw = (ix2 - ix1) * cam.scale,
-    dh = (iy2 - iy1) * cam.scale;
+    dx = (ix1 - planner.cam.x) * planner.cam.scale,
+    dy = (iy1 - planner.cam.y) * planner.cam.scale,
+    dw = (ix2 - ix1) * planner.cam.scale,
+    dh = (iy2 - iy1) * planner.cam.scale;
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.imageSmoothingEnabled = false;
@@ -446,31 +453,31 @@ function drawCached(ctx, cache, alpha = 1) {
   ctx.restore();
 }
 
-function drawBase() {
-  clearCtx(bctx);
-  bctx.fillStyle = "#05090d";
-  bctx.fillRect(0, 0, viewport.clientWidth, viewport.clientHeight);
-  const mode = document.getElementById("mode").value;
+export function drawBase(planner) {
+  clearCtx(planner, planner.bctx);
+  planner.bctx.fillStyle = "#05090d";
+  planner.bctx.fillRect(0, 0, planner.viewport.clientWidth, planner.viewport.clientHeight);
+  const mode = planner.document.getElementById("mode").value;
   if (mode === "visual") {
-    drawCached(bctx, caches.bg, 1);
-    drawCached(bctx, caches.solid, 1);
+    drawCached(planner, planner.bctx, planner.caches.bg, 1);
+    drawCached(planner, planner.bctx, planner.caches.solid, 1);
   } else if (mode === "structure") {
-    drawCached(bctx, caches.bg, 0.28);
-    drawCached(bctx, caches.solid, 1);
+    drawCached(planner, planner.bctx, planner.caches.bg, 0.28);
+    drawCached(planner, planner.bctx, planner.caches.solid, 1);
   } else if (mode === "furniture") {
-    drawCached(bctx, caches.bg, 0.32);
-    drawCached(bctx, caches.solid, 0.48);
+    drawCached(planner, planner.bctx, planner.caches.bg, 0.32);
+    drawCached(planner, planner.bctx, planner.caches.solid, 0.48);
   } else if (mode === "arena" || mode === "wiring") {
-    drawCached(bctx, caches.bg, 0.72);
-    drawCached(bctx, caches.solid, 1);
+    drawCached(planner, planner.bctx, planner.caches.bg, 0.72);
+    drawCached(planner, planner.bctx, planner.caches.solid, 1);
   } else {
-    drawCached(bctx, caches.bg, 1);
-    drawCached(bctx, caches.solid, 0.16);
+    drawCached(planner, planner.bctx, planner.caches.bg, 1);
+    drawCached(planner, planner.bctx, planner.caches.solid, 0.16);
   }
 }
 
-function draw() {
-  drawBase();
-  drawObjects();
-  drawOverlay();
+export function draw(planner) {
+  drawBase(planner);
+  drawObjects(planner);
+  drawOverlay(planner);
 }

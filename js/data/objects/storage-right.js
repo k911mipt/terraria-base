@@ -1,6 +1,6 @@
 // Right storage tower: stackable resources, engineering and building supplies.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_STORAGE_RIGHT = [
+export const OBJECTS_STORAGE_RIGHT = [
   {
     id: "R1_1",
     name: "NEW — стакающееся",

@@ -1,12 +1,12 @@
 // Underground Snow Goblin workshop bounds, rooms, lighting zones and frozen design invariants.
-const UNDERGROUND_BOUNDS = {
+export const UNDERGROUND_BOUNDS = {
   "xMin": 0,
   "xMax": 65,
   "yMin": 0,
   "yMax": 50
 };
 
-const UNDERGROUND_ROOMS = [
+export const UNDERGROUND_ROOMS = [
   {
     "id": "underground_context",
     "name": "Подземный снежный узел",
@@ -79,9 +79,9 @@ const UNDERGROUND_ROOMS = [
   }
 ];
 
-const UNDERGROUND_RESERVES = [];
+export const UNDERGROUND_RESERVES = [];
 
-const UNDERGROUND_LIGHTING_ZONES = [
+export const UNDERGROUND_LIGHTING_ZONES = [
   {
     "id": "mechanic_room",
     "name": "Комната Механика",
@@ -128,7 +128,7 @@ const UNDERGROUND_LIGHTING_ZONES = [
   }
 ];
 
-const UNDERGROUND_VALIDATION = {
+export const UNDERGROUND_VALIDATION = {
   "status": "PASS",
   "sceneWidth": 66,
   "sceneHeight": 51,
@@ -198,7 +198,7 @@ const UNDERGROUND_VALIDATION = {
   "princessStyleRegions": 5
 };
 
-const UNDERGROUND_NOTES = [
+export const UNDERGROUND_NOTES = [
   "Финальная группа жителей остаётся прежней: Механик, Гоблин-инженер и будущая Принцесса.",
   "Обе внутренние двери имеют свободный трёхтайловый столбец с каждой стороны; наружным дверям достаточно свободной стороны тоннеля.",
   "Твёрдая стенка x38, y23–27 удалена: из короткого спуска теперь можно напрямую пройти к сундуку рыболовных снастей.",
@@ -208,4 +208,4 @@ const UNDERGROUND_NOTES = [
   "1984 Snow/Ice Blocks по-прежнему гарантируют ледяной биом при пороге 1500."
 ];
 
-const UNDERGROUND_TITLE = "Terraria — снежная мастерская Гоблина v3, освещённые комнаты и рыбалка 20×16";
+export const UNDERGROUND_TITLE = "Terraria — снежная мастерская Гоблина v3, освещённые комнаты и рыбалка 20×16";

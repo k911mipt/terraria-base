@@ -1,12 +1,12 @@
 // Desert outpost bounds, rooms and design metadata.
-const DESERT_BOUNDS = {
+export const DESERT_BOUNDS = {
   "xMin": 0,
   "xMax": 79,
   "yMin": 0,
   "yMax": 70
 };
 
-const DESERT_ROOMS = [
+export const DESERT_ROOMS = [
   {
     "id": "desert_surface",
     "name": "Компактный поверхностный павильон",
@@ -69,9 +69,9 @@ const DESERT_ROOMS = [
   }
 ];
 
-const DESERT_RESERVES = [];
+export const DESERT_RESERVES = [];
 
-const DESERT_VALIDATION = {
+export const DESERT_VALIDATION = {
   "status": "PASS",
   "npcHouses": 2,
   "pylonCount": 1,
@@ -146,7 +146,7 @@ const DESERT_VALIDATION = {
   "hatchShiftedBelowFloor": true
 };
 
-const DESERT_NOTES = [
+export const DESERT_NOTES = [
   "Сцена универсальна и не привязана к расположению конкретных мировых структур.",
   "За каждой из пяти дверей находится безопасная фоновая стена на всех трёх тайлах дверного проёма.",
   "На x49–50, y20 находится Palm Wood Platform; люк перенесён на x49–50, y21.",
@@ -156,4 +156,4 @@ const DESERT_NOTES = [
   "Платформы центральной шахты расположены на y27/34/41/48/55/62/69 с постоянным шагом 7."
 ];
 
-const DESERT_TITLE = "Terraria — компактный пустынный аванпост, пилон и рыбалка";
+export const DESERT_TITLE = "Terraria — компактный пустынный аванпост, пилон и рыбалка";

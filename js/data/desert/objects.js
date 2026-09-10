@@ -1,5 +1,5 @@
 // Furniture, NPCs, local storage, pylon, water and landscape accents.
-const DESERT_OBJECTS = [
+export const DESERT_OBJECTS = [
   {
     "id": "D_OUTER_L",
     "name": "Левая наружная дверь",

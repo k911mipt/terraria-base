@@ -1,5 +1,5 @@
 // Doors, residents, styled furniture, measured lights, storage, water and Cavern Pylon.
-const UNDERGROUND_OBJECTS = [
+export const UNDERGROUND_OBJECTS = [
   {
     "id": "UG_OUTER_L",
     "name": "Левая наружная дверь",

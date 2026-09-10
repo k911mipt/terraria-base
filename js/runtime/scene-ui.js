@@ -1,5 +1,6 @@
+
 // Scene differences only. Shared startup/tables/controls consume this record.
-const SCENE_UI = {
+export const SCENE_UI = {
   main: {
     engineering: true,
     initialMode: "arena",
@@ -61,5 +62,3 @@ const SCENE_UI = {
     },
   },
 };
-const plannerUI = SCENE_UI[D.sceneId];
-if (!plannerUI) throw new Error(`Unknown scene UI: ${D.sceneId}`);

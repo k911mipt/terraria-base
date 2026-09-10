@@ -13,8 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def validation_steps(root: Path = ROOT) -> list[tuple[str, list[str]]]:
     """Discover syntax/regression files; keep integration stages explicit."""
-    steps = [("runner-regressions", [sys.executable, "tools/check-validation.py"])]
-    for directory, pattern in (("js", "*.js"), ("tools", "*.cjs")):
+    steps = [("runner-regressions", [sys.executable, "tools/check-validation.py"]),
+             ("release-regressions", [sys.executable, "tools/check-version-assets.py"]),
+             ("release-stamps", [sys.executable, "tools/version-assets.py", "--check"])]
+    for directory, pattern in (("js", "*.js"), ("tools", "*.cjs"), ("tools", "*.mjs")):
         for file in sorted((root / directory).rglob(pattern)):
             relative = file.relative_to(root).as_posix()
             steps.append(("syntax-" + relative.replace("/", "-"), ["node", "--check", relative]))
@@ -25,6 +27,7 @@ def validation_steps(root: Path = ROOT) -> list[tuple[str, list[str]]]:
         ("scene-audit", ["node", "tools/audit-scene.cjs"]),
         ("browser", [sys.executable, "tools/check-browser.py"]),
         ("cache-rollout", [sys.executable, "tools/check-ui-rollout.py"]),
+        ("native-browser", [sys.executable, "tools/check-native-browser.py"]),
         ("lighting-browser", [sys.executable, "tools/check-lighting-browser.py"]),
     ])
     return steps

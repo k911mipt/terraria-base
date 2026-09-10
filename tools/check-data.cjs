@@ -6,48 +6,9 @@ const path = require("path");
 const vm = require("vm");
 
 const root = path.resolve(__dirname, "..");
-const files = [
-  "js/data/layout.js",
-  "js/data/solids/upper.js",
-  "js/data/solids/street.js",
-  "js/data/solids/lower.js",
-  "js/data/solids/index.js",
-  "js/data/backgrounds/core.js",
-  "js/data/backgrounds/boss-arena.js",
-  "js/data/backgrounds/boss-platform-joins.js",
-  "js/data/backgrounds/museum-pits.js",
-  "js/data/backgrounds/index.js",
-  "js/data/objects/routes.js",
-  "js/data/objects/crafting.js",
-  "js/data/objects/rooms.js",
-  "js/data/objects/street.js",
-  "js/data/objects/storage-left.js",
-  "js/data/objects/storage-right.js",
-  "js/data/objects/greenhouse.js",
-  "js/data/objects/dyes.js",
-  "js/data/objects/arena.js",
-  "js/data/objects/eternia.js",
-  "js/data/objects/museum.js",
-  "js/data/objects/pits.js",
-  "js/data/objects/index.js",
-  "js/data/metadata.js",
-  "js/data/index.js",
-  "js/data/engineering/circuits.js",
-  "js/data/engineering/controls.js",
-  "js/data/engineering/traps.js",
-  "js/data/engineering/index.js",
-  "js/data/materials.js",
-];
-const code = files
-  .map((file) => fs.readFileSync(path.join(root, file), "utf8"))
-  .join("\n\n");
-
-const context = {};
-vm.runInNewContext(code + "\nglobalThis.__plannerData = { D, ENG };", context, {
-  filename: "planner-data.bundle.js",
-});
-
-const { D, ENG } = context.__plannerData;
+const { loadScene } = require("./lib/load-scene.cjs");
+const { run } = loadScene("index.html");
+const { D, ENG } = run("({D, ENG})");
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };

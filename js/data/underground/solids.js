@@ -1,5 +1,5 @@
 // Guaranteed Ice-biome context, styled rooms, open access and artificial fishing reservoir.
-const UNDERGROUND_SOLIDS = [
+export const UNDERGROUND_SOLIDS = [
   {
     "x1": 0,
     "y1": 0,

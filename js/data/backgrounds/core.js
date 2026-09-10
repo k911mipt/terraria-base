@@ -1,6 +1,6 @@
 // Base, rooms, greenhouse, storage and mushroom-pavilion background walls.
 // Generated from the canonical monolith without changing item order.
-const BACKGROUNDS_CORE = [
+export const BACKGROUNDS_CORE = [
   {
     x1: 1,
     y1: 14,

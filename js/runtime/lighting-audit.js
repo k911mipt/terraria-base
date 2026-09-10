@@ -1,7 +1,11 @@
+import { auditBuilding, buildingGrid } from './building-audit.js';
+import { roomForObject } from './core.js';
+import { escHtml } from './formatters.js';
+
 // Project coverage by room-local point sources; not Terraria's light engine.
 // Conservative type defaults. Existing larger radii are pinned below, not inferred
 // from the current data and not increased to make newly audited rooms pass.
-const LIGHT_RADII = {
+export const LIGHT_RADII = {
   light: 7, lantern_warm: 7, star_light: 8, pink_torch: 7, ice_torch: 7,
   white_torch: 7, red_torch: 7, purple_torch: 7, ultrabright_torch: 9,
   mushroom: 7, green_torch: 7, glass_lantern: 8, ice_lantern: 7,
@@ -9,7 +13,7 @@ const LIGHT_RADII = {
   jungle_lantern: 11, jungle_torch: 8, painter_lantern: 11,
   painter_torch: 7, tiki_lantern: 12, tiki_torch: 8,
 };
-const LIGHT_RADIUS_EXCEPTIONS = new Map([
+export const LIGHT_RADIUS_EXCEPTIONS = new Map([
   ['underground', 'UG_GOBLIN_GREEN_TORCH', 'green_torch', 10],
   ['underground', 'UG_MECH_CHANDELIER', 'copper_chandelier', 12],
   ['underground', 'UG_PYLON_ICE_LANTERN', 'ice_lantern', 9],
@@ -24,8 +28,8 @@ const LIGHT_RADIUS_EXCEPTIONS = new Map([
   style, radius,
   reason: 'Сохранён прежний проектный радиус из 21ce3f3; это геометрическая эвристика, не игровая яркость.',
 }]));
-const LIGHT_KINDS = new Set(['light', 'campfire', 'heart_lantern', 'star_bottle']);
-const EXTRA_LIGHTING_ZONES = {
+export const LIGHT_KINDS = new Set(['light', 'campfire', 'heart_lantern', 'star_bottle']);
+export const EXTRA_LIGHTING_ZONES = {
   main: [
     ['left_tower', 1, 14, 7, 67, 1],
     ['forest_npc', 9, 28, 31, 33, 3],
@@ -52,12 +56,12 @@ const EXTRA_LIGHTING_ZONES = {
     ['desert_service', 29, 21, 46, 26, 2],
   ],
 };
-const EXISTING_LIGHTING_ZONE_IDS = {
+export const EXISTING_LIGHTING_ZONE_IDS = {
   underground: ['mechanic_room', 'goblin_room', 'princess_room', 'fishing_floor'],
   jungle: ['dryad_room', 'pylon_hub', 'painter_loft', 'witch_room', 'jungle_shaft'],
 };
 
-function lightingZonesFor(scene) {
+export function lightingZonesFor(scene) {
   if (Object.hasOwn(EXTRA_LIGHTING_ZONES, scene.sceneId))
     return EXTRA_LIGHTING_ZONES[scene.sceneId].map(([room, x1, y1, x2, y2, minSources]) => ({
       id: room, room, x1, y1, x2, y2, minSources, minCoverage: 1,
@@ -66,7 +70,7 @@ function lightingZonesFor(scene) {
   return scene.lightingZones;
 }
 
-function lightingRadius(sceneId, source) {
+export function lightingRadius(sceneId, source) {
   const fallback = source.kind === 'light'
     ? (Object.hasOwn(LIGHT_RADII, source.style) ? LIGHT_RADII[source.style] : null)
     : ({campfire: 8, heart_lantern: 8, star_bottle: 8})[source.kind];
@@ -82,7 +86,7 @@ function lightingRadius(sceneId, source) {
   return {radius, reason: exception?.reason || 'Консервативный радиус типа источника.'};
 }
 
-function auditLighting(scene, blockSpecs, zones = lightingZonesFor(scene),
+export function auditLighting(scene, blockSpecs, zones = lightingZonesFor(scene),
   construction = auditBuilding(scene, blockSpecs)) {
   const errors = [], warnings = [], results = [], sources = [], excludedSources = [];
   const diagnostic = (rule, message, item) => ({scene: scene.sceneId, rule,
@@ -159,7 +163,7 @@ function auditLighting(scene, blockSpecs, zones = lightingZonesFor(scene),
     errors, warnings, zones: results, sources, excludedSources};
 }
 
-function renderLightingAudit(report) {
+export function renderLightingAudit(report) {
   if (report.status === 'NOT_RUN') return '<p class="sub">Проектное покрытие светом не рассчитано: неверные исходные данные.</p>';
   const zones = report.zones;
   return `<details class="lighting-audit"><summary>Проектное покрытие светом: ${zones.filter(zone => zone.status === 'PASS').length}/${zones.length} зон достигли цели</summary>` +

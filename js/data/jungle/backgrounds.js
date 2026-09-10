@@ -1,5 +1,5 @@
 // Safe player-placed walls for the Jungle treehouse, doors, platforms and shaft.
-const JUNGLE_BACKGROUNDS = [
+export const JUNGLE_BACKGROUNDS = [
   {
     x1: 9,
     y1: 23,

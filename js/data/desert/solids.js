@@ -1,5 +1,5 @@
 // Foreground blocks and platforms for the compact desert outpost.
-const DESERT_SOLIDS = [
+export const DESERT_SOLIDS = [
   {
     "x1": 0,
     "y1": 20,

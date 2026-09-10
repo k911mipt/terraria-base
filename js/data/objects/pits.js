@@ -1,6 +1,6 @@
 // Pit liquids and final pit-specific foreground objects.
 // Generated from the canonical monolith without changing item order.
-const OBJECTS_PITS = [
+export const OBJECTS_PITS = [
   {
     id: "L_PIT_LAVA",
     name: "Лава левой ямы",

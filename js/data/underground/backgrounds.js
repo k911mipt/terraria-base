@@ -1,5 +1,5 @@
 // Safe walls for all rooms, styled panels, platforms and every door opening.
-const UNDERGROUND_BACKGROUNDS = [
+export const UNDERGROUND_BACKGROUNDS = [
   {
     "x1": 13,
     "y1": 8,

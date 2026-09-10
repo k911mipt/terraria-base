@@ -1,9 +1,14 @@
-// One preparation path, including the supported empty-engineering case.
-prepareEngineering();
-if (plannerUI.engineering) {
-  validateHeartWireTargets();
-  validatePitConfiguration();
-} else {
-  ENG.validation.heartTargets = "не используется";
-  ENG.validation.pitStates = "не используется";
+import { prepareEngineering, validateHeartWireTargets } from './overlay.js';
+import { validatePitConfiguration } from './validation.js';
+
+export function preparePlanner(planner) {
+  // One preparation path, including the supported empty-engineering case.
+  prepareEngineering(planner);
+  if (planner.plannerUI.engineering) {
+    validateHeartWireTargets(planner);
+    validatePitConfiguration(planner);
+  } else {
+    planner.ENG.validation.heartTargets = "не используется";
+    planner.ENG.validation.pitStates = "не используется";
+  }
 }

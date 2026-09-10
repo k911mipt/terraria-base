@@ -1,7 +1,9 @@
+import { installedDisplayItem, materialSpecProblems, objectMetadata, objectSpecPrefix } from './validation.js';
+
 // Shared placement and identity adapter. No DOM, Canvas or inference from current D.
 // Bind each material key to its reviewed identity and collision mode independently
 // of mutable display specs. A valid but different item name is still an error.
-const MATERIAL_BINDINGS = {
+export const MATERIAL_BINDINGS = {
   block: {
     bamboo_block: ["Bamboo", "solid"],
     black_slab: ["Stone Slab", "solid"],
@@ -82,20 +84,20 @@ const MATERIAL_BINDINGS = {
   },
 };
 
-const LAYER_COLLISIONS = {
+export const LAYER_COLLISIONS = {
   "Блок": "solid", "Твёрдый блок": "solid", "Блок с травой": "solid",
   "Поверхность": "solid", "Блок-механизм": "solid", "Механизм-блок": "solid",
   "Платформа": "platform", "Проходимый блок-мебель": "passable",
 };
 
-function materialBinding(id, background = false) {
+export function materialBinding(id, background = false) {
   const bindings = MATERIAL_BINDINGS[background ? "wall" : "block"];
   if (!Object.hasOwn(bindings, id)) return null;
   const [itemEn, collision] = bindings[id];
   return {itemEn, collision};
 }
 
-function materialBindingProblems(id, spec, background = false) {
+export function materialBindingProblems(id, spec, background = false) {
   const binding = materialBinding(id, background);
   if (!binding) return [`missing material binding: ${id}`];
   if (!spec || typeof spec !== "object") return []; // structural validator diagnoses this
@@ -110,7 +112,7 @@ function materialBindingProblems(id, spec, background = false) {
 
 // The material identity is separate from its placement inventory item. Wand-made
 // tiles and grass surfaces must not be advertised as literal inventory items.
-const COMPOSITE_MATERIALS = {
+export const COMPOSITE_MATERIALS = {
   living_mahogany: {kind: "tile", id: "Living Mahogany", inventoryItem: null},
   leaf_block: {kind: "tile", id: "Leaf Block", inventoryItem: null},
   jungle_grass: {kind: "surface", id: "Jungle Grass on Mud Block", inventoryItem: "Mud Block"},
@@ -118,7 +120,7 @@ const COMPOSITE_MATERIALS = {
   mushroom_block: {kind: "item", id: "Glowing Mushroom", inventoryItem: "Glowing Mushroom"},
 };
 
-function materialPlacementContract(id, spec, background = false) {
+export function materialPlacementContract(id, spec, background = false) {
   const binding = materialBinding(id, background);
   if (!binding || !spec || typeof spec !== "object" || Array.isArray(spec) ||
       materialSpecProblems(spec, background).length || materialBindingProblems(id, spec, background).length) return null;
@@ -129,15 +131,15 @@ function materialPlacementContract(id, spec, background = false) {
     safe: background && typeof spec?.safe === "boolean" ? spec.safe : null};
 }
 
-const BUILDING_FLOOR_KINDS = new Set(['chest','station','furniture','bed','personal_storage',
+export const BUILDING_FLOOR_KINDS = new Set(['chest','station','furniture','bed','personal_storage',
   'pylon','campfire','statue','museum_mannequin']);
-const BUILDING_WALL_KINDS = new Set(['museum_trophy','museum_weapon_rack','museum_item_frame','jungle_sign']);
-const BUILDING_CEILING_STYLES = new Set(['lantern_warm','star_light','glass_lantern','ice_lantern',
+export const BUILDING_WALL_KINDS = new Set(['museum_trophy','museum_weapon_rack','museum_item_frame','jungle_sign']);
+export const BUILDING_CEILING_STYLES = new Set(['lantern_warm','star_light','glass_lantern','ice_lantern',
   'copper_chandelier','crystal_chandelier','jungle_lantern','painter_lantern','tiki_lantern']);
 
 // Attachment classes describe the existing design intention. Item identity and
 // exact game footprint remain separate; unknown properties are not guessed.
-function buildingObjectTraits(object) {
+export function buildingObjectTraits(object) {
   if (object.kind === 'door') return {attachment:'door',collision:true,blocksDoor:false};
   if (object.kind === 'hatch') return {attachment:'hatch',collision:true,blocksDoor:false};
   if (object.kind === 'planter') return {attachment:'self',collision:true,blocksDoor:false};
@@ -160,7 +162,7 @@ function buildingObjectTraits(object) {
 
 // These optional annotations may confirm the contract, never silently disable it.
 // Alternative attachment policies must first be supported by the shared type model.
-function objectPlacementProblems(object) {
+export function objectPlacementProblems(object) {
   if (!object || typeof object !== "object") return [];
   const placement = buildingObjectTraits(object), problems = [];
   for (const field of ["attachment", "collision", "blocksDoor"]) {
@@ -174,21 +176,21 @@ function objectPlacementProblems(object) {
   return problems;
 }
 
-const OBJECT_PASSAGE_LABELS = {
+export const OBJECT_PASSAGE_LABELS = {
   passable: "Проходимый предмет",
   platform: "Платформа: проходима снизу и сбоку",
   door: "Зависит от открытого/закрытого состояния",
   annotation: "Непредметный элемент схемы",
   unknown: "Не определено",
 };
-const ATTACHMENT_LABELS = {
+export const ATTACHMENT_LABELS = {
   floor: "На опоре снизу", wall: "На фоновой стене", ceiling: "Под опорой сверху",
   torch: "Стена или подходящая соседняя опора", door: "Дверной проём",
   hatch: "Под платформой, между боковыми опорами", self: "Самонесущий элемент",
   embedded: "Составной элемент в переднем слое", none: "Не применяется",
 };
 
-function objectContract(object) {
+export function objectContract(object) {
   const metadata = objectMetadata(object), placement = object ? buildingObjectTraits(object) : null;
   const prefix = objectSpecPrefix(object), carrier = installedDisplayItem(object);
   let identity = {status: metadata.role === "unknown" || (prefix && metadata.problems.length) ? "invalid"

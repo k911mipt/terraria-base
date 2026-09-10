@@ -5,26 +5,10 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
-const scripts = [
-  "js/data/desert/layout.js",
-  "js/data/desert/solids.js",
-  "js/data/desert/backgrounds.js",
-  "js/data/desert/objects.js",
-  "js/data/desert/index.js",
-  "js/data/desert/engineering.js",
-];
+const { loadScene } = require("./lib/load-scene.cjs");
+const { context, run, runFile } = loadScene("desert.html");
+const { D, ENG } = run("({D, ENG})");
 
-const context = vm.createContext({ console });
-for (const relative of scripts) {
-  vm.runInContext(fs.readFileSync(path.join(root, relative), "utf8"), context, {
-    filename: relative,
-  });
-}
-
-const { D, ENG } = vm.runInContext(
-  "({ D: JSON.parse(JSON.stringify(D)), ENG: JSON.parse(JSON.stringify(ENG)) })",
-  context,
-);
 
 const errors = [];
 const assert = (condition, message) => {

@@ -1,36 +1,38 @@
+import { saveCam, schedule } from './core.js';
+
 // Camera transforms, viewport fitting and render scheduling.
-function resize() {
-  dpr = devicePixelRatio || 1;
-  for (const c of [baseCanvas, objectCanvas, overlayCanvas]) {
-    c.width = Math.round(viewport.clientWidth * dpr);
-    c.height = Math.round(viewport.clientHeight * dpr);
+export function resize(planner) {
+  planner.dpr = planner.window.devicePixelRatio || 1;
+  for (const c of [planner.baseCanvas, planner.objectCanvas, planner.overlayCanvas]) {
+    c.width = Math.round(planner.viewport.clientWidth * planner.dpr);
+    c.height = Math.round(planner.viewport.clientHeight * planner.dpr);
   }
-  schedule();
+  schedule(planner);
 }
 
-function viewRect() {
+export function viewRect(planner) {
   return {
-    x1: cam.x,
-    y1: cam.y,
-    x2: cam.x + viewport.clientWidth / cam.scale,
-    y2: cam.y + viewport.clientHeight / cam.scale,
+    x1: planner.cam.x,
+    y1: planner.cam.y,
+    x2: planner.cam.x + planner.viewport.clientWidth / planner.cam.scale,
+    y2: planner.cam.y + planner.viewport.clientHeight / planner.cam.scale,
   };
 }
 
-function clearCtx(ctx) {
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, viewport.clientWidth, viewport.clientHeight);
+export function clearCtx(planner, ctx) {
+  ctx.setTransform(planner.dpr, 0, 0, planner.dpr, 0, 0);
+  ctx.clearRect(0, 0, planner.viewport.clientWidth, planner.viewport.clientHeight);
 }
 
-function sx(x) {
-  return (x - cam.x) * cam.scale;
+export function sx(planner, x) {
+  return (x - planner.cam.x) * planner.cam.scale;
 }
 
-function sy(y) {
-  return (y - cam.y) * cam.scale;
+export function sy(planner, y) {
+  return (y - planner.cam.y) * planner.cam.scale;
 }
 
-function textLabel(ctx, text, x, y, size, fill = "#f4f7f9", align = "center") {
+export function textLabel(ctx, text, x, y, size, fill = "#f4f7f9", align = "center") {
   ctx.font = `800 ${size}px system-ui`;
   ctx.textAlign = align;
   ctx.textBaseline = "middle";
@@ -42,25 +44,25 @@ function textLabel(ctx, text, x, y, size, fill = "#f4f7f9", align = "center") {
   ctx.fillText(text, x, y);
 }
 
-function focusRect(x1, y1, x2, y2, pad = 2, push = true) {
-  if (push) saveCam();
+export function focusRect(planner, x1, y1, x2, y2, pad = 2, push = true) {
+  if (push) saveCam(planner);
   const w = x2 - x1 + 1,
     h = y2 - y1 + 1;
-  cam.scale = Math.min(
-    viewport.clientWidth / (w + pad * 2),
-    viewport.clientHeight / (h + pad * 2),
+  planner.cam.scale = Math.min(
+    planner.viewport.clientWidth / (w + pad * 2),
+    planner.viewport.clientHeight / (h + pad * 2),
   );
-  cam.x = x1 - pad + (w + pad * 2 - viewport.clientWidth / cam.scale) / 2;
-  cam.y = y1 - pad + (h + pad * 2 - viewport.clientHeight / cam.scale) / 2;
-  schedule();
+  planner.cam.x = x1 - pad + (w + pad * 2 - planner.viewport.clientWidth / planner.cam.scale) / 2;
+  planner.cam.y = y1 - pad + (h + pad * 2 - planner.viewport.clientHeight / planner.cam.scale) / 2;
+  schedule(planner);
 }
 
-function fit(push = true) {
-  focusRect(
-    D.bounds.xMin,
-    D.bounds.yMin,
-    D.bounds.xMax,
-    D.bounds.yMax,
+export function fit(planner, push = true) {
+  focusRect(planner,
+    planner.D.bounds.xMin,
+    planner.D.bounds.yMin,
+    planner.D.bounds.xMax,
+    planner.D.bounds.yMax,
     3,
     push,
   );

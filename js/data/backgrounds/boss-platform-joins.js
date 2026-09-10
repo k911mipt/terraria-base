@@ -1,6 +1,6 @@
 // Continue the existing wall features through the four boss-arena platform rows.
 // Explicit design coordinates: no inferred repair or runtime mutation.
-const BACKGROUNDS_BOSS_PLATFORM_JOINS = [
+export const BACKGROUNDS_BOSS_PLATFORM_JOINS = [
   [-191, 11, -191, "industrial_wall"],
   [-185, 11, -185, "industrial_wall"],
   [-181, 11, -159, "sandstone_wall_plain"],

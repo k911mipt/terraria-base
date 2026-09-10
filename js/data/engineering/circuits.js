@@ -1,6 +1,6 @@
 // Wiring circuits and exact orthogonal paths.
 // Generated from the canonical monolith without changing item order.
-const ENGINEERING_CIRCUITS = [
+export const ENGINEERING_CIRCUITS = [
   {
     id: "HEARTS_ARM",
     name: "HEARTS AUTO · управление таймером",

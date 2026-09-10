@@ -1,5 +1,5 @@
 // Safe player-placed walls for rooms, doors, enclosed platforms and the central shaft.
-const DESERT_BACKGROUNDS = [
+export const DESERT_BACKGROUNDS = [
   {
     "x1": 19,
     "y1": 9,

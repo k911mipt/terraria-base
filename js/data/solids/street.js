@@ -1,6 +1,6 @@
 // Combat street, honey baths, continuous Y54 floor and pit bridges.
 // Generated from the canonical monolith without changing item order.
-const SOLIDS_STREET = [
+export const SOLIDS_STREET = [
   {
     x1: 34,
     y1: 53,
