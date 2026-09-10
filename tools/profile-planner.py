@@ -323,6 +323,11 @@ def summarize(results):
     return groups
 
 
+def prepare_output(output):
+    """Atomically claim a new directory; never alter a previous run."""
+    output.mkdir(parents=True, exist_ok=False)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repeats', type=int, default=5)
@@ -330,7 +335,10 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.repeats <= 20:
         parser.error('--repeats must be between 1 and 20')
-    args.output.mkdir(parents=True,exist_ok=True)
+    try:
+        prepare_output(args.output)
+    except OSError as error:
+        parser.error(f'Choose a new --output directory; existing results are not overwritten: {error}')
     commit = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
     cpu = next((line.split(':',1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines()
                 if line.startswith('model name')),None) if Path('/proc/cpuinfo').exists() else platform.processor()
