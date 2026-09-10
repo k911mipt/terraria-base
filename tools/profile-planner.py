@@ -125,7 +125,7 @@ def measure_phase(page, session, action):
     after = metric_snapshot(session)
     frames = page.evaluate('__profile.frames')
     return {'wallMsIncludingDriverAndFrameWait': (time.perf_counter()-started)*1000,
-            'rafCallbackCpuMs': frames,
+            'rafCallbackElapsedMs': frames,
             'rendererTaskMs': (after['TaskDuration']-before['TaskDuration'])*1000,
             'scriptMs': (after['ScriptDuration']-before['ScriptDuration'])*1000}
 
@@ -206,6 +206,10 @@ def one_profile(browser, browser_session, origin, entry, device, repeat, output)
                                     box['y']+30+(i*23)%min(260,box['height']-60))
             phases['hover'] = measure_phase(page,session,hover)
         phases['panZoom'] = measure_phase(page,session,lambda:native_inputs(page,session,mobile))
+        if mobile:
+            page.locator('.toolbar-toggle').tap()
+            assert page.locator('.toolbar-toggle').get_attribute('aria-expanded') == 'true'
+            settle(page)
         if entry=='index.html':
             def modes():
                 for mode in ('arena','wiring','visual')*3:
@@ -215,6 +219,10 @@ def one_profile(browser, browser_session, origin, entry, device, repeat, output)
         result['phases'] = phases
         # Dedicated isolated batch cost; not whole pointer-handler/event latency.
         page.select_option('#mode','visual')
+        if mobile:
+            page.locator('.toolbar-toggle').tap()
+            page.evaluate('window.scrollTo(0,0)')
+            assert page.locator('.toolbar-toggle').get_attribute('aria-expanded') == 'false'
         settle(page)
         result['lookupMicrosecondsPerCall'] = page.evaluate(LOOKUPS, {'iterations':10000,'batches':10})
         assert result['lookupMicrosecondsPerCall']['checksum'] > 0
@@ -257,7 +265,7 @@ def summarize(results):
                 'startupReadyMs':stats([r['startupReadyMs'] for r in rows]),
                 'lookupUs':{key:stats([v for r in rows for v in r['lookupMicrosecondsPerCall'][key]])
                             for key in ('objectAt','roomAt')},
-                'rafCallbackCpuMs':{phase:stats([v for r in rows for v in r['phases'].get(phase,{}).get('rafCallbackCpuMs',[])])
+                'rafCallbackElapsedMs':{phase:stats([v for r in rows for v in r['phases'].get(phase,{}).get('rafCallbackElapsedMs',[])])
                                    for phase in ('hover','panZoom','engineeringModes')},
             }
     return groups

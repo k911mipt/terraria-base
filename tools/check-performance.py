@@ -25,10 +25,10 @@ class ProfileReportTests(unittest.TestCase):
     def test_missing_phase_is_not_zero(self):
         rows = [{'scene':'index.html','device':'desktop','status':'PASS','startupReadyMs':20,
                  'lookupMicrosecondsPerCall':{'objectAt':[1,3],'roomAt':[2,4]},
-                 'phases':{'panZoom':{'rafCallbackCpuMs':[1,2]}}}]
+                 'phases':{'panZoom':{'rafCallbackElapsedMs':[1,2]}}}]
         summary = profile.summarize(rows)
         self.assertEqual(summary['index.html/desktop']['lookupUs']['objectAt']['median'],2)
-        self.assertEqual(summary['index.html/desktop']['rafCallbackCpuMs']['hover']['n'],0)
+        self.assertEqual(summary['index.html/desktop']['rafCallbackElapsedMs']['hover']['n'],0)
         self.assertIsNone(summary['desert.html/mobile']['startupReadyMs']['median'])
 
     def test_failed_profile_is_not_aggregated(self):
