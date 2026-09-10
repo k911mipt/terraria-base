@@ -1,4 +1,4 @@
-name: Stage spawn diagnostics (temporary)
+name: Stage PR59 early-failure evidence (temporary)
 on:
   push:
     branches: [maintenance/pr59-artifact-isolation-20260911]
@@ -9,86 +9,60 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: 018f6b650ec427758b9d73969c16c79d5aef8ac1
-          persist-credentials: false
-      - name: Assemble four exact remaining edits and publish tree only
+      - name: Retrieve authored patch before checkout code
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/spawn-stage"
+          mkdir -p "$RUNNER_TEMP/pr59-init"
+          gh api "repos/$GH_REPO/contents/pr59-init-fix.patch?ref=75eb4d27471081a93a4ad0b505fd65c032ebc633" --jq .content | base64 -d > "$RUNNER_TEMP/pr59-init/changes.patch"
+          echo "d24c462e3ef3d760aebceb608aa8d606b7fcc24bc7357f03ff395353fd61cdc7  $RUNNER_TEMP/pr59-init/changes.patch" | sha256sum -c -
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 6eb27858faba97b6afbe15a682f8826177bd70ad
+          persist-credentials: false
+      - name: Publish verified tree and commit only, without moving any ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git apply --check "$RUNNER_TEMP/pr59-init/changes.patch"
+          git apply "$RUNNER_TEMP/pr59-init/changes.patch"
+          git diff --check
           python - <<'PY'
+          import json,os,subprocess
           from pathlib import Path
-          import json,subprocess,os
-          def replace(path,old,new):
-              p=Path(path); text=p.read_text(); assert text.count(old)==1,(path,old)
-              p.write_text(text.replace(old,new))
-          replace('README.md','## Правила изменений','''## Диагностика поверхностей спавна
-
-          ```sh
-          node tools/audit-spawn-surfaces.cjs --player 20,50 --player 100,50
-          node tools/audit-scene.cjs --spawn-surfaces --player 20,50 --json
-          ```
-
-          Обследуются обе исходные области над жилыми крыльями и контрольная боевая улица.
-          Это геометрические кандидаты, **не подтверждённый спавн 1.4.5.6**. Безопасные
-          зоны, специальные враги и неизвестное окружение явно не проверены; приложение,
-          жидкости и геометрия не меняются. [Источники, параметры и ограничения](docs/spawn-surfaces.md).
-
-          ## Правила изменений''')
-          p=Path('docs/code-map.md');p.write_text(p.read_text()+'''
-
-          ## Необязательная диагностика поверхностей
-
-          `tools/lib/spawn-surfaces.cjs` использует общий `buildingGrid` и контракт
-          материалов, не входит в runtime-граф. `tools/audit-spawn-surfaces.cjs` обследует
-          явные участки Main и параметры одного/двух игроков; `audit-scene.cjs
-          --spawn-surfaces` добавляет тот же результат отдельно от проверок конструкции.
-          `tools/check-spawn-surfaces.cjs` автоматически обнаруживается общей командой
-          валидации. [Версионные ограничения, источники и значения статусов](spawn-surfaces.md).
-          ''')
-          line='        ("scene-audit", ["node", "tools/audit-scene.cjs"]),\n'
-          replace('tools/validate.py',line,line+'        ("spawn-surface-diagnostic", ["node", "tools/audit-spawn-surfaces.cjs", "--json"]),\n')
-          line='                            [sys.executable, "tools/check-browser.py"]):\n'
-          replace('tools/check-validation.py',line,'                            ["node", "tools/audit-spawn-surfaces.cjs", "--json"],\n'+line)
-          subprocess.run(['git','diff','--check'],check=True)
           paths=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
-          assert set(paths)=={'README.md','docs/code-map.md','tools/validate.py','tools/check-validation.py'}
+          assert set(paths)=={'tools/profile-planner.py','tools/check-performance.py','docs/performance.md'}
           subprocess.run(['git','add','--',*paths],check=True)
-          expected='8858e1c41a2bdf76c05c2cd3c179043c3c7d3fc7'
-          local=subprocess.check_output(['git','write-tree'],text=True).strip()
-          assert local==expected,(local,expected)
+          expected='7414cd8301e5f7d2151c9ef8e443006b4f03a6c6'
+          assert subprocess.check_output(['git','write-tree'],text=True).strip()==expected
           def api(endpoint,body=None):
               command=['gh','api','repos/'+os.environ['GH_REPO']+'/'+endpoint]
               if body is not None:command+=['--method','POST','--input','-']
-              result=subprocess.run(command,input=json.dumps(body) if body is not None else None,text=True,capture_output=True)
-              if result.returncode:raise RuntimeError(result.stderr)
-              return json.loads(result.stdout)
+              r=subprocess.run(command,input=json.dumps(body) if body is not None else None,text=True,capture_output=True)
+              if r.returncode:raise RuntimeError(r.stderr)
+              return json.loads(r.stdout)
+          parent='6eb27858faba97b6afbe15a682f8826177bd70ad'
+          pr=api('pulls/59');assert pr['state']=='open' and pr['head']['sha']==parent
           entries=[{'path':p,'mode':'100644','type':'blob','sha':api('git/blobs',{'content':Path(p).read_text(),'encoding':'utf-8'})['sha']} for p in paths]
-          tree=api('git/trees',{'base_tree':'127ba569a009c2ab92446caa25534ac58d29119d','tree':entries})['sha']
-          assert tree==expected
-          out=Path(os.environ['RUNNER_TEMP'])/'spawn-stage'
-          receipt={'tree':tree,'base':'6898e1d4eb627620744af8bc9d3c8738f17f83de','entries':entries,'refsUpdated':False}
+          tree=api('git/trees',{'base_tree':'6898e1d4eb627620744af8bc9d3c8738f17f83de','tree':entries})['sha'];assert tree==expected
+          commit=api('git/commits',{'tree':tree,'parents':[parent],'message':'fix: retain FAIL evidence for provenance and browser setup errors\n\nAddress PR59 initialization review. Guard git/digest/environment setup after claiming output; retain failed context/page and completed phases. Aggregate before PASS. No app/model/baseline changes; 19 unit regressions.'})['sha']
+          out=Path(os.environ['RUNNER_TEMP'])/'pr59-init'
+          receipt={'tree':tree,'parent':parent,'commit':commit,'refsUpdated':False}
           (out/'receipt.json').write_text(json.dumps(receipt,indent=2))
           subprocess.run(['git','archive','--format=tar','-o',str(out/'source.tar'),tree],check=True)
           print(json.dumps(receipt,indent=2))
           PY
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-      - name: Check diagnostics without GitHub token
+      - name: Test without GitHub token
         shell: bash
         run: |
-          node tools/check-spawn-surfaces.cjs 2>&1 | tee "$RUNNER_TEMP/spawn-stage/checks.log"
-          node tools/check-geometry.cjs 2>&1 | tee "$RUNNER_TEMP/spawn-stage/geometry.log"
-          node tools/audit-spawn-surfaces.cjs --json > "$RUNNER_TEMP/spawn-stage/diagnostic.json"
-      - name: Preserve assembled source and evidence
+          python -m pip install -r requirements-dev.txt
+          python tools/check-performance.py 2>&1 | tee "$RUNNER_TEMP/pr59-init/tests.log"
+      - name: Preserve source and evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: spawn-diagnostic-staged
-          path: ${{ runner.temp }}/spawn-stage/
+          name: pr59-init-staged
+          path: ${{ runner.temp }}/pr59-init/
           if-no-files-found: error
