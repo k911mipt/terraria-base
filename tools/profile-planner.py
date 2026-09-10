@@ -84,7 +84,7 @@ def stats(values):
 
 def application_digest():
     files = sorted(set(ROOT.glob('*.html')) | set(ROOT.glob('*.css')) |
-                   set((ROOT / 'js').rglob('*.js')) | {ROOT / 'deployment.json'})
+                   set((ROOT / 'js').rglob('*.js')) | {ROOT / 'deployment.json', ROOT / 'favicon.svg'})
     digest = hashlib.sha256()
     for path in files:
         digest.update(path.relative_to(ROOT).as_posix().encode() + b'\0' + path.read_bytes() + b'\0')
@@ -201,9 +201,11 @@ def camera_snapshot(page):
     }""")
 
 
-def one_profile(browser, browser_session, origin, entry, device, repeat, output):
+def one_profile(browser, browser_session, origin, entry, device, repeat, output, results):
     name = f'{Path(entry).stem}-{device}-{repeat}'
     result = {'scene':entry, 'device':device, 'repeat':repeat, 'status':'FAIL'}
+    # Register before any browser operation: even a setup failure remains visible.
+    results.append(result)
     context = browser.new_context(viewport=smoke.VIEWPORTS[device], device_scale_factor=1,
                                   is_mobile=device=='mobile', has_touch=device=='mobile')
     page = context.new_page()
@@ -342,7 +344,8 @@ def main():
     commit = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
     cpu = next((line.split(':',1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines()
                 if line.startswith('model name')),None) if Path('/proc/cpuinfo').exists() else platform.processor()
-    report = {'schemaVersion':2,'status':'FAIL','commit':commit,'applicationSha256':application_digest(),
+    report = {'schemaVersion':2,'status':'FAIL','commit':commit,'applicationDigestVersion':2,
+              'applicationSha256':application_digest(),
               'environment':{'os':platform.platform(),'cpu':cpu,'python':platform.python_version(),
                   'playwright':importlib.metadata.version('playwright'),'viewports':smoke.VIEWPORTS,
                   'dpr':1,'headless':True,'physicalPhone':False,'throttling':False},
@@ -359,7 +362,7 @@ def main():
                 for repeat in range(1,args.repeats+1):
                     for entry in SCENES:
                         for device in smoke.VIEWPORTS:
-                            report['profiles'].append(one_profile(browser,browser_session,origin,entry,device,repeat,args.output))
+                            one_profile(browser,browser_session,origin,entry,device,repeat,args.output,report['profiles'])
             finally:
                 browser.close()
         assert len(report['profiles']) == report['expectedProfiles']

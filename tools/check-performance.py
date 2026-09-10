@@ -6,7 +6,7 @@ import unittest
 import tempfile
 import io
 from contextlib import redirect_stderr
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 spec = importlib.util.spec_from_file_location('profile_planner', Path(__file__).with_name('profile-planner.py'))
 profile = importlib.util.module_from_spec(spec)
@@ -111,6 +111,50 @@ class ProfileOutputTests(unittest.TestCase):
             self.assertIn('Choose a new --output directory',stderr.getvalue())
             git.assert_not_called(); browser.assert_not_called()
             self.assertEqual(list(Path(root).iterdir()),[])
+
+
+class ProfileProvenanceTests(unittest.TestCase):
+    def test_favicon_is_part_of_application_digest(self):
+        with tempfile.TemporaryDirectory() as root, patch.object(profile,'ROOT',Path(root)):
+            for name in ['index.html','styles.css','deployment.json','favicon.svg','js/start.js']:
+                file=Path(root)/name; file.parent.mkdir(parents=True,exist_ok=True); file.write_text(name)
+            before=profile.application_digest()
+            (Path(root)/'favicon.svg').write_text('<svg>changed</svg>')
+            self.assertNotEqual(before,profile.application_digest())
+            changed=profile.application_digest()
+            (Path(root)/'notes.txt').write_text('not a loaded resource')
+            self.assertEqual(changed,profile.application_digest())
+            (Path(root)/'favicon.svg').unlink()
+            with self.assertRaises(FileNotFoundError):
+                profile.application_digest()
+
+    def test_failed_profile_retains_identity_partial_measurements_and_error(self):
+        results=[]
+        browser=MagicMock(); context=browser.new_context.return_value
+        page=context.new_page.return_value; page.goto.return_value.status=200
+        page.evaluate.side_effect=lambda expression: 42 if expression=='__profile.readyMs' else {}
+        context.new_cdp_session.return_value.send.return_value={}
+        with tempfile.TemporaryDirectory() as root, \
+             patch.object(profile,'process_rss',return_value={'available':False}), \
+             patch.object(profile,'focus_room',side_effect=RuntimeError('partial-profile failure')):
+            with self.assertRaisesRegex(RuntimeError,'partial-profile failure'):
+                profile.one_profile(browser,MagicMock(),'http://localhost','index.html','desktop',2,Path(root),results)
+            self.assertEqual(len(results),1)
+            record=results[0]
+            self.assertEqual((record['scene'],record['device'],record['repeat']),('index.html','desktop',2))
+            self.assertEqual(record['status'],'FAIL')
+            self.assertEqual(record['startupReadyMs'],42)
+            self.assertIn('partial-profile failure',record['error'])
+            self.assertEqual(record['failures'],[])
+            self.assertEqual(profile.json.loads((Path(root)/'index-desktop-2.json').read_text()),record)
+            self.assertEqual(profile.summarize(results)['index.html/desktop']['startupReadyMs']['n'],0)
+        context.close.assert_called_once()
+
+    def test_browser_setup_failure_is_retained_in_run_list(self):
+        results=[]; browser=MagicMock(); browser.new_context.side_effect=RuntimeError('setup failure')
+        with tempfile.TemporaryDirectory() as root, self.assertRaisesRegex(RuntimeError,'setup failure'):
+            profile.one_profile(browser,None,'http://localhost','desert.html','mobile',3,Path(root),results)
+        self.assertEqual(results,[{'scene':'desert.html','device':'mobile','repeat':3,'status':'FAIL'}])
 
 
 if __name__ == '__main__':
