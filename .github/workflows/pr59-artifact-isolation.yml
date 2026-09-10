@@ -1,4 +1,4 @@
-name: Stage PR59 report fixes (temporary)
+name: Stage spawn diagnostics (temporary)
 on:
   push:
     branches: [maintenance/pr59-artifact-isolation-20260911]
@@ -9,63 +9,86 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Read exact authored patch before checkout
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/pr59-report"
-          gh api "repos/$GH_REPO/contents/pr59-report-fix.patch?ref=efb6d2671a52d9dcfaf5bbffbbbe2bd89735911e" --jq .content | base64 -d > "$RUNNER_TEMP/pr59-report/changes.patch"
-          echo "083e149a73e6f8d08a2ea92f026def46bf7c79ae53221dec436481be0918fe21  $RUNNER_TEMP/pr59-report/changes.patch" | sha256sum -c -
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: bca39f84081a28b4d70a050b9cd5dc5c13b2fc18
+          ref: 018f6b650ec427758b9d73969c16c79d5aef8ac1
           persist-credentials: false
-      - name: Apply exact patch and publish Git objects, never refs
+      - name: Assemble four exact remaining edits and publish tree only
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = bca39f84081a28b4d70a050b9cd5dc5c13b2fc18
-          git apply --check "$RUNNER_TEMP/pr59-report/changes.patch"
-          git apply "$RUNNER_TEMP/pr59-report/changes.patch"
-          git diff --check
+          mkdir -p "$RUNNER_TEMP/spawn-stage"
           python - <<'PY'
-          import json,subprocess,os
           from pathlib import Path
-          expected='6898e1d4eb627620744af8bc9d3c8738f17f83de'
-          parent='bca39f84081a28b4d70a050b9cd5dc5c13b2fc18'
+          import json,subprocess,os
+          def replace(path,old,new):
+              p=Path(path); text=p.read_text(); assert text.count(old)==1,(path,old)
+              p.write_text(text.replace(old,new))
+          replace('README.md','## Правила изменений','''## Диагностика поверхностей спавна
+
+          ```sh
+          node tools/audit-spawn-surfaces.cjs --player 20,50 --player 100,50
+          node tools/audit-scene.cjs --spawn-surfaces --player 20,50 --json
+          ```
+
+          Обследуются обе исходные области над жилыми крыльями и контрольная боевая улица.
+          Это геометрические кандидаты, **не подтверждённый спавн 1.4.5.6**. Безопасные
+          зоны, специальные враги и неизвестное окружение явно не проверены; приложение,
+          жидкости и геометрия не меняются. [Источники, параметры и ограничения](docs/spawn-surfaces.md).
+
+          ## Правила изменений''')
+          p=Path('docs/code-map.md');p.write_text(p.read_text()+'''
+
+          ## Необязательная диагностика поверхностей
+
+          `tools/lib/spawn-surfaces.cjs` использует общий `buildingGrid` и контракт
+          материалов, не входит в runtime-граф. `tools/audit-spawn-surfaces.cjs` обследует
+          явные участки Main и параметры одного/двух игроков; `audit-scene.cjs
+          --spawn-surfaces` добавляет тот же результат отдельно от проверок конструкции.
+          `tools/check-spawn-surfaces.cjs` автоматически обнаруживается общей командой
+          валидации. [Версионные ограничения, источники и значения статусов](spawn-surfaces.md).
+          ''')
+          line='        ("scene-audit", ["node", "tools/audit-scene.cjs"]),\n'
+          replace('tools/validate.py',line,line+'        ("spawn-surface-diagnostic", ["node", "tools/audit-spawn-surfaces.cjs", "--json"]),\n')
+          line='                            [sys.executable, "tools/check-browser.py"]):\n'
+          replace('tools/check-validation.py',line,'                            ["node", "tools/audit-spawn-surfaces.cjs", "--json"],\n'+line)
+          subprocess.run(['git','diff','--check'],check=True)
           paths=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
-          assert set(paths)=={'tools/profile-planner.py','tools/check-performance.py','docs/performance.md'}
+          assert set(paths)=={'README.md','docs/code-map.md','tools/validate.py','tools/check-validation.py'}
           subprocess.run(['git','add','--',*paths],check=True)
-          assert subprocess.check_output(['git','write-tree'],text=True).strip()==expected
+          expected='8858e1c41a2bdf76c05c2cd3c179043c3c7d3fc7'
+          local=subprocess.check_output(['git','write-tree'],text=True).strip()
+          assert local==expected,(local,expected)
           def api(endpoint,body=None):
               command=['gh','api','repos/'+os.environ['GH_REPO']+'/'+endpoint]
               if body is not None:command+=['--method','POST','--input','-']
               result=subprocess.run(command,input=json.dumps(body) if body is not None else None,text=True,capture_output=True)
               if result.returncode:raise RuntimeError(result.stderr)
               return json.loads(result.stdout)
-          pr=api('pulls/59');assert pr['state']=='open' and pr['head']['sha']==parent
           entries=[{'path':p,'mode':'100644','type':'blob','sha':api('git/blobs',{'content':Path(p).read_text(),'encoding':'utf-8'})['sha']} for p in paths]
-          tree=api('git/trees',{'base_tree':api('git/commits/'+parent)['tree']['sha'],'tree':entries})['sha']
+          tree=api('git/trees',{'base_tree':'127ba569a009c2ab92446caa25534ac58d29119d','tree':entries})['sha']
           assert tree==expected
-          commit=api('git/commits',{'tree':tree,'parents':[parent],'message':'fix: retain failed profiles and fingerprint the loaded favicon\n\nAddress PR59 review. Failed attempts remain in run summary; digest v2 includes SVG without rewriting historical metrics. 16 regression tests; no application edits.'})['sha']
-          receipt={'commit':commit,'tree':tree,'parent':parent,'refsUpdated':False}
-          out=Path(os.environ['RUNNER_TEMP'])/'pr59-report'
+          out=Path(os.environ['RUNNER_TEMP'])/'spawn-stage'
+          receipt={'tree':tree,'base':'6898e1d4eb627620744af8bc9d3c8738f17f83de','entries':entries,'refsUpdated':False}
           (out/'receipt.json').write_text(json.dumps(receipt,indent=2))
           subprocess.run(['git','archive','--format=tar','-o',str(out/'source.tar'),tree],check=True)
           print(json.dumps(receipt,indent=2))
           PY
-      - name: Run regression tests without GitHub token
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Check diagnostics without GitHub token
         shell: bash
         run: |
-          python -m pip install -r requirements-dev.txt
-          python tools/check-performance.py 2>&1 | tee "$RUNNER_TEMP/pr59-report/tests.log"
-      - name: Preserve source and evidence
+          node tools/check-spawn-surfaces.cjs 2>&1 | tee "$RUNNER_TEMP/spawn-stage/checks.log"
+          node tools/check-geometry.cjs 2>&1 | tee "$RUNNER_TEMP/spawn-stage/geometry.log"
+          node tools/audit-spawn-surfaces.cjs --json > "$RUNNER_TEMP/spawn-stage/diagnostic.json"
+      - name: Preserve assembled source and evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: pr59-report-staged
-          path: ${{ runner.temp }}/pr59-report/
+          name: spawn-diagnostic-staged
+          path: ${{ runner.temp }}/spawn-stage/
           if-no-files-found: error
