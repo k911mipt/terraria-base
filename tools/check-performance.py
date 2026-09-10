@@ -35,6 +35,13 @@ class ProfileReportTests(unittest.TestCase):
         summary = profile.summarize([{'scene':'index.html','device':'desktop','status':'FAIL'}])
         self.assertEqual(summary['index.html/desktop']['startupReadyMs']['n'],0)
 
+    def test_empty_map_is_not_a_hover_workload(self):
+        class NoTargets:
+            def evaluate(self, _):
+                return []
+        with self.assertRaisesRegex(AssertionError, 'visible object targets'):
+            profile.visible_targets(NoTargets())
+
     def test_unavailable_rss_is_not_zero(self):
         class Unsupported:
             def send(self, _):
