@@ -154,7 +154,63 @@ class ProfileProvenanceTests(unittest.TestCase):
         results=[]; browser=MagicMock(); browser.new_context.side_effect=RuntimeError('setup failure')
         with tempfile.TemporaryDirectory() as root, self.assertRaisesRegex(RuntimeError,'setup failure'):
             profile.one_profile(browser,None,'http://localhost','desert.html','mobile',3,Path(root),results)
-        self.assertEqual(results,[{'scene':'desert.html','device':'mobile','repeat':3,'status':'FAIL'}])
+        self.assertEqual(len(results),1)
+        self.assertEqual(results[0]['scene'],'desert.html')
+        self.assertEqual(results[0]['device'],'mobile')
+        self.assertEqual(results[0]['repeat'],3)
+        self.assertEqual(results[0]['status'],'FAIL')
+        self.assertIn('setup failure',results[0]['error'])
+        self.assertEqual(results[0]['failures'],[])
+
+
+class InitializationFailureTests(unittest.TestCase):
+    def test_provenance_failures_leave_minimal_failure_summary(self):
+        for failure_stage in ('git', 'digest', 'metadata'):
+            with self.subTest(stage=failure_stage), tempfile.TemporaryDirectory() as root:
+                output=Path(root)/'new-run'
+                with patch('sys.argv',['profile-planner.py','--output',str(output)]), \
+                     patch.object(profile.subprocess,'run') as git, \
+                     patch.object(profile,'application_digest',return_value='digest') as digest, \
+                     patch.object(profile.importlib.metadata,'version',return_value='test') as metadata, \
+                     patch.object(profile.smoke,'serve') as server, \
+                     patch.object(profile,'sync_playwright') as browser:
+                    git.return_value.stdout='commit'
+                    {'git':git,'digest':digest,'metadata':metadata}[failure_stage].side_effect=OSError(failure_stage+' unavailable')
+                    with self.assertRaisesRegex(OSError, failure_stage+' unavailable'):
+                        profile.main()
+                    report=profile.json.loads((output/'summary.json').read_text())
+                    self.assertEqual(report['status'],'FAIL')
+                    self.assertEqual(report['profiles'],[])
+                    self.assertIn(failure_stage+' unavailable',report['error'])
+                    self.assertEqual(list(output.iterdir()),[output/'summary.json'])
+                    server.assert_not_called(); browser.assert_not_called()
+
+    def test_missing_favicon_in_real_digest_is_reported(self):
+        with tempfile.TemporaryDirectory() as root:
+            output=Path(root)/'run'
+            (Path(root)/'deployment.json').write_text('{}')
+            with patch.object(profile,'ROOT',Path(root)), \
+                 patch('sys.argv',['profile-planner.py','--output',str(output)]), \
+                 patch.object(profile.subprocess,'run') as git, \
+                 patch.object(profile,'sync_playwright') as browser:
+                git.return_value.stdout='commit'
+                with self.assertRaises(FileNotFoundError):
+                    profile.main()
+                report=profile.json.loads((output/'summary.json').read_text())
+                self.assertEqual(report['status'],'FAIL')
+                self.assertIn('favicon.svg',report['error'])
+                browser.assert_not_called()
+
+    def test_failed_page_setup_is_reported_and_context_closed(self):
+        results=[]; browser=MagicMock(); context=browser.new_context.return_value
+        context.new_page.side_effect=RuntimeError('new page failed')
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaisesRegex(RuntimeError, 'new page failed'):
+                profile.one_profile(browser,None,'http://localhost','index.html','desktop',1,Path(root),results)
+            saved=profile.json.loads((Path(root)/'index-desktop-1.json').read_text())
+            self.assertEqual(saved,results[0]);self.assertEqual(saved['status'],'FAIL')
+            self.assertIn('new page failed',saved['error'])
+        context.close.assert_called_once()
 
 
 if __name__ == '__main__':

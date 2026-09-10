@@ -206,18 +206,19 @@ def one_profile(browser, browser_session, origin, entry, device, repeat, output,
     result = {'scene':entry, 'device':device, 'repeat':repeat, 'status':'FAIL'}
     # Register before any browser operation: even a setup failure remains visible.
     results.append(result)
-    context = browser.new_context(viewport=smoke.VIEWPORTS[device], device_scale_factor=1,
-                                  is_mobile=device=='mobile', has_touch=device=='mobile')
-    page = context.new_page()
-    page.set_default_timeout(15000)
+    context = None
     failures = []
-    page.on('pageerror', lambda e: failures.append(str(e)))
-    page.on('requestfailed', lambda r: failures.append(f'{r.url}: {r.failure}'))
-    page.on('response', lambda r: failures.append(f'{r.url}: HTTP {r.status}') if r.status>=400 else None)
-    page.add_init_script(PROBE)
-    session = context.new_cdp_session(page)
-    session.send('Performance.enable')
     try:
+        context = browser.new_context(viewport=smoke.VIEWPORTS[device], device_scale_factor=1,
+                                      is_mobile=device=='mobile', has_touch=device=='mobile')
+        page = context.new_page()
+        page.set_default_timeout(15000)
+        page.on('pageerror', lambda e: failures.append(str(e)))
+        page.on('requestfailed', lambda r: failures.append(f'{r.url}: {r.failure}'))
+        page.on('response', lambda r: failures.append(f'{r.url}: HTTP {r.status}') if r.status>=400 else None)
+        page.add_init_script(PROBE)
+        session = context.new_cdp_session(page)
+        session.send('Performance.enable')
         response = page.goto(origin+'/'+entry, wait_until='load')
         assert response.status == 200
         page.wait_for_selector('#viewport[data-ready="true"]')
@@ -242,7 +243,7 @@ def one_profile(browser, browser_session, origin, entry, device, repeat, output,
         result['inputView'] = camera_snapshot(page)
         result['inputView']['roomId'] = FOCUS_ROOMS[entry]
         result['visibleTargetIds'] = [target['id'] for target in targets]
-        phases = {}
+        phases = result['phases'] = {}
         if not mobile:
             def hover():
                 for i in range(80):
@@ -304,8 +305,11 @@ def one_profile(browser, browser_session, origin, entry, device, repeat, output,
         raise
     finally:
         result['failures'] = failures
-        (output/(name+'.json')).write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
-        context.close()
+        try:
+            (output/(name+'.json')).write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+        finally:
+            if context is not None:
+                context.close()
     print('PASS profile '+name, flush=True)
     return result
 
@@ -341,16 +345,18 @@ def main():
         prepare_output(args.output)
     except OSError as error:
         parser.error(f'Choose a new --output directory; existing results are not overwritten: {error}')
-    commit = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
-    cpu = next((line.split(':',1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines()
-                if line.startswith('model name')),None) if Path('/proc/cpuinfo').exists() else platform.processor()
-    report = {'schemaVersion':2,'status':'FAIL','commit':commit,'applicationDigestVersion':2,
-              'applicationSha256':application_digest(),
-              'environment':{'os':platform.platform(),'cpu':cpu,'python':platform.python_version(),
-                  'playwright':importlib.metadata.version('playwright'),'viewports':smoke.VIEWPORTS,
-                  'dpr':1,'headless':True,'physicalPhone':False,'throttling':False},
-              'expectedProfiles':args.repeats*len(SCENES)*len(smoke.VIEWPORTS),'profiles':[]}
+    report = {'schemaVersion':2, 'status':'FAIL',
+              'expectedProfiles':args.repeats*len(SCENES)*len(smoke.VIEWPORTS), 'profiles':[]}
     try:
+        commit = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
+        cpu = next((line.split(':',1)[1].strip() for line in Path('/proc/cpuinfo').read_text().splitlines()
+                    if line.startswith('model name')),None) if Path('/proc/cpuinfo').exists() else platform.processor()
+        report.update({'commit':commit,'applicationDigestVersion':2,
+                  'applicationSha256':application_digest(),
+                  'environment':{'os':platform.platform(),'cpu':cpu,'python':platform.python_version(),
+                      'playwright':importlib.metadata.version('playwright'),'viewports':smoke.VIEWPORTS,
+                      'dpr':1,'headless':True,'physicalPhone':False,'throttling':False},
+                  })
         with smoke.serve() as origin, sync_playwright() as pw:
             options = {'headless':True}
             if executable := os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE'):
@@ -366,12 +372,12 @@ def main():
             finally:
                 browser.close()
         assert len(report['profiles']) == report['expectedProfiles']
+        report['summary'] = summarize(report['profiles'])
         report['status'] = 'PASS'
     except Exception as error:
         report['error'] = f'{type(error).__name__}: {error}'
         raise
     finally:
-        report['summary'] = summarize(report['profiles'])
         (args.output/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 
 
