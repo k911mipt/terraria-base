@@ -96,3 +96,12 @@ workflow — `validate-browser.yml`; check — `validate`. Старые Jungle-w
 [Профиль производительности Main/Desert](performance.md): измеритель
 `tools/profile-planner.py`, сырые HTTP-артефакты и отдельные расчёты RGBA/V8/RSS.
 Измерения не являются порогами обязательного CI.
+
+## Необязательная диагностика спавна (#38)
+
+`tools/lib/spawn-surfaces.mjs` использует общий `buildingGrid`, но не входит в
+загружаемый браузером граф. `audit-spawn-surfaces.cjs` принимает координаты
+одного/двух игроков; `check-spawn-surfaces.cjs` проверяет геометрию, справочный
+профиль, границы, явные исключения и CLI. Общий CLI подключает раздел через
+`--spawn`; он не превращает `NOT_VERIFIED` в строительный PASS.
+[Методика и пределы достоверности](spawn-surfaces.md).

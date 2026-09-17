@@ -25,7 +25,7 @@ def validation_steps(root: Path = ROOT) -> list[tuple[str, list[str]]]:
         steps.append((file.stem, ["node", file.relative_to(root).as_posix()]))
     steps.extend([
         ("construction-audit", ["node", "tools/audit-building.cjs"]),
-        ("scene-audit", ["node", "tools/audit-scene.cjs"]),
+        ("scene-audit", ["node", "tools/audit-scene.cjs", "--spawn"]),
         ("browser", [sys.executable, "tools/check-browser.py"]),
         ("cache-rollout", [sys.executable, "tools/check-ui-rollout.py"]),
         ("native-browser", [sys.executable, "tools/check-native-browser.py"]),
