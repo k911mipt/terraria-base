@@ -51,6 +51,29 @@ test('second player contributes both spawn opportunities and safe-window exclusi
   const near = audit(scene, {players: [{x: 10, y: 20}, {x: 20, y: 20}]});
   assert.equal(at(near, 'roof', 20).range, 'inside-reference-safe-window');
 });
+test('a high seed does not bypass the reference safe-window check on its landing', () => {
+  const scene = fixture(), players = [{x: 20, y: 20}];
+  // X20/Y16 is an empty seed outside this player's safe window (Y17..23),
+  // but the first full support X20/Y20 remains inside that window.
+  assert.equal(at(audit(scene, {players}), 'roof', 20).range, 'inside-reference-safe-window');
+});
+test('support below the search window is rejected even with an in-window seed above it', () => {
+  const scene = fixture();
+  // P1 Y7 has a search bottom of Y19. The empty seed Y18 is inside;
+  // its first full support Y20 is below the documented ground-search limit.
+  assert.equal(at(audit(scene, {players: [{x: 10, y: 7}]}), 'roof', 20).range,
+    'outside-reference-spawn-window');
+  // Moving the player down one tile brings the same support onto the boundary.
+  assert.equal(at(audit(scene, {players: [{x: 10, y: 8}]}), 'roof', 20).range,
+    'reference-candidate');
+});
+test('support on the top search boundary has no in-window seed above it', () => {
+  const scene = fixture();
+  assert.equal(at(audit(scene, {players: [{x: 10, y: 32}]}), 'roof', 20).range,
+    'no-seed-in-reference-window');
+  const r = at(audit(scene, {players: [{x: 10, y: 31}]}), 'roof', 20);
+  assert.equal(r.range, 'reference-candidate'); assert.equal(r.seed.y, 19);
+});
 test('inclusion of spawn and safe boundary coordinates is explicit', () => {
   const scene = fixture();
   assert.equal(at(audit(scene), 'roof', 22).range, 'reference-candidate');

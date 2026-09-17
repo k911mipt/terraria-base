@@ -82,8 +82,11 @@ export function auditSpawnSurfaces(scene, blockSpecs, wallSpecs, options = {}) {
 
   function rangeAt(x, y) {
     if (ranges === null) return {range: 'not-checked', seed: null};
-    // This is ONLY the supplied safe-window approximation, not the game's final
-    // pixel/hitbox check. Every active player contributes an exclusion window.
+    // The cited ordinary-ground algorithm checks the FOUND SUPPORT against the
+    // search/safe windows after falling from the seed. A seed outside the safe
+    // window must not bypass a landing inside it (Space NPCs are excluded).
+    // The union across players is only a reference approximation, not the final
+    // pixel/hitbox exclusion. This ordering is not executable-verified for 1.4.5.6.
     if (players.some(p => inWindow(p, {x, y}, ranges.safe)))
       return {range: 'inside-reference-safe-window', seed: null};
     let boundaryUnknown = false, routeUnknown = false, within = false;
@@ -95,6 +98,7 @@ export function auditSpawnSurfaces(scene, blockSpecs, wallSpecs, options = {}) {
       // from every seed above it; a background wall rejects only that seed.
       let uncertainRoute = false, interrupted = false;
       for (let sy = y - 1; sy >= Math.max(top, bounds.yMin); sy--) {
+        if (!inWindow(player, {x, y: sy}, ranges.spawn)) continue;
         if (fullBlock(x, sy)) { interrupted = true; break; }
         if (uncertainTile(x, sy) || liquidAt(x, sy)) uncertainRoute = true;
         const wall = grid.wall(x, sy);
